@@ -246,7 +246,7 @@
     <repositories>
         <repository>
             <id>okse-jenkins</id>
-            <url>http://okse.kappa.me:8081/jenkins/plugin/repository/everything/</url>
+            <url>http://okse.test.pe:8081/repository/okse/</url>
         </repository>
     </repositories>
 
