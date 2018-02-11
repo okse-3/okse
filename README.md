@@ -2,9 +2,9 @@
 [![Build Status](https://travis-ci.org/okse-2/okse.svg?branch=master)](https://travis-ci.org/okse-2/okse)
 [![Coverage Status](https://coveralls.io/repos/github/okse-2/okse/badge.svg?branch=master)](https://coveralls.io/github/okse-2/okse?branch=master)
 
-This software has been developed for [FFI](http://www.ffi.no/) by two separate
+This software has been developed for [FFI](http://www.ffi.no/) by three separate
 teams as Bachelor's degree projects at [NTNU](https://www.ntnu.edu/), first
-during the spring of 2015 and then during the spring of 2016. For specific
+during the spring of 2015, then during the spring of 2016 and finally during the spring of 2018. For specific
 credits, see the AUTHORS file at the base of the project.
 
 OKSE is a polyglot topic-based publish-subscribe message broker written in
@@ -21,10 +21,10 @@ follows:
 | Protocol | Upstream | Fork |
 |-----------------|---|---|
 | AMQP 0.9.1      | [Apache Qpid Proton](https://qpid.apache.org/proton/) | N/A |
-| AMQP 1.0        | [Joram](http://joram.ow2.org/)                        | [Customised fork](https://github.com/okse-2/joram)    |
-| MQTT            | [Moquette](https://github.com/andsel/moquette)        | [Customised fork](https://github.com/okse-2/moquette) |
-| STOMP           | [Stampy](https://github.com/mrstampy/Stampy)          | [Customised fork](https://github.com/okse-2/Stampy)   |
-| WS-Notification | [WS-Nu](https://github.com/tOgg1/WS-Nu)               | [Customised fork](https://github.com/okse-2/WS-Nu)    |
+| AMQP 1.0        | [Joram](http://joram.ow2.org/)                        | [Customised fork](https://github.com/okse-3/joram)    |
+| MQTT            | [Moquette](https://github.com/andsel/moquette)        | [Customised fork](https://github.com/okse-3/moquette) |
+| STOMP           | [Stampy](https://github.com/mrstampy/Stampy)          | [Customised fork](https://github.com/okse-3/Stampy)   |
+| WS-Notification | [WS-Nu](https://github.com/tOgg1/WS-Nu)               | [Customised fork](https://github.com/okse-3/WS-Nu)    |
 
 The OKSE message broker has been written with extensibility in mind. Every
 protocol is integrated independently, only communicating with the core layer of
