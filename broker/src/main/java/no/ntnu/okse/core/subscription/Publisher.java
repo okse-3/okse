@@ -95,8 +95,7 @@ public class Publisher {
      * @throws IllegalArgumentException If the timeout is in the past
      */
     public void setTimeout(Long timeout) throws IllegalArgumentException {
-        if (timeout == null) this.timeout = timeout;
-        else if (timeout < System.currentTimeMillis())
+        if (timeout != null && timeout < System.currentTimeMillis())
             throw new IllegalArgumentException("Timeout cannot be in the past");
         this.timeout = timeout;
     }
@@ -150,10 +149,7 @@ public class Publisher {
      * @return True if it should expire and has expired, false otherwise
      */
     public boolean hasExpired() {
-        if (shouldExpire()) {
-            return timeout < System.currentTimeMillis();
-        }
-        return false;
+        return shouldExpire() && timeout < System.currentTimeMillis();
     }
 
     /**

@@ -197,8 +197,7 @@ public class MQTTServer extends Server {
      */
     private String getPayload(InterceptPublishMessage message) {
         ByteBuffer buffer = message.getPayload();
-        String payload = new String(buffer.array(), buffer.position(), buffer.limit());
-        return payload;
+        return new String(buffer.array(), buffer.position(), buffer.limit());
     }
 
     /**
@@ -231,7 +230,7 @@ public class MQTTServer extends Server {
      * Returns the config of the server
      * @param host the host of the server
      * @param port the port of the server
-     * @return returns a Proprties object of the config of the server
+     * @return returns a Properties object of the config of the server
      */
     private Properties getConfig(String host, int port) {
         Properties properties = new Properties();
@@ -261,7 +260,7 @@ public class MQTTServer extends Server {
         PublishMessage msg = createMQTTMessage(message);
         ArrayList<MQTTSubscriber> subscribers = subscriptionManager.getAllSubscribersFromTopic(message.getTopic());
         if (subscribers.size() > 0) {
-            //This will incremenet the total messages sent for each of the subscribers that the subscription manager found.
+            //This will increment the total messages sent for each of the subscribers that the subscription manager found.
             //We should never send fewer or more messages than the number of subscriptions.
             for (int i = 0; i < subscribers.size(); i++) {
                 ps.incrementTotalMessagesSent();

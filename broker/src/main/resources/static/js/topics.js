@@ -27,7 +27,7 @@ var Topics = (function($) {
     // Private variable holding the topics object returned upon the ajax-request.
     var topics;
 
-    var _PAGINATOR = 'topic-pagination-selector'
+    var _PAGINATOR = 'topic-pagination-selector';
     var _CURRENTPAGE = 1; // Variable holding the last page showed in the paginator.
 
     /*
@@ -46,29 +46,29 @@ var Topics = (function($) {
             listLength: topics.length,
             fillTableCallback: fillTable
         })
-    }
+    };
 
     /*
         This function fills the topics table
      */
     var fillTable = function(from, to) {
-        unBindButtons()
+        unBindButtons();
 
         if (topics.length == 0) {
-            $('#topics-table').html('<tr class="danger"><td colspan="6"><h4 class="text-center">No topics returned from TopicService</h4></td></tr>')
+            $('#topics-table').html('<tr class="danger"><td colspan="6"><h4 class="text-center">No topics returned from TopicService</h4></td></tr>');
             return;
         }
         if (from === undefined || to === undefined) {
-            $.okseDebug.logPrint("[Debug][Topics] Filling table with the complete list")
+            $.okseDebug.logPrint("[Debug][Topics] Filling table with the complete list");
             $('#topics-table').html(createTableForAllTopics(topics))
         } else {
-            $.okseDebug.logPrint("[Debug][Topics] Filling table with [" + from + "," + to + "]")
-            var topicsToPopulate = topics.slice(from, to)
+            $.okseDebug.logPrint("[Debug][Topics] Filling table with [" + from + "," + to + "]");
+            var topicsToPopulate = topics.slice(from, to);
             $('#topics-table').html(createTableForAllTopics(topicsToPopulate))
         }
 
         bindButtons()
-    }
+    };
 
     /*
         Creates, fills and returns a <tr>-element. The <tr>-element is generated based on the topics
@@ -76,10 +76,10 @@ var Topics = (function($) {
         this purpose. This function does not manipulate the DOM by checking if an element exists. It overwrites everything.
      */
     var createTableForAllTopics = function(topics) {
-        var trHTML = ""
+        var trHTML = "";
         $.each(topics, function(i, topicInfo) {
-            var topic = topicInfo.topic
-            var subscribers = topicInfo.subscribers
+            var topic = topicInfo.topic;
+            var subscribers = topicInfo.subscribers;
             trHTML +=
                 '<tr id="' + topic.topicID +'">' +
                     '<td>' + topic.fullTopicString + '</td>' +
@@ -90,13 +90,13 @@ var Topics = (function($) {
                 '</tr>'
         });
         return trHTML
-    }
+    };
 
     /*
         Unbinds the buttons that change on every AJAX-response.
         Removes the 'click'-listener
      */
-    var unBindButtons = function() { $('.delete-topic').off('click'); }
+    var unBindButtons = function() { $('.delete-topic').off('click'); };
 
     /*
         Binds the buttons after the AJAX-request success function has completed
@@ -108,9 +108,9 @@ var Topics = (function($) {
 
             if (confirm("Are you sure you want to delete this topic? This will remove all subscribers and child topics.")) {
                 // Disable the topic and buttons temporarily
-                var topicID = $(e.target).closest("tr").attr("id")
-                $(e.target).closest('tr').addClass('deleted')
-                $(e.target).addClass("disabled")
+                var topicID = $(e.target).closest("tr").attr("id");
+                $(e.target).closest('tr').addClass('deleted');
+                $(e.target).addClass("disabled");
 
                 Main.ajax({
                     url: 'topic/delete/single?topicID=' + encodeURIComponent(topicID),
@@ -128,38 +128,38 @@ var Topics = (function($) {
                         */
                     },
                     error: function(xhr, status, error) {
-                        $.okseDebug.logPrint("[Debug][Topics] Unable to remove topic with id: " + e.target.id)
-                        $(e.target).closest('tr').removeClass('deleted')
-                        $(e.target).removeClass("disabled")
-                        Main.displayMessage('Unable to remove topic!')
+                        $.okseDebug.logPrint("[Debug][Topics] Unable to remove topic with id: " + e.target.id);
+                        $(e.target).closest('tr').removeClass('deleted');
+                        $(e.target).removeClass("disabled");
+                        Main.displayMessage('Unable to remove topic!');
                         Main.error(xhr, status, error)
                     }
                 });
             }
         });
-    }
+    };
 
     return {
         init: function() {
             $("#topics-button-refresh").on("click", function(e) {
-                e.preventDefault()
+                e.preventDefault();
                 if (!$(this).hasClass("active")) {
-                    $(this).addClass("active")
-                    $(this).text("Stop refresh")
+                    $(this).addClass("active");
+                    $(this).text("Stop refresh");
                     Main.setIntervalForTab({
                         url: 'topic/get/all',
                         type: 'GET',
                         success: Topics.refresh
                     })
                 } else {
-                    $(this).removeClass("active")
-                    $(this).text("Start refresh")
+                    $(this).removeClass("active");
+                    $(this).text("Start refresh");
                     Main.clearIntervalForTab()
                 }
-            })
+            });
 
             $('#delete-all-topics').on('click', function(e) {
-                e.preventDefault()
+                e.preventDefault();
 
                 if (confirm("Are you sure you want to delete all the topics? This will also remove all subscriptions.")) {
 
@@ -167,17 +167,17 @@ var Topics = (function($) {
                         url: 'topic/delete/all',
                         type: 'DELETE',
                         success: function(data) {
-                            $.okseDebug.logPrint("[Debug][Topics] Callback from server; deleted all topics")
+                            $.okseDebug.logPrint("[Debug][Topics] Callback from server; deleted all topics");
                             // Disable all topics and buttons
                             if (data.deleted == true) {
-                                $('#topics-table').addClass('deleted')
+                                $('#topics-table').addClass('deleted');
                                 $('#topics-table').find('a').each(function() {
                                     $(this).addClass('disabled')
                                 });
                             }
                         },
                         error: function(xhr, status, error) {
-                            Main.displayMessage('Unable to remove all topics!')
+                            Main.displayMessage('Unable to remove all topics!');
                             Main.error(xhr, status, error)
                         }
                     });
@@ -185,8 +185,8 @@ var Topics = (function($) {
             });
         },
         refresh: function(response) {
-            topics = response
-            checkIfPaginationIsNeeded()
+            topics = response;
+            checkIfPaginationIsNeeded();
 
             // Remove 'deleted class' if it exists
             if ($('#topics-table').hasClass('deleted')) { $('#topics-table').removeClass('deleted'); }

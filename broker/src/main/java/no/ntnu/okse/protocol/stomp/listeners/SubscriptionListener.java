@@ -19,7 +19,7 @@ public class SubscriptionListener implements StampyMessageListener {
 
     /**
      * Constructor for the class
-     * Sets the protcol type to stomp
+     * Sets the protocol type to stomp
      */
     public SubscriptionListener(){
         this.protocol = "stomp";

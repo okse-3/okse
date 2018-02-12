@@ -47,7 +47,7 @@ public class LogController {
     private static final String LOG_LEVELS = "/levels";
     private static final String LOG_FILES = "/files";
 
-    // The available log leves
+    // The available log levels
     private static final LinkedHashMap<String, ArrayList<String>> logLevels = new LinkedHashMap<String, ArrayList<String>>() {{
         put("DEBUG", new ArrayList<String>() {{
             add("DEBUG");
@@ -149,10 +149,9 @@ public class LogController {
             return log;
 
         } catch (IOException e) {
-            Log log = new Log("Does not exists", new ArrayList<String>() {{
+            return new Log("Does not exists", new ArrayList<String>() {{
                 add("The logfile you requested do not exist.");
             }});
-            return log;
         }
     }
 
@@ -178,9 +177,7 @@ public class LogController {
     public
     @ResponseBody
     List<Object> logLevelsAvailable() {
-        List<Object> reverseList = Lists.reverse(
-                Lists.newArrayList(logLevels.keySet()));
-        return reverseList;
+        return Lists.reverse(Lists.newArrayList(logLevels.keySet()));
     }
 
 }

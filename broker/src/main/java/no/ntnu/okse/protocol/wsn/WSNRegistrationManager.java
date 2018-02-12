@@ -162,9 +162,9 @@ public class WSNRegistrationManager extends AbstractPublisherRegistrationManager
     }
 
     /**
-     * Check wether or not we have a registered publisher with the provided registrationKey
+     * Check whether or not we have a registered publisher with the provided registrationKey
      *
-     * @param p The registrationKey to check existance of
+     * @param p The registrationKey to check existence of
      * @return True if the manager knows the provided registrationKey, false otherwise
      */
     public boolean hasPublisher(String p) {
@@ -231,7 +231,7 @@ public class WSNRegistrationManager extends AbstractPublisherRegistrationManager
                 }
 
                 log.debug("Malformed subscription parameter");
-                ExceptionUtilities.throwResourceNotDestroyed("en", "Ill-formated subscription-parameter");
+                ExceptionUtilities.throwResourceNotDestroyed("en", "Ill-formatted subscription-parameter");
 
             } else if (entry.getValue().length == 0) {
                 log.debug("Missing subscription parameter value");

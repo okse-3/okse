@@ -28,7 +28,6 @@ import no.ntnu.okse.exceptions.TopicExceptions;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Stack;
 
 public class TopicTools {
@@ -49,7 +48,7 @@ public class TopicTools {
             Topic t = queue.pop();
             if (!discovered.contains(t)) {
                 discovered.add(t);
-                t.getChildren().stream().forEach(c -> queue.push(c));
+                t.getChildren().stream().forEach(queue::push);
             }
         }
 
@@ -73,7 +72,7 @@ public class TopicTools {
                 throw new TopicExceptions.NonRootNodeException("Expected rootNode, but was " + rootNode);
 
             // Perform a Depth-First-Search from the root node and add the results to the return set.
-            DFS(rootNode).stream().forEach(t -> returnSet.add(t));
+            returnSet.addAll(DFS(rootNode));
         }
 
         return returnSet;
@@ -90,7 +89,7 @@ public class TopicTools {
 
         // Iterate over all the nodes in the set, and add discovered nodes to the return set.
         for (Topic node : nodes) {
-            DFS(node).stream().forEach(t -> returnSet.add(t));
+            returnSet.addAll(DFS(node));
         }
 
         return returnSet;
@@ -117,12 +116,8 @@ public class TopicTools {
      */
     public static HashSet<Topic> getAllLeafNodesFromNode(Topic t) {
         HashSet<Topic> returnSet = getAllChildrenFromNode(t);
-        Iterator<Topic> iterator = returnSet.iterator();
 
-        while (iterator.hasNext()) {
-            Topic current = iterator.next();
-            if (!current.isLeaf()) iterator.remove();
-        }
+        returnSet.removeIf(current -> !current.isLeaf());
 
         return returnSet;
     }

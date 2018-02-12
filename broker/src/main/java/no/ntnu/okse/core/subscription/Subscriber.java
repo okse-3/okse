@@ -26,12 +26,12 @@ package no.ntnu.okse.core.subscription;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.log4j.Logger;
-import org.springframework.security.crypto.codec.Hex;
 
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import static no.ntnu.okse.core.Utilities.generateID;
 
 @JsonIgnoreProperties({"timeout"})
 public class Subscriber {
@@ -78,12 +78,7 @@ public class Subscriber {
      */
     private String generateSubscriberID() {
         try {
-            MessageDigest m = MessageDigest.getInstance("MD5");
-            m.update(Long.toString(System.nanoTime()).getBytes());
-            byte[] hash = m.digest();
-            String topicID = new String(Hex.encode(hash));
-
-            return topicID;
+            return generateID();
         } catch (NoSuchAlgorithmException e) {
             log.error("Could not generate a subscriber ID (MD5 algorithm not found)");
         }
@@ -188,8 +183,7 @@ public class Subscriber {
      * @return True if timeout is null, false otherwise
      */
     public boolean shouldExpire() {
-        if (timeout != null) return true;
-        return false;
+        return timeout != null;
     }
 
     /**

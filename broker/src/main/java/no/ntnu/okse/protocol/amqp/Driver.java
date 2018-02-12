@@ -69,7 +69,7 @@ public class Driver extends BaseHandler {
     }
 
     /**
-     * Gets the netaddress from the acceptor
+     * Gets the InetAddress from the acceptor
      *
      * @return The address from connection
      */
@@ -152,10 +152,10 @@ public class Driver extends BaseHandler {
         while (_running) {
             Event ev = collector.peek();
             if (ev == null) break;
-            if (ev.getType().name() == "CONNECTION_INIT") {
+            if (ev.getType().name().equals("CONNECTION_INIT")) {
                 ps.incrementTotalErrors();
             }
-            if (ev.getType().name() == "LINK_LOCAL_OPEN") {
+            if (ev.getType().name().equals("LINK_LOCAL_OPEN")) {
                 ps.decrementTotalErrors();
             }
             log.debug("Dispatching event of type: " + ev.getType().name());
@@ -277,11 +277,7 @@ public class Driver extends BaseHandler {
                     key.interestOps((c != 0 ? SelectionKey.OP_READ : 0) |
                             (p > 0 ? SelectionKey.OP_WRITE : 0));
                 }
-                if (c < 0 && p < 0) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return c < 0 && p < 0;
             } else {
                 return false;
             }
@@ -348,7 +344,7 @@ public class Driver extends BaseHandler {
         /**
          * Used if only ChannelHandler object is available
          *
-         * @return Netaddress from connection
+         * @return InetAddress from connection
          */
         public InetAddress getInetAddress() {
             return this.socket.socket().getInetAddress();

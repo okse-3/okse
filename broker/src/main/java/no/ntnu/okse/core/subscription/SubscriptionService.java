@@ -70,7 +70,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
     }
 
     /**
-     * The main instanciation method of SubscriptionService adhering to the singleton pattern
+     * The main instantiation method of SubscriptionService adhering to the singleton pattern
      *
      * @return singleton instance of SubscriptionService
      */
@@ -171,7 +171,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
     private void startScheduledRemovalOfExpiredSubscribersAndPublishers() {
         if (!autoPurgeRunning) {
             log.info("Starting periodic removal of expired subscribers and publishers (1 min interval)");
-            scheduler.scheduleAtFixedRate(() -> purgeExpiredSubscribersAndPublishers(), 1, 1, TimeUnit.MINUTES);
+            scheduler.scheduleAtFixedRate(this::purgeExpiredSubscribersAndPublishers, 1, 1, TimeUnit.MINUTES);
         } else {
             log.warn("Attempt to start scheduled removal of subscribers and publishers when its already started");
         }
@@ -184,8 +184,8 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
      */
     private void purgeExpiredSubscribersAndPublishers() {
         log.debug("Running scheduled purge of expired subscribers and publishers");
-        getAllSubscribers().stream().filter(s -> s.hasExpired()).forEach(s -> removeSubscriber(s));
-        getAllPublishers().stream().filter(p -> p.hasExpired()).forEach(p -> removePublisher(p));
+        getAllSubscribers().stream().filter(Subscriber::hasExpired).forEach(this::removeSubscriber);
+        getAllPublishers().stream().filter(Publisher::hasExpired).forEach(this::removePublisher);
     }
 
     /**
@@ -272,7 +272,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
     }
 
     /**
-     * Service-local private method to reusme the subscription for a particular subscriber
+     * Service-local private method to resume the subscription for a particular subscriber
      *
      * @param s The subscriber that is to be resumed
      */
@@ -395,7 +395,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
     /**
      * Public method to pause a subscription
      *
-     * @param s The subciber object that is to be paused
+     * @param s The subscriber object that is to be paused
      */
     public void pauseSubscriber(Subscriber s) {
         if (s == null) {
@@ -521,7 +521,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
                 // Only pass on those who match topic argument
                 .filter(s -> s.getTopic() == null || s.getTopic().equals(topic))
                         // Collect in the results set
-                .forEach(s -> results.add(s));
+                .forEach(results::add);
 
         return results;
     }
@@ -541,7 +541,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
                 // Only pass on those who match topic argument
                 .filter(p -> p.getTopic().equals(topic))
                         // Collect in the results set
-                .forEach(p -> results.add(p));
+                .forEach(results::add);
 
         return results;
     }
@@ -554,7 +554,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
      */
     public HashSet<Subscriber> getAllSubscribers() {
         HashSet<Subscriber> result = new HashSet<>();
-        _subscribers.iterator().forEachRemaining(s -> result.add(s));
+        _subscribers.iterator().forEachRemaining(result::add);
         return result;
     }
 
@@ -566,7 +566,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
      */
     public HashSet<Publisher> getAllPublishers() {
         HashSet<Publisher> result = new HashSet<>();
-        _publishers.iterator().forEachRemaining(p -> result.add(p));
+        _publishers.iterator().forEachRemaining(result::add);
         return result;
     }
 
@@ -648,7 +648,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
     }
 
     /**
-     * Private helper method fo fire the publisherChange method on all listners.
+     * Private helper method fo fire the publisherChange method on all listeners.
      *
      * @param reg  : The particular publisher object that has changed.
      * @param type : What type of action is associated with the publisher object.
@@ -670,9 +670,9 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
             String fullRawTopicString = event.getData().getFullTopicString();
 
             // Remove all the subscribers for the topic that was deleted
-            getAllSubscribersForTopic(fullRawTopicString).forEach(s -> removeSubscriber(s));
+            getAllSubscribersForTopic(fullRawTopicString).forEach(this::removeSubscriber);
             // Remove all the publishers for the topic that was deleted
-            getAllPublishersForTopic(fullRawTopicString).forEach(p -> removePublisher(p));
+            getAllPublishersForTopic(fullRawTopicString).forEach(this::removePublisher);
         }
     }
 

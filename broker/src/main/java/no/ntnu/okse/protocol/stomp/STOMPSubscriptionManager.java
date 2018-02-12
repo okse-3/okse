@@ -25,8 +25,8 @@ public class STOMPSubscriptionManager implements SubscriptionChangeListener {
     }
 
     /**
-     * Inits the core subscription service. Basically a setter
-     * @param subService subscripton service
+     * Initialises the core subscription service. Basically a setter
+     * @param subService subscription service
      */
     public void initCoreSubscriptionService(SubscriptionService subService) {
         this.subscriptionService = subService;
@@ -115,7 +115,7 @@ public class STOMPSubscriptionManager implements SubscriptionChangeListener {
      * @return
      */
     public HashMap<String, Subscriber> getAllSubscribersForTopic(String topic){
-        HashMap<String, Subscriber> newHashMap = new HashMap<String, Subscriber>();
+        HashMap<String, Subscriber> newHashMap = new HashMap<>();
         Object[] keyArr = localSubscriberMap.keySet().toArray();
         for(int i = 0; i < localSubscriberMap.size(); i++){
             String key = (String)keyArr[i];

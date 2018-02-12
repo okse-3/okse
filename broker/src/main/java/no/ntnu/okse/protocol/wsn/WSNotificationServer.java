@@ -66,7 +66,7 @@ import java.util.concurrent.TimeUnit;
 
 public class WSNotificationServer extends AbstractProtocolServer {
 
-    // Runstate variables
+    // Run-state variables
     private boolean _running;
 
     // Path to internal configuration file on classpath
@@ -93,7 +93,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
     private Server _server;
     private WSNRequestParser _requestParser;
     private WSNCommandProxy _commandProxy;
-    private final ArrayList<Connector> _connectors = new ArrayList();
+    private final ArrayList<Connector> _connectors = new ArrayList<>();
     private HttpClient _client;
     private HashSet<ServiceConnection> _services;
     private ExecutorService clientPool;
@@ -136,7 +136,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
     private void init() {
         log.warn("Logging!");
 
-        // Set the servertype
+        // Set the server type
         protocolServerType = "WSNotification";
 
         // Declare HttpClient field
@@ -158,10 +158,10 @@ public class WSNotificationServer extends AbstractProtocolServer {
             configResource = Resource.newSystemResource(wsnInternalConfigFile);
             XmlConfiguration config = new XmlConfiguration(configResource.getInputStream());
             this._server = (Server) config.configure();
-            // Remove the xmlxonfig connector
+            // Remove the xml config connector
             this._server.removeConnector(this._server.getConnectors()[0]);
 
-            // Add a the serverconnector
+            // Add a the server connector
             log.debug("Adding WSNServer connector");
             this.addStandardConnector(this.host, this.port);
 
@@ -175,7 +175,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
             HttpHandler handler = new WSNotificationServer.HttpHandler();
             this._server.setHandler(handler);
 
-            log.debug("XMLConfig complete, server instanciated.");
+            log.debug("XMLConfig complete, server instantiated.");
 
         } catch (Exception e) {
             log.error("Unable to start WSNotificationServer: " + e.getMessage());
@@ -231,9 +231,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
                 broker.setRegistrationManager(registrationManager);
 
                 // Create a new thread for the Jetty Server to run in
-                this._serverThread = new Thread(() -> {
-                    this.run();
-                });
+                this._serverThread = new Thread(this::run);
                 this._serverThread.setName("WSNServer");
                 // Start the Jetty Server
                 this._serverThread.start();
@@ -402,7 +400,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
                                     InternalMessage.STATUS_ENDPOINTREF_IS_SET,
                             toSend
                     );
-                    // Update the requestinformation
+                    // Update the request-information
                     outMessage.getRequestInformation().setEndpointReference(_commandProxy.getEndpointReferenceOfRecipient(recipient));
 
                     // Check if the subscriber has requested raw message format
@@ -509,8 +507,8 @@ public class WSNotificationServer extends AbstractProtocolServer {
     /**
      * Add a standard serverconnector to the server instance.
      *
-     * @param address The IP address you wish to bind the serverconnector to
-     * @param port    The port you with to bind the serverconnector to
+     * @param address The IP address you wish to bind the server-connector to
+     * @param port    The port you with to bind the server-connector to
      */
     public void addStandardConnector(String address, int port) {
         ServerConnector connector = new ServerConnector(_server);
@@ -525,7 +523,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
     }
 
     /**
-     * Add a predefined serverconnector to the server instance.
+     * Add a predefined server-connector to the server instance.
      *
      * @param connector A jetty ServerConnector
      */
@@ -648,7 +646,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
                     return;
                 }
 
-                /* If no valid destination was found for the request (Endpoint non-existant) */
+                /* If no valid destination was found for the request (Endpoint non-existent) */
                 if ((returnMessage.statusCode & InternalMessage.STATUS_FAULT_INVALID_DESTINATION) > 0) {
                     response.setStatus(HttpStatus.NOT_FOUND_404);
                     baseRequest.setHandled(true);
@@ -774,7 +772,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
                 // Set proper request method
                 request.method(HttpMethod.POST);
 
-                // If the statusflag has set a message and it is not an input stream
+                // If the status-flag has set a message and it is not an input stream
                 if ((message.statusCode & InternalMessage.STATUS_MESSAGE_IS_INPUTSTREAM) == 0) {
                     log.error("sendMessage(): " + "The message contained something else than an inputStream." +
                             "Please convert your message to an InputStream before calling this methbod.");
@@ -798,7 +796,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
                     ContentResponse response = request.send();
                     totalMessagesSent.incrementAndGet();
 
-                    // Check what HTTP status we received, if is not A-OK, flag the internalmessage as fault
+                    // Check what HTTP status we received, if is not A-OK, flag the internal-message as fault
                     // and make the response content the message of the InternalMessage returned
                     if (!HttpStatus.isSuccess(response.getStatus())) {
                         totalBadRequests.incrementAndGet();
@@ -832,17 +830,17 @@ public class WSNotificationServer extends AbstractProtocolServer {
 
         if(relays.contains(relay)) return false;
 
-        // if relay.host == 0.0.0 etc sjekk port
+        // if relay.host == 0.0.0 etc check port
         if (localRelays.contains(host)) {
             log.debug("Same host, need to check port");
             if (getPort() == port) {
                 log.debug("Same port, invalid relay command");
                 return false;
             }
-            // else sjekk relay.host mot publicWANHost, så sjekk port
+            // else check relay.host mot publicWANHost, så sjekk port
         } else if (host.equals(getPublicWANHost())) {
             log.info("Same host (WAN), need to check port");
-            if (getPublicWANPort() == port) {
+            if (getPublicWANPort().equals(port)) {
                 log.info("Same port (WAN), invalid relay command");
                 return false;
             }

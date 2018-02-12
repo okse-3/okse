@@ -30,7 +30,7 @@ var Stats = (function($) {
      It overwrites everything.
      */
     var createTableForAllProtocols = function(protocols) {
-        var trHTML = ""
+        var trHTML = "";
         $.each(protocols, function(i, protocol) {
             trHTML +=
                 '<tr>' +
@@ -43,27 +43,27 @@ var Stats = (function($) {
                 '</tr>'
         });
         return trHTML
-    }
+    };
 
 
 
     var refreshCoreServiceStatistics = function(statistics) {
-        $('#messagesSent').html(statistics.totalMessagesSent)
-        $('#messagesReceived').html(statistics.totalMessagesReceived)
-        $('#totalRequests').html(statistics.totalRequests)
-        $('#badRequests').html(statistics.totalBadRequests)
-        $('#totalErrors').html(statistics.totalErrors)
-        Main.refreshElementByClassWithText('.messagesSent', statistics.totalMessagesSent)
-        Main.refreshElementByClassWithText('.totalSubscribers', statistics.subscribers)
-        Main.refreshElementByClassWithText('.totalPublishers', statistics.publishers)
+        $('#messagesSent').html(statistics.totalMessagesSent);
+        $('#messagesReceived').html(statistics.totalMessagesReceived);
+        $('#totalRequests').html(statistics.totalRequests);
+        $('#badRequests').html(statistics.totalBadRequests);
+        $('#totalErrors').html(statistics.totalErrors);
+        Main.refreshElementByClassWithText('.messagesSent', statistics.totalMessagesSent);
+        Main.refreshElementByClassWithText('.totalSubscribers', statistics.subscribers);
+        Main.refreshElementByClassWithText('.totalPublishers', statistics.publishers);
         Main.refreshElementByClassWithText('.totalTopics', statistics.topics)
-    }
+    };
 
     return {
         refresh: function(data) {
 
             if (data.protocolServerStatistics.length != 0) {
-                var table = createTableForAllProtocols(data.protocolServerStatistics)
+                var table = createTableForAllProtocols(data.protocolServerStatistics);
                 $('#protocol-table').html(table)
 
             } else {

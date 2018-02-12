@@ -20,8 +20,8 @@ import java.net.InetSocketAddress;
  * STOMP server.
  *
  * IT also adds a handler to the gateway that cleans up
- * lingering subscribers if there is a forcefull disconnect without
- * there being sent a disonnect message
+ * lingering subscribers if there is a forceful disconnect without
+ * there being sent a disconnect message
  */
 public class DisconnectListener implements StampyMessageListener{
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -61,7 +61,7 @@ public class DisconnectListener implements StampyMessageListener{
 
     /**
      * Sets the gateway
-     * Used to add the handler for forcefull disconnects
+     * Used to add the handler for forceful disconnects
      * @param gateway
      */
     public void setGateway(ServerNettyMessageGateway gateway) {

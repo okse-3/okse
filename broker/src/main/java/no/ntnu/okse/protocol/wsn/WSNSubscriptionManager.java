@@ -132,7 +132,7 @@ public class WSNSubscriptionManager extends AbstractSubscriptionManager implemen
      * Removes a Subscriber from the SubscriptionService, and the listener callback will remove it from
      * local mappings.
      *
-     * @param s The WS-Nu subscriptionkey
+     * @param s The WS-Nu subscription key
      */
     @Override
     public void removeSubscriber(String s) {
@@ -199,7 +199,7 @@ public class WSNSubscriptionManager extends AbstractSubscriptionManager implemen
      * SimpleSubscriptionManagers implementation of unsubscribe.
      *
      * @param unsubscribeRequest The incoming unsubscribeRequest parsed from XML
-     * @return A proper UbsubscribeResponse XML Object
+     * @return A proper UnsubscribeResponse XML Object
      * @throws ResourceUnknownFault             If the subscription reference did not exist
      * @throws UnableToDestroySubscriptionFault If there was an other error of some sort
      */
@@ -234,7 +234,7 @@ public class WSNSubscriptionManager extends AbstractSubscriptionManager implemen
                     _subscriptionService.removeSubscriber(localSubscriberMap.get(subRef));
                     return new UnsubscribeResponse();
                 } else {
-                    ExceptionUtilities.throwResourceUnknownFault("en", "Ill-formated subscription-parameter");
+                    ExceptionUtilities.throwResourceUnknownFault("en", "Ill-formatted subscription-parameter");
                 }
             } else if (entry.getValue().length == 0) {
                 ExceptionUtilities.throwUnableToDestroySubscriptionFault("en", "Subscription-parameter in URL is missing value");
@@ -270,7 +270,7 @@ public class WSNSubscriptionManager extends AbstractSubscriptionManager implemen
      * @param renewRequest The incoming renewRequest parsed from XML
      * @return A RenewResponse XML object
      * @throws ResourceUnknownFault             If the subscriptionReference was not found, or missing
-     * @throws UnacceptableTerminationTimeFault If the terminationTime was either unparseable or in the past
+     * @throws UnacceptableTerminationTimeFault If the terminationTime was either un-parsable or in the past
      */
     @Override
     @WebResult(name = "RenewResponse", targetNamespace = "http://docs.oasis-open.org/wsn/b-2", partName = "RenewResponse")
@@ -457,8 +457,8 @@ public class WSNSubscriptionManager extends AbstractSubscriptionManager implemen
                         ExceptionUtilities.throwPauseFailedFault("en", "Subscription is already paused");
                     }
                 }
-                log.debug("Received ill-formated subscription parameter in Pause request");
-                ExceptionUtilities.throwResourceUnknownFault("en", "Ill-formated subscription-parameter");
+                log.debug("Received ill-formatted subscription parameter in Pause request");
+                ExceptionUtilities.throwResourceUnknownFault("en", "Ill-formatted subscription-parameter");
             } else if (entry.getValue().length == 0) {
                 log.debug("Subscription parameter missing in Pause request");
                 ExceptionUtilities.throwPauseFailedFault("en", "Subscription-parameter in URL is missing value");
@@ -505,7 +505,7 @@ public class WSNSubscriptionManager extends AbstractSubscriptionManager implemen
         if (e.getData().getOriginProtocol().equals(_protocolserver.getProtocolServerType())) {
             // If we are dealing with an Unsubscribe
             if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
-                log.debug("Ubsubscribing " + localSubscriberHandle.get(e.getData().getAttribute(WSN_SUBSCRIBER_TOKEN)));
+                log.debug("Unsubscribing " + localSubscriberHandle.get(e.getData().getAttribute(WSN_SUBSCRIBER_TOKEN)));
                 // Remove the local mappings from WS-Nu subscriptionKey to OKSE Subscriber object and WS-Nu subscriptionHandle
                 localSubscriberMap.remove(e.getData().getAttribute(WSN_SUBSCRIBER_TOKEN));
                 localSubscriberHandle.remove(e.getData().getAttribute(WSN_SUBSCRIBER_TOKEN));

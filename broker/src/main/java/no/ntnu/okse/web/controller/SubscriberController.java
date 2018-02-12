@@ -91,7 +91,7 @@ public class SubscriberController {
     }
 
     /**
-     * Thid method deletes all the subscribers registered in the SubscriptionService.
+     * This method deletes all the subscribers registered in the SubscriptionService.
      *
      * @return A JSON serialized string
      */
@@ -101,7 +101,7 @@ public class SubscriberController {
     String deleteAllSubscribers() {
         SubscriptionService ss = SubscriptionService.getInstance();
         HashSet<Subscriber> allSubscribers = ss.getAllSubscribers();
-        allSubscribers.stream().forEach(s -> ss.removeSubscriber(s));
+        allSubscribers.stream().forEach(ss::removeSubscriber);
         return "{ \"deleted\" :true }";
     }
 

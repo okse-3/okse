@@ -29,7 +29,7 @@ import no.ntnu.okse.core.subscription.Subscriber;
 public class SubscriptionChangeEvent extends Event {
 
     // The different types of subscription changes that might occur
-    public static enum Type {
+    public enum Type {
         SUBSCRIBE,
         UNSUBSCRIBE,
         RENEW,

@@ -47,12 +47,12 @@ public class AMQPServer extends BaseHandler {
 
     private static class MessageStore {
 
-        Map<String, Deque<MessageBytes>> messages = new HashMap<String, Deque<MessageBytes>>();
+        Map<String, Deque<MessageBytes>> messages = new HashMap<>();
 
         void put(String address, MessageBytes messageBytes) {
             Deque<MessageBytes> queue = messages.get(address);
             if (queue == null) {
-                queue = new ArrayDeque<MessageBytes>();
+                queue = new ArrayDeque<>();
                 messages.put(address, queue);
             }
             queue.add(messageBytes);
@@ -215,7 +215,7 @@ public class AMQPServer extends BaseHandler {
     public static MessageBytes convertAMQPMessageToMessageBytes(Message msg) {
 
 
-        byte[] buffer = gestimateMessageByteSize(msg);
+        byte[] buffer = guesstimateMessageByteSize(msg);
 
         MessageBytes mb = new MessageBytes(buffer);
         System.out.println("This is mb.length: " + mb.getBytes().length);
@@ -229,21 +229,21 @@ public class AMQPServer extends BaseHandler {
      * @param msg : AMQP internal message
      * @return byte[]
      */
-    private static byte[] gestimateMessageByteSize(Message msg) {
+    private static byte[] guesstimateMessageByteSize(Message msg) {
 
-        int guestimateByteSize = 0;
+        int guesstimateByteSize = 0;
         if (msg.getBody().toString().length() != 0) {
-            guestimateByteSize += msg.getBody().toString().getBytes().length;
+            guesstimateByteSize += msg.getBody().toString().getBytes().length;
         }
         if (msg.getAddress().getBytes().length != 0) {
-            guestimateByteSize += msg.getAddress().getBytes().length;
+            guesstimateByteSize += msg.getAddress().getBytes().length;
         }
         if (msg.getSubject().getBytes().length != 0) {
-            guestimateByteSize += msg.getSubject().getBytes().length;
+            guesstimateByteSize += msg.getSubject().getBytes().length;
         }
         int encoded;
 
-        byte[] buffer = new byte[guestimateByteSize];
+        byte[] buffer = new byte[guesstimateByteSize];
         while (true) {
             try {
                 //log.debug("While loop: encode block, buffer length: " + buffer.length);
@@ -378,7 +378,7 @@ public class AMQPServer extends BaseHandler {
     public static Address createAddress(String addr, Delivery dlv) {
         Address address = new Address(addr);
 
-        // This handles an edgecase where client only sends
+        // This handles an edge-case where client only sends
         // the topic as address, which causes the Address
         // object creation to fail.
         if (address.getName() == null || !address.getName().equals(dlv.getLink().getTarget().getAddress())) {

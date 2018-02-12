@@ -63,7 +63,7 @@ public class Application {
 
     /**
      * Main method for the OKSE Message Broker
-     * Used to initate the complete application (CoreService and WebServer)
+     * Used to initiate the complete application (CoreService and WebServer)
      *
      * @param args Command line arguments
      */
@@ -158,13 +158,10 @@ public class Application {
             // Update values based on what keys are provided
             switch (option) {
                 case "CACHE_MESSAGES":
-                    if (properties.getProperty(option).equalsIgnoreCase("true")) CACHE_MESSAGES = true;
-                    else CACHE_MESSAGES = false;
+                    CACHE_MESSAGES = properties.getProperty(option).equalsIgnoreCase("true");
                     break;
                 case "BROADCAST_SYSTEM_MESSAGES_TO_SUBSCRIBERS":
-                    if (properties.getProperty(option).equalsIgnoreCase("true")) {
-                        BROADCAST_SYSTEM_MESSAGES_TO_SUBSCRIBERS = true;
-                    } else BROADCAST_SYSTEM_MESSAGES_TO_SUBSCRIBERS = false;
+                    BROADCAST_SYSTEM_MESSAGES_TO_SUBSCRIBERS = properties.getProperty(option).equalsIgnoreCase("true");
                     break;
                 case "DEFAULT_SUBSCRIPTION_TERMINATION_TIME":
                     try {

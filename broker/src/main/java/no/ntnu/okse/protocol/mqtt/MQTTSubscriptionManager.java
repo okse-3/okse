@@ -2,15 +2,12 @@ package no.ntnu.okse.protocol.mqtt;
 
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
 import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
-import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.core.topic.TopicService;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class handles subscriptions, will add and remove subscribers based on clientID, a subscriber object or a host, a port and a topic.
@@ -148,9 +145,7 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
      * @return returns true if there exists a subscriber with these values.
      */
     public boolean containsSubscriber(String host, int port, String topic) {
-        if (getSubscriberIndex(host, port, topic) == -1)
-            return false;
-        return true;
+        return getSubscriberIndex(host, port, topic) != -1;
     }
 
     /**

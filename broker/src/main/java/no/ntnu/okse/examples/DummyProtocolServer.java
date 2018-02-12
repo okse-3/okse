@@ -30,11 +30,7 @@ import no.ntnu.okse.core.event.SystemEvent;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
-import no.ntnu.okse.protocol.wsn.WSNTools;
-import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import org.apache.log4j.Logger;
-import org.ntnunotif.wsnu.base.util.Utilities;
-import org.ntnunotif.wsnu.services.general.WsnUtilities;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -75,7 +71,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
     }
 
     /**
-     * The main DummuProtocolServer instanciation method
+     * The main DummyProtocolServer instantiation method
      *
      * @return The DummyProtocolServer instance
      */
@@ -144,7 +140,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
             log.info("Booting DummyProtocolServer...");
 
             try {
-                // Bind the serverchannel localhost on 61001
+                // Bind the serverChannel localhost on 61001
                 serverChannel.socket().bind(new InetSocketAddress(this.host, this.port));
                 // Set to non-blocking
                 serverChannel.configureBlocking(false);
@@ -166,7 +162,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
             }
 
             // Create and start the serverThread
-            _serverThread = new Thread(() -> this.run());
+            _serverThread = new Thread(this::run);
             _serverThread.setName("DummyProtocolServer");
             _serverThread.start();
 
@@ -278,7 +274,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
                 log.error("Caught unknown exception: " + e);
             }
         }
-        log.info("DummypPotocolServer stopped.");
+        log.info("DummyProtocolServer stopped.");
     }
 
     /**
@@ -307,7 +303,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
     }
 
     /**
-     * Returns the type of this protocolserver as a string
+     * Returns the type of this ProtocolServer as a string
      *
      * @return A string representing the name of the protocol in question.
      */

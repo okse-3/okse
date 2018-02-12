@@ -155,7 +155,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
                 if (parts[0].equals(pubWanHost) && pubWanPort == 80) {
                     isLegal = false;
                 } else {
-                    // Check for defaultport at regular port
+                    // Check for default port at regular port
                     if (_protocolserver.getPort() == 80) {
                         isLegal = false;
                     }
@@ -177,7 +177,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
                 }
             }
         }
-        // If we found an illefal combination, throw the exception
+        // If we found an illegal combination, throw the exception
         if (!isLegal)
             ExceptionUtilities.throwSubscribeCreationFailedFault("en", "Invalid consumer reference. Would cause local loopback on the broker.");
     }
@@ -185,7 +185,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
     /**
      * Check if a subscription / registration -key exists
      *
-     * @param s The key to check existance for
+     * @param s The key to check existence for
      * @return True if the key exists, false otherwise
      */
     @Override
@@ -257,7 +257,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
             if (_subscriptionManager.subscriptionIsPaused(s)) return null;
         }
 
-        // If we dont have filter support, nothing more to do.
+        // If we don't have filter support, nothing more to do.
         if (this.filterSupport == null) {
             return notify;
         }
@@ -277,7 +277,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
      */
     @WebMethod(exclude = true)
     public void sendSingleNotify(Notify notify, W3CEndpointReference w3CEndpointReference) {
-        // Not really needed, since we are not using the WS-Nu quickbuild, but just in case
+        // Not really needed, since we are not using the WS-Nu quick build, but just in case
         // we need to terminate the request if we don't have anywhere to forward
         if (hub == null) {
             log.error("Tried to send message with hub null. If a quickBuild is available," +
@@ -287,17 +287,17 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
 
         log.debug("Was told to send single notify to a target");
 
-        // Initialize a new WS-Nu internalmessage
+        // Initialize a new WS-Nu internal message
         InternalMessage outMessage = new InternalMessage(InternalMessage.STATUS_OK |
                 InternalMessage.STATUS_HAS_MESSAGE |
                 InternalMessage.STATUS_ENDPOINTREF_IS_SET,
                 notify);
 
-        // Update the requestinformation
+        // Update the request information
         outMessage.getRequestInformation().setEndpointReference(ServiceUtilities.getAddress(w3CEndpointReference));
         log.debug("Forwarding Notify");
 
-        // Pass it along to the requestparser
+        // Pass it along to the request parser
         CoreService.getInstance().execute(() -> hub.acceptLocalMessage(outMessage));
     }
 
@@ -409,7 +409,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
                                 InternalMessage.STATUS_ENDPOINTREF_IS_SET,
                         toSend
                 );
-                // Update the requestinformation
+                // Update the request information
                 outMessage.getRequestInformation().setEndpointReference(getEndpointReferenceOfRecipient(recipient));
 
                 // If the recipient has requested UseRaw, remove Notify payload wrapping
@@ -423,11 +423,11 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
                         Object content = WSNTools.extractMessageContentFromNotify(toSend);
                         // Update the InternalMessage with the content of the NotificationMessage
                         outMessage.setMessage(content);
-                        // Pass it to the requestparser
+                        // Pass it to the request parser
                         CoreService.getInstance().execute(() -> hub.acceptLocalMessage(outMessage));
                     }
                 } else {
-                    // Pass it along to the requestparser
+                    // Pass it along to the request parser
                     CoreService.getInstance().execute(() -> hub.acceptLocalMessage(outMessage));
                 }
             }
@@ -507,7 +507,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
             }
         }
 
-        log.debug("Endpointreference is: " + endpointReference);
+        log.debug("Endpoint-reference is: " + endpointReference);
 
         String requestAddress = "";
         Integer port = 80;
@@ -680,7 +680,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         }
 
         log.debug("Initializing OKSE subscriber object");
-        // Instanciate new OKSE Subscriber object
+        // Instantiate new OKSE Subscriber object
         Subscriber subscriber = new Subscriber(requestAddress, port, rawTopicContent, _protocolserver.getProtocolServerType());
         // Set the wsn-subscriber hash key in attributes
         subscriber.setAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN, newSubscriptionKey);
@@ -738,7 +738,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
             ExceptionUtilities.throwPublisherRegistrationFailedFault("en", "Missing endpointreference");
         }
 
-        // Endpointreference extracted from the W3CEndpointReference
+        // Endpoint-reference extracted from the W3CEndpointReference
         String endpointReference = ServiceUtilities.getAddress(registerPublisherRequest.getPublisherReference());
 
         // EndpointReference is returned as "" from getAddress if something went wrong.
@@ -918,7 +918,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         }
     }
 
-    /* Begin obeservation methods */
+    /* Begin observation methods */
 
     @Override
     public void publisherChanged(PublisherRegistrationEvent publisherRegistrationEvent) {

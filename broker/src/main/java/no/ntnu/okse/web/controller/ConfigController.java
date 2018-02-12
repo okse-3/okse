@@ -94,11 +94,9 @@ public class ConfigController {
         TopicService ts = TopicService.getInstance();
         HashMap<String, HashSet<String>> allMappings = ts.getAllMappings();
 
-        HashMap<String, Object> result = new HashMap<String, Object>() {{
+        return new HashMap<String, Object>() {{
             put("mappings", allMappings);
         }};
-
-        return result;
     }
 
     /**
@@ -130,7 +128,7 @@ public class ConfigController {
         ts.addMappingBetweenTopics(topic, newTopic);
         // TODO: We probably need to add some check somewhere, that checks if the input string is correct.
 
-        return new ResponseEntity<String>("{ \"message\" :\"Added mapping from Topic{" + topic + "} to Topic{ " + newTopic + " }\" }", HttpStatus.OK);
+        return new ResponseEntity<>("{ \"message\" :\"Added mapping from Topic{" + topic + "} to Topic{ " + newTopic + " }\" }", HttpStatus.OK);
     }
 
     /**
@@ -147,7 +145,7 @@ public class ConfigController {
         TopicService ts = TopicService.getInstance();
         ts.deleteMapping(topicToRemove);
 
-        return new ResponseEntity<String>("{ \"message\" :\"Deleted mapping for Topic{" + topicToRemove + "}\" }", HttpStatus.OK);
+        return new ResponseEntity<>("{ \"message\" :\"Deleted mapping for Topic{" + topicToRemove + "}\" }", HttpStatus.OK);
     }
 
     /**
@@ -161,10 +159,8 @@ public class ConfigController {
     ResponseEntity<String> deleteAllMapping() {
         log.debug("Trying to delete all mappings");
         TopicService ts = TopicService.getInstance();
-        ts.getAllMappings().forEach((k, v) -> {
-            ts.deleteMapping(k);
-        });
-        return new ResponseEntity<String>("{ \"message\" :\"Deleted all mappings\" }", HttpStatus.OK);
+        ts.getAllMappings().forEach((k, v) -> ts.deleteMapping(k));
+        return new ResponseEntity<>("{ \"message\" :\"Deleted all mappings\" }", HttpStatus.OK);
     }
 
 
@@ -199,7 +195,7 @@ public class ConfigController {
 
         if (host == null || port == null) {
             log.debug("Host or port not provided, not able to add relay");
-            return new ResponseEntity<String>("{ \"message\" :\"Host or port not provided, not able to add relay\" }", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("{ \"message\" :\"Host or port not provided, not able to add relay\" }", HttpStatus.BAD_REQUEST);
         }
 
         Soap.SoapVersion soapVersion;
@@ -214,10 +210,10 @@ public class ConfigController {
         }
 
         if(wsnServers.get(id).addRelay(relay, host, port, topic, soapVersion)) {
-            return new ResponseEntity<String>("{ \"message\" :\"Successfully added relay\" }", HttpStatus.OK);
+            return new ResponseEntity<>("{ \"message\" :\"Successfully added relay\" }", HttpStatus.OK);
         } else {
 
-            return new ResponseEntity<String>("{ \"message\" :\"Unable to add relay\" }", HttpStatus.OK);
+            return new ResponseEntity<>("{ \"message\" :\"Unable to add relay\" }", HttpStatus.OK);
         }
     }
 
@@ -236,9 +232,9 @@ public class ConfigController {
         final WSNotificationServer server = wsnServers.get(id);
 
         if(server.deleteRelay(relay))
-            return new ResponseEntity<String>("{ \"message\" :\"Successfully removed the relay\" }", HttpStatus.OK);
+            return new ResponseEntity<>("{ \"message\" :\"Successfully removed the relay\" }", HttpStatus.OK);
         else
-            return new ResponseEntity<String>("{ \"message\" :\"Unable to remove the relay, can't find it.\" }", HttpStatus.OK);
+            return new ResponseEntity<>("{ \"message\" :\"Unable to remove the relay, can't find it.\" }", HttpStatus.OK);
     }
 
     /**
@@ -251,7 +247,7 @@ public class ConfigController {
     public
     @ResponseBody
     ResponseEntity<String> deleteAllRelays() {
-        wsnServers.forEach(s -> s.deleteAllRelays());
-        return new ResponseEntity<String>("{ \"message\" :\"Deleted all relays\" }", HttpStatus.OK);
+        wsnServers.forEach(WSNotificationServer::deleteAllRelays);
+        return new ResponseEntity<>("{ \"message\" :\"Deleted all relays\" }", HttpStatus.OK);
     }
 }

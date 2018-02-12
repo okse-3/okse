@@ -54,19 +54,19 @@ public class WSNRequestParser implements Hub {
      * to send back to the originator of the message
      *
      * @param message Incoming message to parse
-     * @param streamToRequestor Ouput stream for the response message
+     * @param streamToRequestor Output stream for the response message
      * @return An InternalMessage with status from parsing the message
      */
     public InternalMessage parseMessage(InternalMessage message, OutputStream streamToRequestor) {
 
         ServiceConnection recipient = findRecipientService(message.getRequestInformation().getRequestURL());
 
-        // We set up the initial returnmessage as having no destination, so we can just return it
+        // We set up the initial return message as having no destination, so we can just return it
         // if we cannot locate where it should go, even though it might be syntactically correct.
         InternalMessage returnMessage = new InternalMessage(InternalMessage.STATUS_FAULT |
                 InternalMessage.STATUS_FAULT_INVALID_DESTINATION, null);
 
-        boolean foundRecipient = recipient != null ? true : false;
+        boolean foundRecipient = recipient != null;
 
         // Is it just a request and has no content
         if ((message.statusCode & InternalMessage.STATUS_HAS_MESSAGE) == 0) {
@@ -161,7 +161,7 @@ public class WSNRequestParser implements Hub {
 
         /* Everything is processed properly, and we can figure out what to return */
         if ((returnMessage.statusCode & InternalMessage.STATUS_OK) > 0) {
-            /* If we have a message we should try and convert it to an inputstream before returning
+            /* If we have a message we should try and convert it to an input-stream before returning
             * Notably the ApplicationServer does accept other form of messages, but it is more logical to convert
             * it at this point */
 
@@ -192,19 +192,19 @@ public class WSNRequestParser implements Hub {
                     /* This was not do-able */
                     } catch (JAXBException e) {
 
-                        String faultMessage = e.getClass().getName();
-                        faultMessage += e.getMessage() == null ? "" : e.getMessage();
+                        StringBuilder faultMessage = new StringBuilder(e.getClass().getName());
+                        faultMessage.append(e.getMessage() == null ? "" : e.getMessage());
                         Throwable cause = e.getCause();
 
                         while (cause != null) {
-                            faultMessage += "\n\tCaused by: ";
-                            faultMessage += cause.getClass().getName() + (cause.getMessage() == null ? "" : cause.getMessage());
+                            faultMessage.append("\n\tCaused by: ");
+                            faultMessage.append(cause.getClass().getName()).append(cause.getMessage() == null ? "" : cause.getMessage());
                             cause = cause.getCause();
                         }
 
                         if (e.getLinkedException() != null) {
-                            faultMessage += "\n\tWith linked exception:" + e.getLinkedException().getClass().getName();
-                            faultMessage += e.getLinkedException().getMessage() == null ? "" : e.getLinkedException().getMessage();
+                            faultMessage.append("\n\tWith linked exception:").append(e.getLinkedException().getClass().getName());
+                            faultMessage.append(e.getLinkedException().getMessage() == null ? "" : e.getLinkedException().getMessage());
                         }
 
                         log.error("Unable to marshal returnMessage. Consider converting the " +
@@ -243,7 +243,7 @@ public class WSNRequestParser implements Hub {
                 }
             /* We have no unhandled exceptions at least */
             } else {
-                // Is it an invalid or non-existant endpoint reference requested?
+                // Is it an invalid or non-existent endpoint reference requested?
                 if ((returnMessage.statusCode & InternalMessage.STATUS_FAULT_INVALID_DESTINATION) > 0) {
 
                     try {

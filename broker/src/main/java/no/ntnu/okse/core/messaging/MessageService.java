@@ -50,7 +50,7 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
     private Properties config;
 
     /**
-     * Private Constructor that recieves invocation from getInstance, enabling the singleton pattern for this class
+     * Private Constructor that receives invocation from getInstance, enabling the singleton pattern for this class
      */
     protected MessageService() {
         super(MessageService.class.getName());
@@ -70,7 +70,7 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
     }
 
     /**
-     * The main invocation method of the MessageService. Instanciates a MessageService instance if needed,
+     * The main invocation method of the MessageService. Instantiates a MessageService instance if needed,
      * and returns the active instance.
      *
      * @return The MessageService instance
@@ -116,7 +116,7 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
                 try {
                     // Fetch the next job, will wait until a new message arrives
                     Message m = queue.take();
-                    log.info("Received a message for distrubution: " + m);
+                    log.info("Received a message for distribution: " + m);
 
                     // Do we have a system message?
                     if (m.isSystemMessage() && m.getTopic() == null) {

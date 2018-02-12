@@ -27,7 +27,7 @@ package no.ntnu.okse.core.topic;
 public class TopicTask {
 
     // The different Task types
-    public static enum Type {
+    public enum Type {
         NEW_TOPIC,
         UPDATE_TOPIC,
         DELETE_TOPIC,

@@ -190,7 +190,7 @@ public class CoreService extends AbstractCoreService {
             log.warn("Interrupted during shutdown sleep");
         }
         // Shut down all the Core Services
-        this.services.forEach(s -> s.stop());
+        this.services.forEach(AbstractCoreService::stop);
 
         // Turn of run flag
         _running = false;
@@ -297,7 +297,7 @@ public class CoreService extends AbstractCoreService {
     /**
      * Statistics for total number of requests that has passed through all protocol servers
      *
-     * @return: An integer representing the total amount of requests.
+     * @return An integer representing the total amount of requests.
      */
     public int getTotalRequestsFromProtocolServers() {
         return getAllProtocolServers().stream().map(ProtocolServer::getTotalRequests).reduce(0, (a, b) -> a + b);
@@ -306,7 +306,7 @@ public class CoreService extends AbstractCoreService {
     /**
      * Statistics for total number of messages that has been received through all protocol servers
      *
-     * @return: An integer representing the total amount of messages received.
+     * @return An integer representing the total amount of messages received.
      */
     public int getTotalMessagesReceivedFromProtocolServers() {
         return getAllProtocolServers().stream().map(ProtocolServer::getTotalMessagesReceived).reduce(0, (a, b) -> a + b);
@@ -324,7 +324,7 @@ public class CoreService extends AbstractCoreService {
     /**
      * Statistics for total number of bad or malformed requests that has passed through all protocol servers
      *
-     * @return: An integer representing the total amount of bad or malformed requests
+     * @return An integer representing the total amount of bad or malformed requests
      */
     public int getTotalBadRequestsFromProtocolServers() {
         return getAllProtocolServers().stream().map(ProtocolServer::getTotalBadRequests).reduce(0, (a, b) -> a + b);
@@ -333,7 +333,7 @@ public class CoreService extends AbstractCoreService {
     /**
      * Statistics for total number of errors generated through all protocol servers
      *
-     * @return: An integer representing the total amount of errors from protocol servers.
+     * @return An integer representing the total amount of errors from protocol servers.
      */
     public int getTotalErrorsFromProtocolServers() {
         return getAllProtocolServers().stream().map(ProtocolServer::getTotalErrors).reduce(0, (a, b) -> a + b);
@@ -342,7 +342,7 @@ public class CoreService extends AbstractCoreService {
     /**
      * Fetches the ArrayList of ProtocolServers currently added to CoreService.
      *
-     * @return: An ArrayList of ProtocolServers that are registered. Returns an empty ArrayList if not booted.
+     * @return An ArrayList of ProtocolServers that are registered. Returns an empty ArrayList if not booted.
      */
     public ArrayList<ProtocolServer> getAllProtocolServers() {
         if (protocolServersBooted) return this.protocolServers;
@@ -390,7 +390,7 @@ public class CoreService extends AbstractCoreService {
         }
 
         // Iterate over all protocol servers and initiate shutdown process
-        getAllProtocolServers().forEach(ps -> ps.stopServer());
+        getAllProtocolServers().forEach(ProtocolServer::stopServer);
         getAllProtocolServers().clear();
         protocolServersBooted = false;
 
@@ -431,7 +431,7 @@ public class CoreService extends AbstractCoreService {
      * Helper method that boots all registered core services
      */
     private void bootCoreServices() {
-        services.forEach(s -> s.boot());
+        services.forEach(AbstractCoreService::boot);
     }
 
     /**
@@ -506,7 +506,7 @@ public class CoreService extends AbstractCoreService {
         // Register listener registration on self
         this.registerListenerSupport();
         // Register listener support on other registered core services
-        services.forEach(s -> s.registerListenerSupport());
+        services.forEach(AbstractCoreService::registerListenerSupport);
 
     }
 }

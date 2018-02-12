@@ -65,7 +65,7 @@ import java.util.regex.Pattern;
 
 public class WSNTools {
 
-    // Intialize the logger
+    // Initialize the logger
     private static Logger log = Logger.getLogger(WSNTools.class.getName());
 
     // Initialize the WSN XML Object factories
@@ -146,9 +146,9 @@ public class WSNTools {
             // Create transformer
             TransformerFactory transFactory = TransformerFactory.newInstance();
             Transformer transformer = transFactory.newTransformer();
-            // Init a stringbuffer
+            // Init a StringBuffer
             StringWriter buffer = new StringWriter();
-            // We dont want the xml declaration
+            // We don't want the xml declaration
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             // Transform the node from source and beyond
             transformer.transform(new DOMSource(node), new StreamResult(buffer));
@@ -207,10 +207,10 @@ public class WSNTools {
 
     /**
      * Extract the Message element from a WS-Notification Notify wrapper
-     * This method does not support multiple notificationmessages bundled in a single Notify
+     * This method does not support multiple notificationMessages bundled in a single Notify
      *
      * @param notify The Notify object to extract message content from
-     * @return The Message object contained within the notificationmessage
+     * @return The Message object contained within the notificationMessage
      */
     public static Object extractMessageContentFromNotify(Notify notify) {
         return notify.getNotificationMessage().get(0).getMessage().getAny();
@@ -223,7 +223,7 @@ public class WSNTools {
      * the content of the current holderType.
      *
      * @param notifyHolderType The wrapper to extract the message content from
-     * @return The message object contained within the notificationmessageholdertype
+     * @return The message object contained within the notificationMessageHolderType
      */
     public static Object extractMessageContentFromNotify(NotificationMessageHolderType notifyHolderType) {
         return notifyHolderType.getMessage().getAny();
@@ -232,7 +232,7 @@ public class WSNTools {
     /**
      * Injects an XML sub-tree into the message content of a notify
      *
-     * @param object The Xml root subnode to be injected
+     * @param object The Xml root sub-node to be injected
      * @param notify The Notify object to be updated
      */
     public static void injectMessageContentIntoNotify(Object object, Notify notify) {
@@ -258,10 +258,10 @@ public class WSNTools {
             if (node.contains(":")) {
                 // Split the node
                 String[] filtered = node.split(":");
-                // Maybe superflous check for duplicate ocurrances of :
+                // Maybe superfluous check for duplicate occurrences of :
                 if (filtered.length == 2) filteredNodeSet.add(filtered[1]);
                 else {
-                    // If we had more than one ocurrance of : remove the first and keep remaining
+                    // If we had more than one occurrence of : remove the first and keep remaining
                     StringBuilder builder = new StringBuilder();
                     for (int i = 1; i < filtered.length; i++) builder.append(filtered[i]);
                     filteredNodeSet.add(builder.toString());
@@ -355,7 +355,7 @@ public class WSNTools {
     }
 
     /**
-     * Helper method that extracts a subscription reference from raw subscriberequest response
+     * Helper method that extracts a subscription reference from raw subscribe request response
      *
      * @param subResponse The internalMessage containing the raw XML SubscribeResponse
      * @return A string with the complete URL + endpoint and params needed
@@ -381,7 +381,7 @@ public class WSNTools {
      * @param endpointReference The full address of the remote host to send the request to
      * @param topic             The topic to subscribe to (can be null)
      * @param consumerReference The consumer reference, which is the address of the subscriber
-     * @param terminationTime   An initialtermination time in milliseconds since epoch.
+     * @param terminationTime   An initial termination time in milliseconds since epoch.
      *                          Can be null to allow broker to use internal defaults.
      * @param version           The SOAP version to use for the message
      * @return An InternalMessage with the Subscribe payload, preset with correct destination endpoint
@@ -484,7 +484,7 @@ public class WSNTools {
     }
 
     /**
-     * Extracts the endtime specified by a XsdDuration string. This method will return the duration specified, added on to
+     * Extracts the end time specified by a XsdDuration string. This method will return the duration specified, added on to
      * the systems current local time.
      *
      * @param time The duration as specified by a XsdDuration string.

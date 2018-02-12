@@ -26,13 +26,12 @@ package no.ntnu.okse.core.topic;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.log4j.Logger;
-import org.springframework.security.crypto.codec.Hex;
 
 import javax.validation.constraints.NotNull;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
-import java.util.Iterator;
+
+import static no.ntnu.okse.core.Utilities.generateID;
 
 @JsonIgnoreProperties({"parent", "children", "type"})
 public class Topic {
@@ -74,16 +73,10 @@ public class Topic {
      */
     private String generateTopicID() {
         try {
-            MessageDigest m = MessageDigest.getInstance("MD5");
-            m.update(Long.toString(System.nanoTime()).getBytes());
-            byte[] hash = m.digest();
-            String topicID = new String(Hex.encode(hash));
-
-            return topicID;
+            return generateID();
         } catch (NoSuchAlgorithmException e) {
             log.error("Could not generate a topic ID (MD5 algorithm not found)");
         }
-
         return null;
     }
 
@@ -206,25 +199,22 @@ public class Topic {
      * Removes all children from this node, by disconnecting their parent relation to this Topic node.
      */
     public void clearChildren() {
-        Iterator<Topic> iterator = this.children.iterator();
-        while (iterator.hasNext()) {
-            Topic t = iterator.next();
+        for (Topic t : this.children) {
             t.setParent(null);
         }
     }
 
     /**
-     * Checks to see wether this topic is the root node in the hierarchy.
+     * Checks to see whether this topic is the root node in the hierarchy.
      *
      * @return true if this is the root node, false otherwise.
      */
     public boolean isRoot() {
-        if (this.parent == null) return true;
-        return false;
+        return this.parent == null;
     }
 
     /**
-     * Checks to see wether this topic is a leaf node in the hierarchy.
+     * Checks to see whether this topic is a leaf node in the hierarchy.
      *
      * @return true if this is a leaf node, false otherwise.
      */
@@ -262,27 +252,22 @@ public class Topic {
     /**
      * Checks if this topic is the ancestor of another topic
      *
-     * @param other The topic node we wish to explore if is a decendant of this topic node
+     * @param other The topic node we wish to explore if is a descendant of this topic node
      * @return True if this topic is an ancestor of the argument, false otherwise
      */
     public boolean isAncestorOf(Topic other) {
-
         // If the other is a root node, it is impossible that this object is an ancestor of it
-        if (other.isRoot()) return false;
-
-            // If the other's parent is this object, we hace a match
-        else if (other.getParent() == this) return true;
-
-            // Recursively ascend up the family tree
-        else return this.isAncestorOf(other.getParent());
+        // If the other's parent is this object, we have a match
+        // else we search recursively
+        return !other.isRoot() && (other.getParent() == this || this.isAncestorOf(other.getParent()));
     }
 
     /**
-     * Checks if this topic is a decendant of the argument topic. This method reuses the isAncestorOf method,
+     * Checks if this topic is a descendant of the argument topic. This method reuses the isAncestorOf method,
      * by swapping the arguments.
      *
-     * @param other The topic we wish to check if we have decended from
-     * @return True if we have decended from the argument topic, false otherwise
+     * @param other The topic we wish to check if we have descended from
+     * @return True if we have descended from the argument topic, false otherwise
      */
     public boolean isDescendantOf(Topic other) {
         return other.isAncestorOf(this);

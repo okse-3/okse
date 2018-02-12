@@ -26,13 +26,13 @@ package no.ntnu.okse.core.messaging;
 
 import no.ntnu.okse.core.subscription.Publisher;
 import org.apache.log4j.Logger;
-import org.springframework.security.crypto.codec.Hex;
 
 import javax.annotation.Nonnull;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+
+import static no.ntnu.okse.core.Utilities.generateID;
 
 public class Message {
 
@@ -78,12 +78,7 @@ public class Message {
      */
     private String generateMessageID() {
         try {
-            MessageDigest m = MessageDigest.getInstance("MD5");
-            m.update(Long.toString(System.nanoTime()).getBytes());
-            byte[] hash = m.digest();
-            String messageID = new String(Hex.encode(hash));
-
-            return messageID;
+            return generateID();
         } catch (NoSuchAlgorithmException e) {
             log.error("Could not generate a message ID (MD5 algorithm not found)");
         }
@@ -133,8 +128,7 @@ public class Message {
      * @return true, if publisher is registered
      */
     public boolean messageSentFromRegisteredPublisher() {
-        if (this.publisher == null) return false;
-        return true;
+        return this.publisher != null;
     }
 
     /**
@@ -170,8 +164,7 @@ public class Message {
      * @return True if the message has been processed, false otherwise.
      */
     public boolean isProcessed() {
-        if (this.processed == null) return false;
-        return true;
+        return this.processed != null;
     }
 
     /**

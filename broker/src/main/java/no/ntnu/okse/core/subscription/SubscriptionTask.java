@@ -27,7 +27,7 @@ package no.ntnu.okse.core.subscription;
 public class SubscriptionTask {
 
     // The different Task types
-    public static enum Type {
+    public enum Type {
         NEW_SUBSCRIBER,
         NEW_PUBLISHER,
         UPDATE_SUBSCRIBER,

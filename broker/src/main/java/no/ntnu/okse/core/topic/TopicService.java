@@ -259,7 +259,7 @@ public class TopicService extends AbstractCoreService {
     public HashMap<String, HashSet<String>> getAllMappings() {
         HashMap<String, HashSet<String>> collector = new HashMap<>();
 
-        mappings.forEach((k, v) -> collector.put(k, v));
+        mappings.forEach(collector::put);
 
         return collector;
     }
@@ -419,7 +419,7 @@ public class TopicService extends AbstractCoreService {
                 // Retrieve a set of all its children
                 HashSet<Topic> children = TopicTools.getAllChildrenFromNode(t);
                 // Remove all the children
-                children.forEach(c -> deleteTopicLocal(c));
+                children.forEach(this::deleteTopicLocal);
                 // Delete the topic itself
                 deleteTopicLocal(t);
             };
@@ -468,7 +468,7 @@ public class TopicService extends AbstractCoreService {
             Runnable job = () -> {
                 // Generate topic nodes based on the raw topic string, and add them all
                 HashSet<Topic> topicNodes = generateTopicNodesFromRawTopicString(topic);
-                topicNodes.forEach(t -> addTopicLocal(t));
+                topicNodes.forEach(this::addTopicLocal);
             };
 
             // Initialize the TopicTask object with proper type and the job itself

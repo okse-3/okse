@@ -67,7 +67,6 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
     /**
      * Method for determining if the server is running
-     * @return
      */
     public boolean isRunning() {
         return _running;

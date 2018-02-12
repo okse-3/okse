@@ -49,7 +49,7 @@ public class StatsController {
     private static Logger log = Logger.getLogger(StatsController.class.getName());
 
     /**
-     * Returnes all the information needed to refresh the stats-pane
+     * Returns all the information needed to refresh the stats-pane
      *
      * @return A HashMap containing all the information
      */

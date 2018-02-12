@@ -28,12 +28,12 @@ var Config = (function($) {
 
     var currentWsnInstance = function() {
         return $("#wsn-instance").val()
-    }
+    };
 
     var updateRelays = function(id) {
-        $.okseDebug.logPrint('updateRelays(' + id +')')
+        $.okseDebug.logPrint('updateRelays(' + id +')');
         if(id === null) {
-            $('#relays-table').html('<tr class="danger"><td colspan="2"><h4 class="text-center">No WSNotification server selected</h4></td></tr>')
+            $('#relays-table').html('<tr class="danger"><td colspan="2"><h4 class="text-center">No WSNotification server selected</h4></td></tr>');
             return
         }
 
@@ -41,27 +41,27 @@ var Config = (function($) {
             url: 'config/relay/get?serverid=' + id,
             type: 'GET',
             success: function(data) {
-                if(Object.keys(data).length > 0) $('#relays-table').html(createTableForAllRelays(data))
-                else $('#relays-table').html('<tr class="danger"><td colspan="2"><h4 class="text-center">No relays returned from ConfigController</h4></td></tr>')
+                if(Object.keys(data).length > 0) $('#relays-table').html(createTableForAllRelays(data));
+                else $('#relays-table').html('<tr class="danger"><td colspan="2"><h4 class="text-center">No relays returned from ConfigController</h4></td></tr>');
 
                 unBindButtons();
                 bindButtons();
             },
             error: function(xhr, status, error) {
-                var data = JSON.parse(xhr.responseText)
-                Main.error(xhr, status, error)
-                Main.displayMessage(data.message)
+                var data = JSON.parse(xhr.responseText);
+                Main.error(xhr, status, error);
+                Main.displayMessage(data.message);
                 $('#relays-table').html('<tr class="danger"><td colspan="2"><h4 class="text-center">WSN instance not valid</h4></td></tr>')
             }
         });
-    }
+    };
 
     var createTableForAllRelays = function(relays) {
-        var trHTML = ""
+        var trHTML = "";
         $.map(relays, function(value) {
             var match = value.match(/(https?:\/\/)?[^:/?]+(:\d+)?\/?/);
-            if(match == null) match = value
-            else match = match[0]
+            if(match == null) match = value;
+            else match = match[0];
             trHTML +=
                 '<tr>' +
                 //TODO: Ugly regex. A better solution should be found for this.
@@ -70,7 +70,7 @@ var Config = (function($) {
                 '</tr>'
         });
         return trHTML
-    }
+    };
 
     /*
      Creates, fills and returns a <tr>-element. The <tr>-element is generated based on the mappings
@@ -78,7 +78,7 @@ var Config = (function($) {
      this purpose. This function does not manipulate the DOM by checking if an element exists. It overwrites everything.
      */
     var createTableForAllMappings = function(mappings) {
-        var trHTML = ""
+        var trHTML = "";
         $.map(mappings, function(value, key) {
             $.each(value, function(i, toTopic) {
                 trHTML +=
@@ -90,12 +90,12 @@ var Config = (function($) {
             });
         });
         return trHTML
-    }
+    };
 
     var unBindButtons = function() {
-        $('.delete-mapping').off('click')
+        $('.delete-mapping').off('click');
         $('.delete-relay').off('click')
-    }
+    };
 
     var bindButtons = function() {
         $('.delete-mapping').on('click', function(e) {
@@ -103,11 +103,11 @@ var Config = (function($) {
 
             if (confirm("Are you sure you want to delete this mapping?")) {
                 // Disable the topic and buttons temporarily
-                var fromTopic = $(e.target).attr('id')
-                fromTopic = fromTopic.split('-').pop()
-                $.okseDebug.logPrint("Trying to remove mapping for topic: " + fromTopic)
-                $(e.target).closest('tr').addClass('deleted')
-                $(e.target).addClass("disabled")
+                var fromTopic = $(e.target).attr('id');
+                fromTopic = fromTopic.split('-').pop();
+                $.okseDebug.logPrint("Trying to remove mapping for topic: " + fromTopic);
+                $(e.target).closest('tr').addClass('deleted');
+                $(e.target).addClass("disabled");
 
                 Main.ajax({
                     url: 'config/mapping/delete/single?topic=' + fromTopic,
@@ -116,12 +116,12 @@ var Config = (function($) {
                         $.okseDebug.logPrint("[Debug][Config] Callback from server; mapping deleted")
                     },
                     error: function(xhr, status, error) {
-                        $.okseDebug.logPrint("[Debug][Config] Unable to remove mapping for topic: " + fromTopic)
-                        $(e.target).closest('tr').removeClass('deleted')
-                        $(e.target).removeClass("disabled")
+                        $.okseDebug.logPrint("[Debug][Config] Unable to remove mapping for topic: " + fromTopic);
+                        $(e.target).closest('tr').removeClass('deleted');
+                        $(e.target).removeClass("disabled");
 
-                        var data = JSON.parse(xhr.responseText)
-                        Main.error(xhr, status, error)
+                        var data = JSON.parse(xhr.responseText);
+                        Main.error(xhr, status, error);
                         Main.displayMessage(data.message)
                     }
                 });
@@ -133,26 +133,26 @@ var Config = (function($) {
 
             if (confirm("Are you sure you want to delete this relay?")) {
                 // Disable the topic and buttons temporarily
-                var relay = $(e.target).attr('id')
-                $.okseDebug.logPrint("Trying to remove relay: " + relay)
-                $(e.target).closest('tr').addClass('deleted')
-                $(e.target).addClass("disabled")
+                var relay = $(e.target).attr('id');
+                $.okseDebug.logPrint("Trying to remove relay: " + relay);
+                $(e.target).closest('tr').addClass('deleted');
+                $(e.target).addClass("disabled");
 
                 Main.ajax({
                     url: 'config/relay/delete/single?relayID=' + relay + "&serverID=" + currentWsnInstance(),
                     type: 'DELETE',
                     success: function(data) {
-                        $.okseDebug.logPrint("[Debug][Config] Callback from server; relay deleted")
+                        $.okseDebug.logPrint("[Debug][Config] Callback from server; relay deleted");
                         updateRelays(currentWsnInstance())
                     },
                     error: function(xhr, status, error) {
-                        $.okseDebug.logPrint("[Debug][Config] Unable to remove relay: " + relay)
-                        $(e.target).closest('tr').removeClass('deleted')
-                        $(e.target).removeClass("disabled")
+                        $.okseDebug.logPrint("[Debug][Config] Unable to remove relay: " + relay);
+                        $(e.target).closest('tr').removeClass('deleted');
+                        $(e.target).removeClass("disabled");
 
-                        var data = JSON.parse(xhr.responseText)
-                        Main.error(xhr, status, error)
-                        Main.displayMessage(data.message)
+                        var data = JSON.parse(xhr.responseText);
+                        Main.error(xhr, status, error);
+                        Main.displayMessage(data.message);
                         updateRelays(currentWsnInstance())
                     }
                 });
@@ -160,13 +160,13 @@ var Config = (function($) {
 
         });
 
-    }
+    };
 
     return {
         refresh: function(response) {
-            unBindButtons()
+            unBindButtons();
 
-            var countMappings = Object.keys(response.mappings).length
+            var countMappings = Object.keys(response.mappings).length;
 
             if ( ! countMappings == 0 ) {
                 $('#mappings-table').html(createTableForAllMappings(response.mappings))
@@ -179,36 +179,36 @@ var Config = (function($) {
         },
         init: function() {
             $('#add-relay').on('click', function(e) {
-                e.preventDefault()
+                e.preventDefault();
 
-                var url = ('config/relay/add?from=' + $('#relay-from').val())
+                var url = ('config/relay/add?from=' + $('#relay-from').val());
 
-                var relayTopic = $('#relay-topic').val()
+                var relayTopic = $('#relay-topic').val();
                 if (relayTopic.length != 0) {
                     url += ('&topic=' + encodeURIComponent(relayTopic))
                 }
 
-                url += ('&serverID=' + $('#wsn-instance').val())
-                url += ('&soap-version=' + $('#relay-soap-version').val())
+                url += ('&serverID=' + $('#wsn-instance').val());
+                url += ('&soap-version=' + $('#relay-soap-version').val());
 
                 Main.ajax({
                     url: url,
                     type: 'POST',
                     success: function(data) {
-                        $.okseDebug.logPrint("[Debug][Config] Callback from server; added relay")
+                        $.okseDebug.logPrint("[Debug][Config] Callback from server; added relay");
                         updateRelays(currentWsnInstance())
                     },
                     error: function(xhr, status, error) {
-                        var data = JSON.parse(xhr.responseText)
-                        Main.error(xhr, status, error)
+                        var data = JSON.parse(xhr.responseText);
+                        Main.error(xhr, status, error);
                         Main.displayMessage(data.message)
 
                     }
                 })
-            })
+            });
 
             $('#add-mapping').on('click', function(e) {
-                e.preventDefault()
+                e.preventDefault();
 
                 Main.ajax({
                     url: 'config/mapping/add?fromTopic=' + encodeURIComponent($('#from-topic').val()) + '&toTopic=' + encodeURIComponent($('#to-topic').val()),
@@ -217,15 +217,15 @@ var Config = (function($) {
                         $.okseDebug.logPrint("[Debug][Config] Callback from server; added mapping")
                     },
                     error: function(xhr, status, error) {
-                        var data = JSON.parse(xhr.responseText)
-                        Main.error(xhr, status, error)
+                        var data = JSON.parse(xhr.responseText);
+                        Main.error(xhr, status, error);
                         Main.displayMessage(data.message)
                     }
                 });
             });
 
             $('#delete-all-relays').on('click', function(e){
-                e.preventDefault()
+                e.preventDefault();
 
                 if (confirm("Are you sure you want to delete all relays?")) {
 
@@ -236,8 +236,8 @@ var Config = (function($) {
                             $.okseDebug.logPrint("[Debug][Config] Callback from server; deleted all relays")
                         },
                         error: function(xhr, status, error) {
-                            var data = JSON.parse(xhr.responseText)
-                            Main.error(xhr, status, error)
+                            var data = JSON.parse(xhr.responseText);
+                            Main.error(xhr, status, error);
                             Main.displayMessage(data.message)
                         }
                     })
@@ -246,7 +246,7 @@ var Config = (function($) {
             });
 
             $('#delete-all-mappings').on('click', function(e) {
-                e.preventDefault()
+                e.preventDefault();
 
                 if (confirm("Are you sure you want to delete all mappings?")) {
 
@@ -257,8 +257,8 @@ var Config = (function($) {
                             $.okseDebug.logPrint("[Debug][Config] Callback from server; deleted all mappings")
                         },
                         error: function (xhr, status, error) {
-                            var data = JSON.parse(xhr.responseText)
-                            Main.error(xhr, status, error)
+                            var data = JSON.parse(xhr.responseText);
+                            Main.error(xhr, status, error);
                             Main.displayMessage(data.message)
                         }
                     });
@@ -274,25 +274,25 @@ var Config = (function($) {
                 url: 'config/get_wsn',
                 type: 'GET',
                 success: function(data) {
-                    wsn_servers = data
+                    wsn_servers = data;
                     var options = wsn_servers.reduce((str, server, id) =>
                         str + "<option value='" + (id) + "'>" + server.host + ":" + server.port + "</option>"
-                    , "");
+                    , "";);
                     $('#wsn-instance').html(options);
                     updateRelays(currentWsnInstance());
                 },
                 error: function(xhr, status, error) {
-                    var data = JSON.parse(xhr.responseText)
-                    Main.error(xhr, status, error)
-                    Main.displayMessage(data.message)
+                    var data = JSON.parse(xhr.responseText);
+                    Main.error(xhr, status, error);
+                    Main.displayMessage(data.message);
                     wsn_servers = []
                 }
             });
 
-            if(wsn_servers.length > 0) updateRelays(0)
+            if(wsn_servers.length > 0) updateRelays(0);
             else updateRelays(null)
         }
     }
 
 
-})(jQuery)
+})(jQuery);

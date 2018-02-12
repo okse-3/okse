@@ -162,9 +162,7 @@ public class STOMPServer extends Server {
     public void sendMessage(@NotNull Message message) {
         HashMap<String, Subscriber> subs = subscriptionManager.getAllSubscribersForTopic(message.getTopic());
 
-        Iterator it = subs.entrySet().iterator();
-        while(it.hasNext()){
-            Map.Entry pair = (Map.Entry) it.next();
+        for (Map.Entry pair : subs.entrySet()) {
             String key = (String) pair.getKey();
 
             Subscriber sub = subs.get(key);
@@ -172,7 +170,7 @@ public class STOMPServer extends Server {
             //TODO: Do we also have to change the message id?
             MessageMessage msg = createSTOMPMessage(message, key);
             try {
-                getGateway().sendMessage((StampyMessage<?>) msg, new HostPort(sub.getHost(), sub.getPort()));
+                getGateway().sendMessage(msg, new HostPort(sub.getHost(), sub.getPort()));
                 ps.incrementTotalMessagesSent();
             } catch (InterceptException e) {
                 ps.incrementTotalErrors();
@@ -193,9 +191,7 @@ public class STOMPServer extends Server {
 
         //Adds all the user defined headers to the STOMP message
         HashMap<String, String> attributes = msg.getAttributes();
-        Iterator it = attributes.entrySet().iterator();
-        while(it.hasNext()){
-            Map.Entry pair = (Map.Entry) it.next();
+        for (Map.Entry pair : attributes.entrySet()) {
             String key = (String) pair.getKey();
             message.getHeader().addHeader(key, attributes.get(key));
         }

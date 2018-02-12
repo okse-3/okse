@@ -1,9 +1,12 @@
 package no.ntnu.okse.core;
 
 import org.apache.log4j.Logger;
+import org.springframework.security.crypto.codec.Hex;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
@@ -16,10 +19,10 @@ public class Utilities {
     public static Logger log = Logger.getLogger(Utilities.class.getName());
 
     /**
-     * Returns a ISO 8601 HH:mm:ss.SSS formated string of a Duration object
+     * Returns a ISO 8601 HH:mm:ss.SSS formatted string of a Duration object
      *
      * @param duration A Duration object
-     * @return The formated string in HH:mm:ss.SSS format
+     * @return The formatted string in HH:mm:ss.SSS format
      */
     public static String getDurationAsISO8601(Duration duration) {
         SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault());
@@ -30,7 +33,7 @@ public class Utilities {
     /**
      * Retrieve a set of properties from a .properties configuration file
      *
-     * @param path The relative path to the configuration file (including filenam)
+     * @param path The relative path to the configuration file (including filename)
      * @return A Properties object containing the data from the configuration file, null if errors during read.
      */
     public static Properties readConfigurationFromFile(String path) {
@@ -82,5 +85,12 @@ public class Utilities {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static String generateID() throws NoSuchAlgorithmException {
+        MessageDigest m = MessageDigest.getInstance("MD5");
+        m.update(Long.toString(System.nanoTime()).getBytes());
+        byte[] hash = m.digest();
+        return new String(Hex.encode(hash));
     }
 }

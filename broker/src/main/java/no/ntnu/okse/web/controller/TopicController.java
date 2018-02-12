@@ -30,10 +30,7 @@ import no.ntnu.okse.core.topic.TopicService;
 import org.apache.log4j.Logger;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/topic")
@@ -70,7 +67,7 @@ public class TopicController {
                     results.add(topicInfo);
                 });
 
-        results.sort((t1, t2) -> ((Topic) t1.get("topic")).getFullTopicString().compareTo(((Topic) t2.get("topic")).getFullTopicString()));
+        results.sort(Comparator.comparing(t -> ((Topic) t.get("topic")).getFullTopicString()));
 
         return results;
     }
@@ -106,12 +103,11 @@ public class TopicController {
         TopicService ts = TopicService.getInstance();
         Topic t = ts.getTopicByID(id.trim());
         ts.deleteTopic(t.getFullTopicString());
-        HashMap<String, Object> result = new HashMap<String, Object>() {{
+
+        return new HashMap<String, Object>() {{
             put("topicID", t.getTopicID());
             /*put("children", t.getChildren());*/
         }};
-
-        return result;
     }
 
 }

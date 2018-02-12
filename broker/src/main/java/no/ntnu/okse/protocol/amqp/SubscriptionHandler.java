@@ -98,8 +98,8 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
     }
 
 
-    private final Routes<Sender> EMPTY_OUT = new Routes<Sender>();
-    private final Routes<Receiver> EMPTY_IN = new Routes<Receiver>();
+    private final Routes<Sender> EMPTY_OUT = new Routes<>();
+    private final Routes<Receiver> EMPTY_IN = new Routes<>();
     private Logger log = Logger.getLogger(SubscriptionHandler.class.getName());
 
     private ConcurrentHashMap<Sender, Subscriber> localSenderSubscriberMap = new ConcurrentHashMap<>();
@@ -107,8 +107,8 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
     private ConcurrentHashMap<String, Sender> localRemoteContainerSenderMap = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Sender, AbstractNotificationProducer.SubscriptionHandle> localSubscriberHandle = new ConcurrentHashMap<>();
 
-    final private Map<String, Routes<Sender>> outgoing = new ConcurrentHashMap<String, Routes<Sender>>();
-    final private Map<String, Routes<Receiver>> incoming = new ConcurrentHashMap<String, Routes<Receiver>>();
+    final private Map<String, Routes<Sender>> outgoing = new ConcurrentHashMap<>();
+    final private Map<String, Routes<Receiver>> incoming = new ConcurrentHashMap<>();
 
     AMQProtocolServer ps;
 
@@ -181,12 +181,12 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
     }
 
     /**
-     * Get the incomming routes of a given address.
+     * Get the incoming routes of a given address.
      *
      * @param address topic/route
      * @return Routes of Receiver objects
      */
-    public Routes<Receiver> getIncomming(String address) {
+    public Routes<Receiver> getIncoming(String address) {
         Routes<Receiver> routes = incoming.get(address);
         if (routes == null) {
             return EMPTY_IN;
@@ -251,7 +251,7 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
         Routes<Sender> routes = outgoing.get(address);
         if (routes == null) {
             log.debug("Route does not exist, adding route for: " + address);
-            routes = new Routes<Sender>();
+            routes = new Routes<>();
             outgoing.put(address, routes);
         }
         log.debug("Adding sender: " + remoteHostName + " to route: " + address);
@@ -310,7 +310,7 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
         Routes<Receiver> routes = incoming.get(address);
         if (routes == null) {
             log.debug("Route does not exist, adding route for: " + address);
-            routes = new Routes<Receiver>();
+            routes = new Routes<>();
             incoming.put(address, routes);
         }
         log.debug("Adding receiver: " + receiver.getName() + " to route: " + address);
@@ -370,13 +370,12 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
         //Setting the RemoteContainer id for the sender to "Unknown" before we get it from the sender object
         String senderRemoteContainer = "Unknown";
 
+        //TODO: messy method, clean up
         //Get sender from localRemoteContainerSenderMap  with eventRemoteContainer as key
         Sender sender;
         try {
             sender = localRemoteContainerSenderMap.get(eventRemoteContainer);
-        }
-
-        catch (NullPointerException e){
+        } catch (NullPointerException e){
             sender = null;
             log.debug("Receiver was terminated in an unexpected way");
             ps.decrementTotalErrors();

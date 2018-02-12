@@ -34,7 +34,7 @@ public class ProtocolStats {
     private final int totalErrors;
 
     /**
-     * Constructes a model for containing protocol stats to be serialized to JSON
+     * Constructs a model for containing protocol stats to be serialized to JSON
      *
      * @param protocolServer : The protocol server
      * @param totalMessagesSent : Total amount of messages sent

@@ -7,7 +7,7 @@ public class MIMEType {
 
     /**
      * Sets the content type, media type and charset.
-     * @param contentType
+     * @param contentType, String on the form (text/html;charset=utf-16 )
      */
     public MIMEType(String contentType){
         this.contentType = contentType;
@@ -21,7 +21,7 @@ public class MIMEType {
     }
 
     /**
-     * Seperates the charset from the content type
+     * Separates the charset from the content type
      * The default value of the charset is utf-8, this was done according to the STOMP specification
      * @param contentType the content type to get the charset from
      * @return the charset
@@ -61,8 +61,6 @@ public class MIMEType {
     public boolean isValid() {
         if(charset == null)
             return true;
-        if(charset.equals(""))
-            return false;
-        return true;
+        return !charset.equals("");
     }
 }

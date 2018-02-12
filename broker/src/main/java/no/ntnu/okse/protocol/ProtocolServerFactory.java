@@ -33,28 +33,25 @@ public class ProtocolServerFactory {
         }
     }
 
-    private static boolean stringToBoolean(String bool, boolean defaulte) {
-        if(bool.equals("true")) return true;
-        else if(bool.equals("false")) return false;
-        else return defaulte;
+    private static boolean stringToBoolean(String bool, boolean defaultValue) {
+        return bool.equals("true") || !bool.equals("false") && defaultValue;
     }
 
-    private static int stringToPort(String port, int defaulte) {
+    private static int stringToPort(String port, int defaultValue) {
         try {
             int p = Integer.parseInt(port);
             if(p >= 1 && p <= 65535) return p;
-            else return defaulte;
+            else return defaultValue;
         } catch(NumberFormatException e) {
-            return defaulte;
+            return defaultValue;
         }
     }
 
-    private static int stringToInt(String i, int defaulte) {
+    private static int stringToInt(String i, int defaultValue) {
         try {
-            int p = Integer.parseInt(i);
-            return p;
+            return Integer.parseInt(i);
         } catch(NumberFormatException e) {
-            return defaulte;
+            return defaultValue;
         }
     }
 
@@ -172,8 +169,7 @@ public class ProtocolServerFactory {
                 stringToPort(attr.getNamedItem("port").getNodeValue(), DEFAULT_PORT) :
                 DEFAULT_PORT;
 
-        STOMPProtocolServer temp = new STOMPProtocolServer (host, port);
-        return temp;
+        return new STOMPProtocolServer (host, port);
     }
 }
 

@@ -85,7 +85,7 @@ public class AMQProtocolServer extends AbstractProtocolServer {
             } catch (IOException e) {
                 throw new BootErrorException("Unable to bind to " + host + ":" + port);
             }
-            _serverThread = new Thread(() -> this.run());
+            _serverThread = new Thread(this::run);
             _serverThread.setName("AMQProtocolServer");
             _serverThread.start();
             log.info("AMQProtocolServer booted successfully");

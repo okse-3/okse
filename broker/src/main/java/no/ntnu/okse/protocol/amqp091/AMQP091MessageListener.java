@@ -117,7 +117,7 @@ public class AMQP091MessageListener implements AMQPMessageListener, Subscription
      */
     @Override
     public void onUnsubscribe(UnsubscribeMessage unsubscribeMessage) {
-        log.debug(String.format("%s:%d unsubscribed on topic %s",
+        log.debug(String.format("%s:%d unsubscribed from topic %s",
                 unsubscribeMessage.getHost(), unsubscribeMessage.getPort(), unsubscribeMessage.getExchange()
         ));
         String host = unsubscribeMessage.getHost();
