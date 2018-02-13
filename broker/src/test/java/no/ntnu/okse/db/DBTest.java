@@ -35,12 +35,12 @@ import static org.testng.Assert.*;
 @Test(singleThreaded = true)
 public class DBTest {
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void setUp() throws Exception {
         DB.setTestMode(true);
     }
 
-    @AfterMethod
+    @AfterMethod(alwaysRun = true)
     public void tearDown() throws Exception {
         DB.setTestMode(false);
     }
@@ -83,16 +83,16 @@ public class DBTest {
     }
 
     @Test
-    public void testInsertPersistantMessage() throws Exception {
+    public void testInsertPersistentMessage() throws Exception {
         assertTrue(DB.initDB());
-        assertTrue(DB.insertPersistantMessage("test", "test", "test"));
+        assertTrue(DB.insertPersistentMessage("test", "test", "test"));
     }
 
     @Test
-    public void testGetPersistantMessages() throws Exception {
+    public void testGetPersistentMessages() throws Exception {
         assertTrue(DB.initDB());
-        assertTrue(DB.insertPersistantMessage("test", "test", "test"));
-        ResultSet rs = DB.getPersistantMessages("test");
+        assertTrue(DB.insertPersistentMessage("test", "test", "test"));
+        ResultSet rs = DB.getPersistentMessages("test");
         assertTrue(rs.next());
         assertFalse(rs.next());
     }

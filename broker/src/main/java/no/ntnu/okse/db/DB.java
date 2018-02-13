@@ -58,11 +58,9 @@ public class DB {
         if (active) {
             dbName = "test.db";
             File dbfile = new File(dbName);
-            if (!dbfile.exists()) System.out.println("Created test db: " + dbfile.createNewFile());
-            else {
-                dbfile.delete();
-                System.out.println("Created test db: " + dbfile.createNewFile());
-            }
+            if (dbfile.exists()) dbfile.delete();
+            System.out.println("Created test db: " + dbfile.createNewFile());
+
         } else {
             File dbfile = new File(dbName);
             if (dbfile.exists()) System.out.println("Deleted test db: " + dbfile.delete());
@@ -92,8 +90,8 @@ public class DB {
      * @return true, if init is successful
      */
     public static boolean initDB() {
-        Statement stmt = null;
-        String sql = null;
+        Statement stmt;
+        String sql;
         conDB();
         try {
             stmt = con.createStatement();
@@ -111,7 +109,7 @@ public class DB {
                     " constraint fk_authorities_users foreign key(username) references users(username))";
             stmt.executeUpdate(sql);
 
-            sql = "CREATE TABLE persistance" +
+            sql = "CREATE TABLE persistence" +
                     "(topic VARCHAR(100), " +
                     " message TEXT, " +
                     " protocol VARCHAR(50))";
@@ -169,7 +167,7 @@ public class DB {
     }
 
     /**
-     * Inserts a message into the persistance table
+     * Inserts a message into the persistence table
      *
      * @param message        The message content
      * @param topic          The topic message was sent on
@@ -177,9 +175,9 @@ public class DB {
      * @return True if the query was successful, false otherwise
      * @throws SQLException If error during query
      */
-    public static boolean insertPersistantMessage(String message, String topic, String originProtocol) throws SQLException {
+    public static boolean insertPersistentMessage(String message, String topic, String originProtocol) throws SQLException {
         conDB();
-        String insert = "INSERT INTO persistance (topic, message, protocol) VALUES (?, ?, ?)";
+        String insert = "INSERT INTO persistence (topic, message, protocol) VALUES (?, ?, ?)";
         PreparedStatement stmt = con.prepareStatement(insert);
         stmt.setString(1, topic);
         stmt.setString(2, message);
@@ -190,20 +188,19 @@ public class DB {
         } catch (SQLException e) {
             con.rollback();
         }
-        if (rows == 1) return true;
-        else return false;
+        return rows == 1;
     }
 
     /**
-     * Retrieves all messages in persistance storage on a specific topic
+     * Retrieves all messages in persistence storage on a specific topic
      *
      * @param topic The topic to query
      * @return A ResultSet containing all messages on the topic
      * @throws SQLException If error during query
      */
-    public static ResultSet getPersistantMessages(String topic) throws SQLException {
+    public static ResultSet getPersistentMessages(String topic) throws SQLException {
         conDB();
-        String select = "SELECT * FROM persistance WHERE topic = ?";
+        String select = "SELECT * FROM persistence WHERE topic = ?";
         PreparedStatement stmt = con.prepareStatement(select);
         stmt.setString(1, topic);
         ResultSet rs = stmt.executeQuery();
@@ -242,8 +239,8 @@ public class DB {
                     System.err.print("Transaction is being rolled back");
                     con.rollback();
                     return true;
-                } catch (SQLException excep) {
-                    excep.printStackTrace();
+                } catch (SQLException except) {
+                    except.printStackTrace();
                     return false;
                 }
             }
