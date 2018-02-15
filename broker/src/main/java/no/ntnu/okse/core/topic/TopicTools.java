@@ -48,7 +48,7 @@ public class TopicTools {
             Topic t = queue.pop();
             if (!discovered.contains(t)) {
                 discovered.add(t);
-                t.getChildren().stream().forEach(queue::push);
+                t.getChildren().forEach(queue::push);
             }
         }
 

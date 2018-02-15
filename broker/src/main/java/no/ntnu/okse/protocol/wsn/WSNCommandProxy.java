@@ -574,7 +574,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
                             // Cast to proper type
                             QueryExpressionType type = (QueryExpressionType) filter.getValue();
                             // For each potential expression, add to the message content filter set
-                            type.getContent().stream().forEach(p -> {
+                            type.getContent().forEach(p -> {
                                 log.debug("Content: " + p.toString());
                                 contentFilters.add(p.toString());
                             });

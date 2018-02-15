@@ -129,7 +129,7 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
                             log.debug("System Message Broadcast set to TRUE, distributing system message...");
 
                             // Generate duplicate messages to all topics and iterate over them
-                            generateMessageToAllTopics(m).stream().forEach(message -> {
+                            generateMessageToAllTopics(m).forEach(message -> {
                                 // Fetch all protocol servers, and call sendMessage on each
                                 CoreService.getInstance().getAllProtocolServers().forEach(s -> s.sendMessage(message));
                                 // Flag the message as processed
@@ -264,7 +264,7 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
     public List<Message> generateMessageForAGivenTopicSet(Message m, HashSet<Topic> topics) {
         ArrayList<Message> collector = new ArrayList<>();
 
-        topics.stream()
+        topics
                 .forEach(t -> {
                     Message msg = new Message(m.getMessage(), t.getFullTopicString(), m.getPublisher(), m.getOriginProtocol());
                     collector.add(msg);
@@ -288,7 +288,7 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
         // Initialize the collector
         HashSet<Message> generated = new HashSet<>();
         // Iterate over all topics and generate individual messages per topic
-        TopicService.getInstance().getAllTopics().stream().forEach(t -> {
+        TopicService.getInstance().getAllTopics().forEach(t -> {
             // Create the message wrapper
             Message msg = new Message(m.getMessage(), t.getFullTopicString(), m.getPublisher(), m.getOriginProtocol());
             // Flag the generated message the same as the originating message

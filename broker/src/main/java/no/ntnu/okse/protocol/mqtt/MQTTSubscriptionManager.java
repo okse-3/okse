@@ -79,8 +79,7 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
      * @param sub the OKSE subscriber instance to remove
      */
     public void removeSubscriber(Subscriber sub) {
-        for (int i = 0; i < subscriberList.size(); i++) {
-            MQTTSubscriber mqtt_sub = subscriberList.get(i);
+        for (MQTTSubscriber mqtt_sub : subscriberList) {
             if (mqtt_sub.getSubscriber() == sub) {
                 removeSubscriber(mqtt_sub.getHost(), mqtt_sub.getPort(), mqtt_sub.getTopic());
                 return;
@@ -95,14 +94,14 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
     public void removeSubscribers(String clientID) {
         ArrayList<Integer> list = getSubscriberIndexes(clientID);
         int count = 0;
-        for(int i = 0; i < list.size(); i++){
-            int index = list.get(i);
+        for (Integer aList : list) {
+            int index = aList;
             //Each time we delete from the lists we also have to subtract 1 from all the indexes
             //We achieve this easiest by counting the number of the removed subscribers and simply subsctracting
-            //that number from the currect index.
+            //that number from the correct index.
             subscriptionService.removeSubscriber(subscriberList.get(index - count).getSubscriber());
             subscriberList.remove(index - count);
-            count ++;
+            count++;
         }
     }
 
@@ -128,7 +127,7 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
      * @return returns an ArrayList of indexes
      */
     public ArrayList<Integer> getSubscriberIndexes(String clientID) {
-        ArrayList<Integer> indexes = new ArrayList<Integer>();
+        ArrayList<Integer> indexes = new ArrayList<>();
         for (int i = 0; i < subscriberList.size(); i++) {
             MQTTSubscriber sub = subscriberList.get(i);
             if (sub.getClientID().equals(clientID))
@@ -168,9 +167,8 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
      * @return returns an ArrayList of MQTTSubscriber instances
      */
     public ArrayList<MQTTSubscriber> getAllSubscribersFromTopic(String topic) {
-        ArrayList<MQTTSubscriber> subscribers = new ArrayList<MQTTSubscriber>();
-        for (int i = 0; i < subscriberList.size(); i++) {
-            MQTTSubscriber sub = subscriberList.get(i);
+        ArrayList<MQTTSubscriber> subscribers = new ArrayList<>();
+        for (MQTTSubscriber sub : subscriberList) {
             if (sub.getTopic().equals(topic)) {
                 subscribers.add(sub);
             }

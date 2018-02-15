@@ -449,7 +449,7 @@ public class TopicService extends AbstractCoreService {
         addTopic(toTopic);
 
         if (!mappings.containsKey(fromTopic)) {
-            mappings.put(fromTopic, new HashSet<String>(Arrays.asList(toTopic)));
+            mappings.put(fromTopic, new HashSet<>(Arrays.asList(toTopic)));
         } else {
             mappings.get(fromTopic).add(toTopic);
         }
@@ -521,7 +521,7 @@ public class TopicService extends AbstractCoreService {
     public void fireTopicChangeEvent(Topic topic, TopicChangeEvent.Type type) {
         TopicChangeEvent topicEvent = new TopicChangeEvent(type, topic);
         log.debug("Firing topicchange event of type " + type + " on topic " + topic);
-        this._listeners.stream().forEach(t -> t.topicChanged(topicEvent));
+        this._listeners.forEach(t -> t.topicChanged(topicEvent));
     }
 
     /* End listener support */

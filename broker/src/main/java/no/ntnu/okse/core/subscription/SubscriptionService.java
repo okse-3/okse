@@ -626,7 +626,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
      */
     private void fireSubcriptionChangeEvent(Subscriber sub, SubscriptionChangeEvent.Type type) {
         SubscriptionChangeEvent sce = new SubscriptionChangeEvent(type, sub);
-        _subscriptionListeners.stream().forEach(l -> l.subscriptionChanged(sce));
+        _subscriptionListeners.forEach(l -> l.subscriptionChanged(sce));
     }
 
     /**
@@ -655,7 +655,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
      */
     private void firePublisherChangeEvent(Publisher reg, PublisherChangeEvent.Type type) {
         PublisherChangeEvent pce = new PublisherChangeEvent(type, reg);
-        _registrationListeners.stream().forEach(l -> l.publisherChanged(pce));
+        _registrationListeners.forEach(l -> l.publisherChanged(pce));
     }
 
     /* End listener support */

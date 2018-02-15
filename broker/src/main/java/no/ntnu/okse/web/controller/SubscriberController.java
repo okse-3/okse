@@ -101,7 +101,7 @@ public class SubscriberController {
     String deleteAllSubscribers() {
         SubscriptionService ss = SubscriptionService.getInstance();
         HashSet<Subscriber> allSubscribers = ss.getAllSubscribers();
-        allSubscribers.stream().forEach(ss::removeSubscriber);
+        allSubscribers.forEach(ss::removeSubscriber);
         return "{ \"deleted\" :true }";
     }
 

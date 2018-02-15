@@ -57,7 +57,7 @@ public class TopicController {
 
         List<HashMap<String, Object>> results = new ArrayList<>();
 
-        allTopics.stream()
+        allTopics
                 .forEach(t -> {
                     int subscribers = ss.getAllSubscribersForTopic(t.getFullTopicString()).size();
                     HashMap<String, Object> topicInfo = new HashMap<String, Object>() {{

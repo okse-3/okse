@@ -204,7 +204,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
                 log.info("Started WSNServer HTTPClient");
 
                 // For all registered connectors in WSNotificationServer, add these to the Jetty Server
-                this._connectors.stream().forEach(c -> this._server.addConnector(c));
+                this._connectors.forEach(c -> this._server.addConnector(c));
 
                 /* OKSE custom WS-Nu web services */
 

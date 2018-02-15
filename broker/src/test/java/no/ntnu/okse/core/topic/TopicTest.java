@@ -159,7 +159,7 @@ public class TopicTest {
 
         assertFalse(rootTwo.getChildren() == localChildren);
 
-        rootTwo.getChildren().stream().forEach(c -> assertTrue(localChildren.contains(c)));
+        rootTwo.getChildren().forEach(c -> assertTrue(localChildren.contains(c)));
 
         Topic childSeven = new Topic();
         Topic childEight = new Topic();
@@ -178,10 +178,10 @@ public class TopicTest {
     @Test
     public void testClearChildren() throws Exception {
         HashSet<Topic> localChildren = rootTwo.getChildren();
-        localChildren.stream().forEach(c -> assertEquals(c.getParent(), rootTwo));
+        localChildren.forEach(c -> assertEquals(c.getParent(), rootTwo));
         rootTwo.clearChildren();
         assertEquals(rootTwo.getChildren().size(), 0);
-        localChildren.stream().forEach(c -> assertEquals(c.getParent(), null));
+        localChildren.forEach(c -> assertEquals(c.getParent(), null));
     }
 
     @Test
