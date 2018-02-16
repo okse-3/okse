@@ -1,5 +1,5 @@
 # Okse (Overordnet KommunikasjonsSystem for Etteretning)
-[![Build Status](https://travis-ci.org/okse-2/okse.svg?branch=master)](https://travis-ci.org/okse-2/okse)
+[![Build Status](https://travis-ci.org/okse-3/okse.svg?branch=master)](https://travis-ci.org/okse-3/okse)
 [![Coverage Status](https://coveralls.io/repos/github/okse-2/okse/badge.svg?branch=master)](https://coveralls.io/github/okse-2/okse?branch=master)
 
 This software has been developed for [FFI](http://www.ffi.no/) by three separate
