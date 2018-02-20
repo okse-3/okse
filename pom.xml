@@ -12,5 +12,18 @@
     </modules>
     <packaging>pom</packaging>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <sourceEncoding>UTF8</sourceEncoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <name>OKSE Parent</name>
 </project>
