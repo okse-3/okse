@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
 
-    protected static final String SERVERTYPE = "amqp091";
+    private final String SERVERTYPE = "amqp091";
     private AMQP091Service amqpService;
     private SubscriptionService subscriptionService;
     private static AtomicBoolean running = new AtomicBoolean(false);
