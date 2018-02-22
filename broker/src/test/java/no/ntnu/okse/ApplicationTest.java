@@ -37,17 +37,17 @@ import static org.testng.Assert.*;
 public class ApplicationTest {
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
 
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
 
     }
 
     @Test
-    public void testGetRunningTime() throws Exception {
+    public void testGetRunningTime() {
         assertTrue(Application.getRunningTime() instanceof Duration);
         assertTrue(Application.getRunningTime().compareTo(Duration.ofMillis(0)) >= 0);
     }
@@ -63,7 +63,7 @@ public class ApplicationTest {
     }
 
     @Test
-    public void testReadConfigurationFiles() throws Exception {
+    public void testReadConfigurationFiles() {
         Properties p = Application.readConfigurationFiles();
         assertNotNull(p);
     }

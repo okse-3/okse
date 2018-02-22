@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class MessageListener implements StampyMessageListener {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private String protocol;
+    private final String protocol;
     private STOMPProtocolServer protocolServer;
     private MessageService messageService;
 
@@ -49,13 +49,13 @@ public class MessageListener implements StampyMessageListener {
     }
 
     @Override
-    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) throws Exception {
+    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) {
         SendMessage sendMessage = (SendMessage) stampyMessage;
         String destination = sendMessage.getHeader().getDestination();
 
         TopicService.getInstance().addTopic(destination);
 
-        Message okseMsg = new Message((String)sendMessage.getBody(), destination, null, protocol);
+        Message okseMsg = new Message(sendMessage.getBody(), destination, null, protocol);
 
         Map<String, List<String>> headers = sendMessage.getHeader().getHeaders();
         Iterator it = headers.entrySet().iterator();

@@ -7,7 +7,7 @@ public abstract class PublishClient extends CommandClient {
     public String message;
 
     @Parameter(names = {"-n"}, description = "Number of messages to send")
-    public int numberOfMessages = 1;
+    public final int numberOfMessages = 1;
 
     public void run() {
         initLogger();

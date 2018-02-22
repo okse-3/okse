@@ -32,7 +32,7 @@ public class SystemEvent extends Event {
         BOOT_PROTOCOL_SERVERS
     }
 
-    Type type;
+    final Type type;
 
     /**
      * Constructs an Event containing an operation, some data and a dataType.
@@ -50,7 +50,7 @@ public class SystemEvent extends Event {
      * An abstract method to retrieve the data payload.
      * <p>
      *
-     * @return: An object containing the data payload casted to proper type in subclass.
+     * @return An object containing the data payload casted to proper type in subclass.
      */
     @Override
     public Object getData() {

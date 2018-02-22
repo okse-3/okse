@@ -40,7 +40,7 @@ public class Topic {
     private final String topicID;
     private String type;
     private Topic parent;
-    private HashSet<Topic> children;
+    private final HashSet<Topic> children;
     private static Logger log;
 
     public Topic() {

@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class STOMPSubscriptionManager implements SubscriptionChangeListener {
     private static Logger log;
     private SubscriptionService subscriptionService = null;
-    public ConcurrentHashMap<String, Subscriber> localSubscriberMap;
+    public final ConcurrentHashMap<String, Subscriber> localSubscriberMap;
 
     /**
      * Setup of variables
@@ -93,7 +93,7 @@ public class STOMPSubscriptionManager implements SubscriptionChangeListener {
 
     /**
      * Looks up if the subscriber is already in the local map
-     * @param clientID the client id of the conneciton
+     * @param clientID the client id of the connection
      * @return
      */
     public boolean containsSubscriber(String clientID){

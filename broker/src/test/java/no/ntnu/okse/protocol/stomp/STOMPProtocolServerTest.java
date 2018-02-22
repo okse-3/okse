@@ -31,7 +31,7 @@ public class STOMPProtocolServerTest {
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         ps_spy = null;
     }
 
@@ -51,7 +51,7 @@ public class STOMPProtocolServerTest {
     }
 
     @Test
-    public void sendMessage() throws InterceptException {
+    public void sendMessage() {
         Message msg = new Message("testing", "testing", null, "stomp");
         ps_spy.sendMessage(msg);
 

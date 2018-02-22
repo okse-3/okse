@@ -13,7 +13,6 @@ import asia.stampy.client.mina.RawClientMinaHandler;
 import asia.stampy.client.mina.connected.MinaConnectedMessageListener;
 import asia.stampy.client.mina.disconnect.MinaDisconnectListenerAndInterceptor;
 import asia.stampy.common.gateway.HostPort;
-import asia.stampy.common.gateway.SecurityMessageListener;
 import asia.stampy.common.gateway.StampyMessageListener;
 import asia.stampy.common.heartbeat.HeartbeatContainer;
 import asia.stampy.common.message.StampyMessage;
@@ -29,13 +28,13 @@ import java.util.Map;
 
 public class StompClient implements TestClient {
 
-    private static Logger log = Logger.getLogger(StompClient.class);
+    private static final Logger log = Logger.getLogger(StompClient.class);
     private final HeartbeatContainer heartbeatContainer;
     private final ClientMinaMessageGateway gateway;
 
     private int receiptId = 1;
     private int subscriptionId = 1;
-    private Map<String, String> subscriptionMap = new HashMap<>();
+    private final Map<String, String> subscriptionMap = new HashMap<>();
     private StompCallback callback;
 
     public StompClient() {

@@ -43,9 +43,9 @@ public class WSNSubscriptionManager extends AbstractSubscriptionManager implemen
 
     private static Logger log;
     private SubscriptionService _subscriptionService = null;
-    private ConcurrentHashMap<String, Subscriber> localSubscriberMap;
-    private ConcurrentHashMap<String, AbstractNotificationProducer.SubscriptionHandle> localSubscriberHandle;
-    private WSNotificationServer _protocolserver;
+    private final ConcurrentHashMap<String, Subscriber> localSubscriberMap;
+    private final ConcurrentHashMap<String, AbstractNotificationProducer.SubscriptionHandle> localSubscriberHandle;
+    private final WSNotificationServer _protocolserver;
 
     /**
      * Empty constructor that initializes the log and local maps

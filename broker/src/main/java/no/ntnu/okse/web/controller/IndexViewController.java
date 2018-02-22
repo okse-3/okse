@@ -56,7 +56,7 @@ public class IndexViewController {
     private int serverPort;
 
     // System information
-    private Properties environment = System.getProperties();
+    private final Properties environment = System.getProperties();
 
     /**
      * This method returns the view to render when a user tries to reach the '/'-url
@@ -98,16 +98,14 @@ public class IndexViewController {
 
         ArrayList<HashMap<String, Object>> protocols = new ArrayList<>();
 
-        Application.cs.getAllProtocolServers().forEach(p -> {
-            protocols.add(new HashMap<String, Object>() {{
-                put("host", p.getHost());
-                put("port", p.getPort());
-                put("type", p.getProtocolServerType());
-            }});
-        });
+        Application.cs.getAllProtocolServers().forEach(p -> protocols.add(new HashMap<String, Object>() {{
+            put("host", p.getHost());
+            put("port", p.getPort());
+            put("type", p.getProtocolServerType());
+        }}));
 
         model.addAttribute("protocols", protocols);
-        model.addAttribute("protocolPower", cs.protocolServersBooted);
+        model.addAttribute("protocolPower", CoreService.protocolServersBooted);
 
         return "fragments/indexLoggedIn";
 

@@ -45,7 +45,7 @@ import java.sql.SQLException;
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(WebSecurityConfig.class.getName());
+    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(WebSecurityConfig.class.getName());
 
     private BCryptPasswordEncoder encoder;
 

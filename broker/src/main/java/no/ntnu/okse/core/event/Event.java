@@ -26,7 +26,7 @@ package no.ntnu.okse.core.event;
 
 public abstract class Event {
 
-    protected Object data;
+    protected final Object data;
 
     /**
      * Constructs an Event containing an operation, some data and a dataType.
@@ -42,7 +42,7 @@ public abstract class Event {
      * An abstract method to retrieve the data payload.
      * <p>
      *
-     * @return: An object containing the data payload casted to proper type in subclass.
+     * @return An object containing the data payload casted to proper type in subclass.
      */
     public abstract Object getData();
 

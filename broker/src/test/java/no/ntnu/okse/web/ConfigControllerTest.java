@@ -37,7 +37,7 @@ public class ConfigControllerTest {
         field.setAccessible(true);
         ArrayList<ProtocolServer> ps = (ArrayList<ProtocolServer>)field.get(cs);
         ps.clear();
-        cs.protocolServersBooted = false;
+        CoreService.protocolServersBooted = false;
         CoreService.getInstance().bootProtocolServers(new BufferedInputStream(new ReaderInputStream(new StringReader(xml_cfg))));
         configController = new ConfigController();
     }

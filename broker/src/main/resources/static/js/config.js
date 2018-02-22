@@ -277,7 +277,8 @@ var Config = (function($) {
                     wsn_servers = data;
                     var options = wsn_servers.reduce((str, server, id) =>
                         str + "<option value='" + (id) + "'>" + server.host + ":" + server.port + "</option>"
-                    , "";);
+                        , "";
+                )
                     $('#wsn-instance').html(options);
                     updateRelays(currentWsnInstance());
                 },

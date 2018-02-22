@@ -27,7 +27,6 @@ package no.ntnu.okse.core;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import no.ntnu.okse.protocol.ProtocolServer;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -55,30 +54,30 @@ public class CoreServiceTest {
         field.setAccessible(true);
         ArrayList<ProtocolServer> ps = (ArrayList<ProtocolServer>)field.get(cs);
         ps.clear();
-        cs.protocolServersBooted = false;
+        CoreService.protocolServersBooted = false;
         InputStream resourceAsStream = CoreService.class.getResourceAsStream("/config/protocolservers.xml");
         cs.bootProtocolServers(resourceAsStream);
     }
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         callback = false;
         counter = 0;
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         callback = false;
         counter = 0;
     }
 
     @Test
-    public void testGetInstance() throws Exception {
+    public void testGetInstance() {
         assertSame(cs, CoreService.getInstance());
     }
 
     @Test
-    public void testExecute() throws Exception {
+    public void testExecute() {
         for (int i = 1; i < 11; i++) {
             if (counter < 10) cs.execute(() -> counter++);
             else cs.execute(() -> assertEquals(counter, 10));
@@ -86,19 +85,19 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testGetEventQueue() throws Exception {
+    public void testGetEventQueue() {
         assertNotNull(cs.getEventQueue());
         assertTrue(cs.getEventQueue() instanceof LinkedBlockingQueue);
     }
 
     @Test
-    public void testGetExecutor() throws Exception {
+    public void testGetExecutor() {
         assertNotNull(cs.getExecutor());
         assertTrue(cs.getExecutor() instanceof ExecutorService);
     }
 
     @Test
-    public void testRegisterService() throws Exception {
+    public void testRegisterService() {
         TestService ts = new TestService();
         cs.registerService(ts);
         assertNotNull(cs.getService(ts.getClass()));
@@ -106,7 +105,7 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testRemoveService() throws Exception {
+    public void testRemoveService() {
         TestService ts = new TestService();
         cs.registerService(ts);
         assertNotNull(cs.getService(ts.getClass()));
@@ -115,7 +114,7 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testGetService() throws Exception {
+    public void testGetService() {
         TestService ts = new TestService();
         cs.registerService(ts);
         assertNotNull(cs.getService(ts.getClass()));
@@ -124,7 +123,7 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testAddProtocolServer() throws Exception {
+    public void testAddProtocolServer() {
         TestProtocol tp = new TestProtocol(1);
         cs.addProtocolServer(tp);
         System.out.println(cs.getAllProtocolServers());
@@ -133,7 +132,7 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testRemoveProtocolServer() throws Exception {
+    public void testRemoveProtocolServer() {
         TestProtocol tp = new TestProtocol(1);
         cs.addProtocolServer(tp);
         assertTrue(cs.getAllProtocolServers().contains(tp));
@@ -142,7 +141,7 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testGetTotalRequestsFromProtocolServers() throws Exception {
+    public void testGetTotalRequestsFromProtocolServers() {
         TestProtocol tp = new TestProtocol(1);
         TestProtocol tp2 = new TestProtocol(2);
         cs.addProtocolServer(tp);
@@ -153,7 +152,7 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testGetTotalMessagesReceivedFromProtocolServers() throws Exception {
+    public void testGetTotalMessagesReceivedFromProtocolServers() {
         TestProtocol tp = new TestProtocol(1);
         TestProtocol tp2 = new TestProtocol(2);
         cs.addProtocolServer(tp);
@@ -164,7 +163,7 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testGetTotalMessagesSentFromProtocolServers() throws Exception {
+    public void testGetTotalMessagesSentFromProtocolServers() {
         TestProtocol tp = new TestProtocol(1);
         TestProtocol tp2 = new TestProtocol(2);
         cs.addProtocolServer(tp);
@@ -175,7 +174,7 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testGetTotalBadRequestsFromProtocolServers() throws Exception {
+    public void testGetTotalBadRequestsFromProtocolServers() {
         TestProtocol tp = new TestProtocol(1);
         TestProtocol tp2 = new TestProtocol(2);
         cs.addProtocolServer(tp);
@@ -186,7 +185,7 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testGetTotalErrorsFromProtocolServers() throws Exception {
+    public void testGetTotalErrorsFromProtocolServers() {
         TestProtocol tp = new TestProtocol(1);
         TestProtocol tp2 = new TestProtocol(2);
         cs.addProtocolServer(tp);
@@ -197,7 +196,7 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testGetAllProtocolServers() throws Exception {
+    public void testGetAllProtocolServers() {
         TestProtocol tp = new TestProtocol(1);
         assertFalse(cs.getAllProtocolServers().contains(tp));
         cs.addProtocolServer(tp);
@@ -206,7 +205,7 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testGetProtocolServer() throws Exception {
+    public void testGetProtocolServer() {
         TestProtocol tp = new TestProtocol(1);
         cs.addProtocolServer(tp);
         ProtocolServer tp2 = cs.getProtocolServer(tp.getClass());
@@ -215,7 +214,7 @@ public class CoreServiceTest {
     }
 
     @Test
-    public void testGetProtocolServer1() throws Exception {
+    public void testGetProtocolServer1() {
         TestProtocol tp = new TestProtocol(1);
         cs.addProtocolServer(tp);
         ProtocolServer tp2 = cs.getProtocolServer("Test");
@@ -238,7 +237,7 @@ public class CoreServiceTest {
 
     public static class TestProtocol extends AbstractProtocolServer {
         public TestProtocol(Integer baseCount) {
-            totalMessagesReceived.getAndAdd(1 * baseCount);
+            totalMessagesReceived.getAndAdd(baseCount);
             totalMessagesSent.getAndAdd(2 * baseCount);
             totalRequests.getAndAdd(3 * baseCount);
             totalBadRequests.getAndAdd(4 * baseCount);

@@ -37,14 +37,14 @@ public class AMQProtocolServer extends AbstractProtocolServer {
 
     protected static final String SERVERTYPE = "amqp";
 
-    private Logger log;
+    private final Logger log;
     private Thread _serverThread;
 
     private SubscriptionHandler sh;
     private boolean shuttingdown = false;
 
     public boolean useQueue;
-    protected boolean useSASL;
+    protected final boolean useSASL;
 
     private Driver driver;
 

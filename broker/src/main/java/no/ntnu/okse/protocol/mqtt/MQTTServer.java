@@ -29,15 +29,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MQTTServer extends Server {
-    private static Logger log = Logger.getLogger(Server.class);
+    private static final Logger log = Logger.getLogger(Server.class);
     private static String protocolServerType;
-    private MQTTProtocolServer ps;
+    private final MQTTProtocolServer ps;
     private final IConfig config;
-    private List<InterceptHandler> interceptHandlers;
+    private final List<InterceptHandler> interceptHandlers;
     private MQTTSubscriptionManager subscriptionManager;
-    private LinkedBlockingQueue<Message> messageQueue;
+    private final LinkedBlockingQueue<Message> messageQueue;
     private Thread messageSenderThread;
-    private AtomicBoolean running;
+    private final AtomicBoolean running;
 
     /**
      * Class for the interceptors to be used in Moquette

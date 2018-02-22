@@ -31,7 +31,7 @@ public class ConfigController {
     private static final String GET_WSN_RELAYS = "/relay/get";
 
     // LOG4J logger
-    private static Logger log = Logger.getLogger(ConfigController.class.getName());
+    private static final Logger log = Logger.getLogger(ConfigController.class.getName());
 
     // Relay fields
     private List<WSNotificationServer> wsnServers;

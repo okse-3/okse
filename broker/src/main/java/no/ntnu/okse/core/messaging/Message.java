@@ -107,7 +107,7 @@ public class Message {
     /**
      * Retrieves the Topic object this message is destined for
      *
-     * @return A topic object this message is to be broadcasted to
+     * @return A topic object this message is to be broadcast to
      */
     public String getTopic() {
         return this.topic;
@@ -218,7 +218,7 @@ public class Message {
     }
 
     /**
-     * Sets the systemMessage status flag of this message. Used to check if this message was broadcasted from the brokering
+     * Sets the systemMessage status flag of this message. Used to check if this message was broadcast from the brokering
      * system itself, and not from an external publisher.
      *
      * @param flag True to set this message as a system message, false otherwise.

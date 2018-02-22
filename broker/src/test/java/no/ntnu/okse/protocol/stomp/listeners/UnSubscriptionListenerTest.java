@@ -48,7 +48,7 @@ public class UnSubscriptionListenerTest {
     }
 
     @Test
-    public void messageReceived() throws Exception {
+    public void messageReceived() {
         listener_spy.messageReceived(createUnsubMessage(), createHostPort());
         Mockito.verify(subscritpionManager_spy).removeSubscriber("ogdans3");
     }

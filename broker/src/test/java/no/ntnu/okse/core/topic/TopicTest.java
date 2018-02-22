@@ -43,7 +43,7 @@ public class TopicTest {
     Topic rootTwo;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         noNameNoTypeTopic = new Topic();
         namedAndTypedTopic = new Topic("SomeName", "SomeType");
         childOne = new Topic("ChildOne", "Topic");
@@ -57,12 +57,12 @@ public class TopicTest {
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
 
     }
 
     @Test
-    public void testGetTopicID() throws Exception {
+    public void testGetTopicID() {
         Topic one = new Topic();
         HashSet<String> ids = new HashSet<>();
         assertNotNull(one.getTopicID());
@@ -78,44 +78,44 @@ public class TopicTest {
     }
 
     @Test
-    public void testGetName() throws Exception {
+    public void testGetName() {
         assertEquals(noNameNoTypeTopic.getName(), "UNNAMED");
         assertEquals(namedAndTypedTopic.getName(), "SomeName");
     }
 
     @Test
-    public void testGetNameIgnoreCase() throws Exception {
+    public void testGetNameIgnoreCase() {
         assertEquals(noNameNoTypeTopic.getNameIgnoreCase(), "unnamed");
         assertEquals(namedAndTypedTopic.getNameIgnoreCase(), "somename");
     }
 
     @Test
-    public void testSetName() throws Exception {
+    public void testSetName() {
         noNameNoTypeTopic.setName("SomeOtherName");
         assertEquals(noNameNoTypeTopic.getName(), "SomeOtherName");
         assertEquals(noNameNoTypeTopic.getNameIgnoreCase(), "someothername");
     }
 
     @Test
-    public void testGetType() throws Exception {
+    public void testGetType() {
         assertEquals(noNameNoTypeTopic.getType(), "UNKNOWN");
     }
 
     @Test
-    public void testSetType() throws Exception {
+    public void testSetType() {
         noNameNoTypeTopic.setType("SomeTopic");
         assertEquals(noNameNoTypeTopic.getType(), "SomeTopic");
     }
 
     @Test
-    public void testGetParent() throws Exception {
+    public void testGetParent() {
         assertEquals(childOne.getParent(), rootOne);
         assertEquals(childTwo.getParent(), rootOne);
         assertEquals(childThree.getParent(), rootTwo);
     }
 
     @Test
-    public void testSetParent() throws Exception {
+    public void testSetParent() {
         assertEquals(childThree.getParent(), rootTwo);
         assertEquals(rootOne.getChildren().size(), 2);
         childThree.setParent(rootOne);
@@ -128,7 +128,7 @@ public class TopicTest {
     }
 
     @Test
-    public void testAddChild() throws Exception {
+    public void testAddChild() {
         Topic childFour = new Topic();
         Topic childFive = new Topic();
         assertEquals(childFour.getParent(), null);
@@ -144,7 +144,7 @@ public class TopicTest {
     }
 
     @Test
-    public void testRemoveChild() throws Exception {
+    public void testRemoveChild() {
         Topic childSix = new Topic();
         rootTwo.addChild(childSix);
         assertTrue(rootTwo.getChildren().contains(childSix));
@@ -154,7 +154,7 @@ public class TopicTest {
     }
 
     @Test
-    public void testGetChildren() throws Exception {
+    public void testGetChildren() {
         HashSet<Topic> localChildren = rootTwo.getChildren();
 
         assertFalse(rootTwo.getChildren() == localChildren);
@@ -176,7 +176,7 @@ public class TopicTest {
     }
 
     @Test
-    public void testClearChildren() throws Exception {
+    public void testClearChildren() {
         HashSet<Topic> localChildren = rootTwo.getChildren();
         localChildren.forEach(c -> assertEquals(c.getParent(), rootTwo));
         rootTwo.clearChildren();
@@ -185,7 +185,7 @@ public class TopicTest {
     }
 
     @Test
-    public void testIsRoot() throws Exception {
+    public void testIsRoot() {
         assertTrue(rootOne.isRoot());
         assertTrue(rootTwo.isRoot());
         Topic t = new Topic();
@@ -195,7 +195,7 @@ public class TopicTest {
     }
 
     @Test
-    public void testIsLeaf() throws Exception {
+    public void testIsLeaf() {
         assertTrue(childOne.isLeaf());
         assertTrue(childTwo.isLeaf());
         assertTrue(childThree.isLeaf());
@@ -207,7 +207,7 @@ public class TopicTest {
     }
 
     @Test
-    public void testGetFullTopicString() throws Exception {
+    public void testGetFullTopicString() {
         Topic childTen = new Topic();
         Topic childEleven = new Topic();
         childTen.setName("ChildTen");
@@ -225,7 +225,7 @@ public class TopicTest {
     }
 
     @Test
-    public void testGetFullTopicStringIgnoreCase() throws Exception {
+    public void testGetFullTopicStringIgnoreCase() {
         Topic childTen = new Topic();
         Topic childEleven = new Topic();
         childTen.setName("ChildTen");
@@ -243,7 +243,7 @@ public class TopicTest {
     }
 
     @Test
-    public void testIsAncestorOf() throws Exception {
+    public void testIsAncestorOf() {
         Topic parent = new Topic();
         Topic child = new Topic();
         Topic grandchild = new Topic();
@@ -256,7 +256,7 @@ public class TopicTest {
     }
 
     @Test
-    public void testIsDescendantOf() throws Exception {
+    public void testIsDescendantOf() {
         Topic parent = new Topic();
         Topic child = new Topic();
         Topic grandchild = new Topic();
@@ -269,7 +269,7 @@ public class TopicTest {
     }
 
     @Test
-    public void testToString() throws Exception {
+    public void testToString() {
         Topic parent = new Topic("parent", "TEST");
         Topic child = new Topic("child", "TEST");
         child.setParent(parent);

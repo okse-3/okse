@@ -35,7 +35,7 @@ public class IncrementTotalRequestsListener implements StampyMessageListener {
     }
 
     @Override
-    public void messageReceived(StampyMessage<?> message, HostPort hostPort) throws Exception {
+    public void messageReceived(StampyMessage<?> message, HostPort hostPort) {
         protocolServer.incrementTotalRequests();
     }
 }

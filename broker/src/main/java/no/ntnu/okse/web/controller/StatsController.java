@@ -79,16 +79,14 @@ public class StatsController {
         ArrayList<ProtocolServer> protocols = cs.getAllProtocolServers();
         ArrayList<ProtocolStats> protocolStats = new ArrayList<>();
 
-        protocols.forEach(p -> {
-            protocolStats.add(new ProtocolStats(
-                    p.getProtocolServerType(),
-                    p.getTotalMessagesSent(),
-                    p.getTotalMessagesReceived(),
-                    p.getTotalRequests(),
-                    p.getTotalBadRequests(),
-                    p.getTotalErrors()
-            ));
-        });
+        protocols.forEach(p -> protocolStats.add(new ProtocolStats(
+                p.getProtocolServerType(),
+                p.getTotalMessagesSent(),
+                p.getTotalMessagesReceived(),
+                p.getTotalRequests(),
+                p.getTotalBadRequests(),
+                p.getTotalErrors()
+        )));
         result.put("protocolServerStatistics", protocolStats);
 
         return result;

@@ -1,7 +1,6 @@
 package no.ntnu.okse.protocol.amqp091;
 
 import no.ntnu.okse.core.subscription.Subscriber;
-import org.mockito.MockitoAnnotations;
 import org.testng.annotations.*;
 
 import static org.junit.Assert.assertEquals;

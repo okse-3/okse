@@ -43,7 +43,7 @@ import java.util.Map;
 import static org.testng.Assert.*;
 
 
-@Test(singleThreaded = true, threadPoolSize = 0, sequential = false)
+@Test(singleThreaded = true)
 public class AMQPServerTest {
 
 
@@ -54,13 +54,13 @@ public class AMQPServerTest {
     int port = 5673;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         ps = new AMQProtocolServer("0.0.0.0", port++, false, true);
         ps.boot();
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         ps.stopServer();
         ps = null;
     }
@@ -100,7 +100,7 @@ public class AMQPServerTest {
         receiveMessenger.start();
         System.out.println("Subscribing...");
         receiveMessenger.subscribe(psTest.getHost() + ":" + psTest.getPort() + "/" + topic);
-        System.out.printf("Receiving messages...");
+        System.out.println("Receiving messages...");
         receiveMessenger.recv(numberOfMessages);
         while (receiveMessenger.incoming() > 0) {
             msg = receiveMessenger.get();
@@ -114,7 +114,7 @@ public class AMQPServerTest {
 
 
     @Test(groups = "amqp")
-    public void testConvertAMQPMessageToMessageBytes() throws Exception {
+    public void testConvertAMQPMessageToMessageBytes() {
         String message = "Hei på test";
         String topic = "test/testConvertAMQPMessageToMessageBytes";
 
@@ -139,7 +139,7 @@ public class AMQPServerTest {
     }
 
     @Test(groups = "amqp")
-    public void testConvertOkseMessageToAMQP() throws Exception {
+    public void testConvertOkseMessageToAMQP() {
         System.out.println("testConvertOkseMessageToAMQP");
         String topic = "test";
         Message okseMessage = new Message("Hei", topic, null, "AMQP");
@@ -154,7 +154,7 @@ public class AMQPServerTest {
     }
 
     @Test(groups = "amqp")
-    public void testCreateAddress() throws Exception {
+    public void testCreateAddress() {
         String topic = "test";
         String address1 = "amqp://127.0.0.1/test";
         String address2 = "127.0.0.1/test";
@@ -524,7 +524,7 @@ public class AMQPServerTest {
     }
 
     @Test(groups = "amqp")
-    public void testConvertAMQPmessageToOkseMessage() throws Exception {
+    public void testConvertAMQPmessageToOkseMessage() {
         String message = "Hei på test";
         String topic = "test/testConvertAMQPMessageToMessageBytes";
         String address = "127.0.0.1" + "/" + topic;
@@ -548,7 +548,7 @@ public class AMQPServerTest {
     }
 
     @Test(groups = "amqp")
-    public void testMessageStore() throws Exception {
+    public void testMessageStore() {
         AMQPServer.TestMessageStore messageStore = AMQPServer.createMessageStoreFactory();
 
         String address1 = "test";
@@ -580,7 +580,7 @@ public class AMQPServerTest {
     }
 
     @Test(groups = "amqp")
-    public void testRoutes() throws Exception {
+    public void testRoutes() {
         SubscriptionHandler.Routes<Sender> routes = new SubscriptionHandler.Routes();
 
         ArrayList<Sender> senders = new ArrayList<>();
@@ -848,7 +848,7 @@ public class AMQPServerTest {
     }
 
     @Test(groups = "amqp")
-    public void testGetAddress() throws Exception {
+    public void testGetAddress() {
 
         class TestSender implements Sender {
 

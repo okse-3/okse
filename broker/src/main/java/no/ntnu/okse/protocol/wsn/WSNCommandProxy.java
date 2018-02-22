@@ -51,7 +51,6 @@ import org.oasis_open.docs.wsn.b_2.*;
 import org.oasis_open.docs.wsn.br_2.RegisterPublisher;
 import org.oasis_open.docs.wsn.br_2.RegisterPublisherResponse;
 import org.oasis_open.docs.wsn.brw_2.PublisherRegistrationFailedFault;
-import org.oasis_open.docs.wsn.brw_2.PublisherRegistrationRejectedFault;
 import org.oasis_open.docs.wsn.bw_2.*;
 import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
 
@@ -75,11 +74,11 @@ import java.util.*;
 @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
 public class WSNCommandProxy extends AbstractNotificationBroker {
 
-    private Logger log;
-    private FilterSupport filterSupport;
+    private final Logger log;
+    private final FilterSupport filterSupport;
     private WSNSubscriptionManager _subscriptionManager;
     private WSNRegistrationManager _registrationManager;
-    private WSNotificationServer _protocolserver;
+    private final WSNotificationServer _protocolserver;
 
     public WSNCommandProxy(WSNotificationServer protocolserver, Hub hub) {
         this.log = Logger.getLogger(WSNCommandProxy.class.getName());
@@ -229,9 +228,9 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
     public String generateHashedURLFromKey(String prefix, String key) {
         String endpointReference = "";
         // Check the prefix, and add the appropriate endpoint
-        if (prefix.equals(_subscriptionManager.WSN_SUBSCRIBER_TOKEN)) {
+        if (prefix.equals(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN)) {
             endpointReference = _subscriptionManager.getEndpointReference();
-        } else if (prefix.equals(_registrationManager.WSN_PUBLISHER_TOKEN)) {
+        } else if (prefix.equals(WSNRegistrationManager.WSN_PUBLISHER_TOKEN)) {
             endpointReference = _registrationManager.getEndpointReference();
         }
         // Return the endpointReference with the appended prefix and associated subscription/registration key
@@ -472,19 +471,19 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
      * @throws InvalidFilterFault                       If the filter was invalid.
      * @throws InvalidProducerPropertiesExpressionFault Never.
      * @throws UnacceptableInitialTerminationTimeFault  If the subscription termination time was invalid.
-     * @throws SubscribeCreationFailedFault             If any internal or general fault occured during the processing of a subscription request.
+     * @throws SubscribeCreationFailedFault             If any internal or general fault occurred during the processing of a subscription request.
      * @throws TopicNotSupportedFault                   If the topic in some way is unknown or unsupported.
      * @throws InvalidMessageContentExpressionFault     Never.
      */
     @WebMethod(operationName = "Subscribe")
     public SubscribeResponse subscribe(@WebParam(partName = "SubscribeRequest", name = "Subscribe",
-            targetNamespace = "http://docs.oasis-open.org/wsn/b-2") Subscribe subscribeRequest, Soap.SoapVersion version) throws NotifyMessageNotSupportedFault, UnrecognizedPolicyRequestFault, TopicExpressionDialectUnknownFault, ResourceUnknownFault, InvalidTopicExpressionFault, UnsupportedPolicyRequestFault, InvalidFilterFault, InvalidProducerPropertiesExpressionFault, UnacceptableInitialTerminationTimeFault, SubscribeCreationFailedFault, TopicNotSupportedFault, InvalidMessageContentExpressionFault {
+            targetNamespace = "http://docs.oasis-open.org/wsn/b-2") Subscribe subscribeRequest, Soap.SoapVersion version) throws TopicExpressionDialectUnknownFault, InvalidTopicExpressionFault, InvalidFilterFault, UnacceptableInitialTerminationTimeFault, SubscribeCreationFailedFault, InvalidMessageContentExpressionFault {
 
         W3CEndpointReference consumerEndpoint = subscribeRequest.getConsumerReference();
         boolean useRaw = false;
 
         if (consumerEndpoint == null) {
-            ExceptionUtilities.throwSubscribeCreationFailedFault("en", "Missing endpointreference");
+            ExceptionUtilities.throwSubscribeCreationFailedFault("en", "Missing endpointReference");
         }
 
         String endpointReference = ServiceUtilities.getAddress(consumerEndpoint);
@@ -494,7 +493,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
 
         // EndpointReference is returned as "" from getAddress if something went wrong.
         if (endpointReference.equals("")) {
-            ExceptionUtilities.throwSubscribeCreationFailedFault("en", "EndpointReference malformatted or missing.");
+            ExceptionUtilities.throwSubscribeCreationFailedFault("en", "EndpointReference mis-formatted or missing.");
         }
 
         // Check if the subscriber has requested non-Notify wrapped notifications
@@ -537,7 +536,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
                 if (o instanceof JAXBElement) {
                     JAXBElement filter = (JAXBElement) o;
 
-                    log.debug("Fetching namespacecontext of filter value");
+                    log.debug("Fetching namespaceContext of filter value");
                     // Get the namespace context for this filter
                     NamespaceContext namespaceContext = connection.getRequestInformation().getNamespaceContext(filter.getValue());
 
@@ -564,7 +563,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
                             requestDialect = type.getDialect();
 
                             // Check if dialect was XPATH, then we need to update the flag and add as filter
-                            // Since we cannot guarantee a single topic resolvement
+                            // Since we cannot guarantee a single topic resolution
                             if (requestDialect.equalsIgnoreCase(WSNTools._XpathTopicExpression)) {
                                 topicExpressionIsXpath = true;
                             }
@@ -608,7 +607,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
                 }
 
             } catch (UnacceptableTerminationTimeFault unacceptableTerminationTimeFault) {
-                ExceptionUtilities.throwUnacceptableInitialTerminationTimeFault("en", "Malformated termination time");
+                ExceptionUtilities.throwUnacceptableInitialTerminationTimeFault("en", "Mis-formatted termination time");
             }
         } else {
             /* Set it to terminate in half a year */
@@ -628,7 +627,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         } catch (DatatypeConfigurationException e) {
             log.error("Could not convert date time, is it formatted properly?");
             ExceptionUtilities.throwUnacceptableInitialTerminationTimeFault("en", "Internal error: The date was not " +
-                    "convertable to a gregorian calendar-instance. If the problem persists," +
+                    "convertible to a gregorian calendar-instance. If the problem persists," +
                     "please post an issue at http://github.com/tOgg1/WS-Nu");
         }
 
@@ -637,7 +636,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         String newSubscriptionKey = generateSubscriptionKey();
         log.debug("Generating WS-Nu endpoint reference url to subscriptionManager using key: " + newSubscriptionKey + " and prefix: " + WsnUtilities.subscriptionString);
 
-        String subscriptionEndpoint = this.generateHashedURLFromKey(_subscriptionManager.WSN_SUBSCRIBER_TOKEN, newSubscriptionKey);
+        String subscriptionEndpoint = this.generateHashedURLFromKey(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN, newSubscriptionKey);
 
         log.debug("Setting up W3C endpoint reference builder");
         /* Build endpoint reference */
@@ -687,7 +686,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         subscriber.setAttribute(WSNSubscriptionManager.WSN_DIALECT_TOKEN, requestDialect);
         subscriber.setTimeout(terminationTime);
         // Add potential XPATH content filters discovered in the subscribe request
-        contentFilters.forEach(filter -> subscriber.addFilter(filter));
+        contentFilters.forEach(subscriber::addFilter);
         // Add useRaw flag if present
         if (useRaw) {
             subscriber.setAttribute(WSNSubscriptionManager.WSN_USERAW_TOKEN, "true");
@@ -722,7 +721,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
     @Override
     @WebResult(name = "RegisterPublisherResponse", targetNamespace = "http://docs.oasis-open.org/wsn/br-2", partName = "RegisterPublisherResponse")
     @WebMethod(operationName = "RegisterPublisher")
-    public RegisterPublisherResponse registerPublisher(RegisterPublisher registerPublisherRequest) throws InvalidTopicExpressionFault, PublisherRegistrationFailedFault, ResourceUnknownFault, PublisherRegistrationRejectedFault, UnacceptableInitialTerminationTimeFault, TopicNotSupportedFault {
+    public RegisterPublisherResponse registerPublisher(RegisterPublisher registerPublisherRequest) throws InvalidTopicExpressionFault, PublisherRegistrationFailedFault, UnacceptableInitialTerminationTimeFault, TopicNotSupportedFault {
         log.debug("registerPublisher called");
 
         // Fetch the namespace context resolver
@@ -735,7 +734,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         // If we do not have an endpoint, produce a soapfault
         if (publisherEndpoint == null) {
             log.error("Missing endpoint reference in publisher registration request");
-            ExceptionUtilities.throwPublisherRegistrationFailedFault("en", "Missing endpointreference");
+            ExceptionUtilities.throwPublisherRegistrationFailedFault("en", "Missing endpointReference");
         }
 
         // Endpoint-reference extracted from the W3CEndpointReference
@@ -827,15 +826,14 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         builder.address(_protocolserver.getURI());
         W3CEndpointReference consumerReference = builder.build();
 
-        // Update the response with endpointreference
+        // Update the response with endpointReference
         response.setConsumerReference(consumerReference);
         response.setPublisherRegistrationReference(publisherRegistrationReference);
 
         return response;
     }
 
-    @Override
-    /**
+     /**
      * Implementation of {@link org.oasis_open.docs.wsn.b_2.GetCurrentMessage}.
      *
      * This message will always fault unless {@link #cacheMessages} is true.
@@ -849,10 +847,11 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
      * @throws NoCurrentMessageOnTopicFault If no message is listed on the current topic.
      * @throws TopicNotSupportedFault Never thrown as of version 0.3.
      */
+    @Override
     @WebResult(name = "GetCurrentMessageResponse", targetNamespace = "http://docs.oasis-open.org/wsn/b-2",
             partName = "GetCurrentMessageResponse")
     @WebMethod(operationName = "GetCurrentMessage")
-    public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage getCurrentMessageRequest) throws InvalidTopicExpressionFault, TopicExpressionDialectUnknownFault, MultipleTopicsSpecifiedFault, ResourceUnknownFault, NoCurrentMessageOnTopicFault, TopicNotSupportedFault {
+    public GetCurrentMessageResponse getCurrentMessage(GetCurrentMessage getCurrentMessageRequest) throws InvalidTopicExpressionFault, TopicExpressionDialectUnknownFault, MultipleTopicsSpecifiedFault, NoCurrentMessageOnTopicFault {
         log.debug("getCurrentMessage called");
 
         if (!MessageService.getInstance().isCachingMessages()) {

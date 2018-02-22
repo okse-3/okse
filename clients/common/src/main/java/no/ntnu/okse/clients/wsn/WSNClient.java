@@ -20,24 +20,21 @@ import no.ntnu.okse.clients.TestClient;
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.wsn.bw_2.UnableToDestroySubscriptionFault;
 import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
-import org.w3c.dom.Element;
 import org.apache.cxf.wsn.client.Consumer;
 import org.apache.cxf.wsn.client.Subscription;
-import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 
-import javax.wsdl.Service;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
 
 public final class WSNClient implements TestClient {
-    private static Logger log = Logger.getLogger(WSNClient.class);
+    private static final Logger log = Logger.getLogger(WSNClient.class);
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 61000;
-    private TestNotificationBroker notificationBroker;
-    private Map<String, Subscription> subscriptions;
-    private Map<String, Consumer> consumers;
+    private final TestNotificationBroker notificationBroker;
+    private final Map<String, Subscription> subscriptions;
+    private final Map<String, Consumer> consumers;
     private Consumer.Callback callback;
 
 

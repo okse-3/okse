@@ -34,7 +34,7 @@ public class IDontNeedSecurityTest{
     }
 
     @Test
-    public void messageReceived() throws Exception {
+    public void messageReceived() {
         listener_spy.messageReceived(null, null);
     }
 }

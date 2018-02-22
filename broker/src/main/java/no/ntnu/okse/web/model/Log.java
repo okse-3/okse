@@ -28,8 +28,8 @@ import java.util.List;
 
 public class Log {
 
-    private String name;
-    private List<String> lines;
+    private final String name;
+    private final List<String> lines;
 
     /**
      * Constructs a model for containing log information to be serialized

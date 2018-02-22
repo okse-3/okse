@@ -8,8 +8,6 @@ import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import java.io.IOException;
-
 public class ProtocolServerFactory {
 
     public static ProtocolServer create(Node node) {

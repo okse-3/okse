@@ -40,7 +40,7 @@ public class TopicTools {
      */
     private static HashSet<Topic> DFS(Topic root) {
 
-        HashSet<Topic> discovered = new HashSet<Topic>();
+        HashSet<Topic> discovered = new HashSet<>();
         Stack<Topic> queue = new Stack<>();
         queue.push(root);
 

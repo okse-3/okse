@@ -48,10 +48,10 @@ public class MainController {
     private static final String PROTOCOL_POWER = "/protocols/power";
 
     // Public static field representing a MB
-    public static int MB = 1024 * 1024;
+    public static final int MB = 1024 * 1024;
 
     // Log4j logger
-    private static Logger log = Logger.getLogger(MainController.class.getName());
+    private static final Logger log = Logger.getLogger(MainController.class.getName());
 
     /**
      * Returns all necessary information for rendering the main-pane
@@ -84,15 +84,13 @@ public class MainController {
             }});
             // Protocol information
             ArrayList<HashMap<String, Object>> protocols = new ArrayList<>();
-            Application.cs.getAllProtocolServers().forEach(p -> {
-                protocols.add(new HashMap<String, Object>() {{
-                    put("host", p.getHost());
-                    put("port", p.getPort());
-                    put("type", p.getProtocolServerType());
-                }});
-            });
+            Application.cs.getAllProtocolServers().forEach(p -> protocols.add(new HashMap<String, Object>() {{
+                put("host", p.getHost());
+                put("port", p.getPort());
+                put("type", p.getProtocolServerType());
+            }}));
             put("protocols", protocols);
-            put("protocolPower", cs.protocolServersBooted);
+            put("protocolPower", CoreService.protocolServersBooted);
         }};
 
         return result;
@@ -109,7 +107,7 @@ public class MainController {
     String powerProtocolServers() {
         CoreService cs = CoreService.getInstance();
 
-        if (cs.protocolServersBooted) {
+        if (CoreService.protocolServersBooted) {
             try {
                 cs.getEventQueue().put(new SystemEvent(SystemEvent.Type.SHUTDOWN_PROTOCOL_SERVERS, null));
             } catch (InterruptedException e) {
@@ -122,7 +120,7 @@ public class MainController {
                 log.warn("WARNING: Please don't interrupt the thread");
             }
         }
-        return "{ \"power\":" + cs.protocolServersBooted + " }";
+        return "{ \"power\":" + CoreService.protocolServersBooted + " }";
     }
 
 }

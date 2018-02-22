@@ -47,14 +47,10 @@ public class AMQPServer extends BaseHandler {
 
     private static class MessageStore {
 
-        Map<String, Deque<MessageBytes>> messages = new HashMap<>();
+        final Map<String, Deque<MessageBytes>> messages = new HashMap<>();
 
         void put(String address, MessageBytes messageBytes) {
-            Deque<MessageBytes> queue = messages.get(address);
-            if (queue == null) {
-                queue = new ArrayDeque<>();
-                messages.put(address, queue);
-            }
+            Deque<MessageBytes> queue = messages.computeIfAbsent(address, k -> new ArrayDeque<>());
             queue.add(messageBytes);
         }
 
@@ -81,10 +77,10 @@ public class AMQPServer extends BaseHandler {
     final private MessageStore messages = new MessageStore();
     final private SubscriptionHandler subscriptionHandler;
     private static Logger log;
-    private boolean quiet;
+    private final boolean quiet;
     private int tag = 0;
-    private LinkedBlockingQueue<String> queue;
-    private AMQProtocolServer ps;
+    private final LinkedBlockingQueue<String> queue;
+    private final AMQProtocolServer ps;
 
     public AMQPServer(AMQProtocolServer ps, SubscriptionHandler subscriptionHandler, boolean quiet) {
         this.subscriptionHandler = subscriptionHandler;
@@ -297,13 +293,13 @@ public class AMQPServer extends BaseHandler {
         Link link = evt.getLink();
         if (link instanceof Sender) {
             Sender snd = (Sender) link;
-            send(subscriptionHandler.getAddress(snd), snd);
+            send(SubscriptionHandler.getAddress(snd), snd);
             //AMQProtocolServer.getInstance().incrementTotalRequests();
         }
     }
 
     /**
-     * onDelviery is triggered when the AMQP socket receives
+     * onDelivery is triggered when the AMQP socket receives
      * a message. When the message is received it will create
      * a OKSE message and pass it into the MessageService.
      * It will also add AMQP messages back into the

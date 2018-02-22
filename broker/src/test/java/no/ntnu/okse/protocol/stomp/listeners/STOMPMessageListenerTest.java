@@ -52,7 +52,7 @@ public class STOMPMessageListenerTest {
     }
 
     @Test
-    public void messageReceived() throws Exception {
+    public void messageReceived() {
         StampyMessage msg = createSendMessage();
         messageListener_spy.messageReceived(msg, new HostPort("localhost", 61613));
 
@@ -66,13 +66,13 @@ public class STOMPMessageListenerTest {
     }
 
     @Test
-    public void mimeTypes() throws Exception {
+    public void mimeTypes() {
         StampyMessage msg = createMimeTypeMessage("plain/text", "utf-8", "test");
         messageListener_spy.messageReceived(msg, new HostPort("localhost", 61613));
     }
 
     @Test
-    public void differentMessageHeaders() throws Exception {
+    public void differentMessageHeaders() {
         StampyMessage msg = createSendMessageWithHeaders();
         messageListener_spy.messageReceived(msg, new HostPort("localhost", 61613));
 

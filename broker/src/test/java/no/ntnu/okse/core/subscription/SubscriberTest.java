@@ -37,22 +37,22 @@ public class SubscriberTest {
     Subscriber s;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         s = new Subscriber("0.0.0.0", 1337, "test/sub", "Test");
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         s = null;
     }
 
     @Test
-    public void testGetHost() throws Exception {
+    public void testGetHost() {
         assertEquals(s.getHost(), "0.0.0.0");
     }
 
     @Test
-    public void testGetPort() throws Exception {
+    public void testGetPort() {
         assertTrue(s.getPort() == 1337);
         try {
             s = new Subscriber("0.0.0.0", 0, "test/sub", "Test");
@@ -69,19 +69,19 @@ public class SubscriberTest {
     }
 
     @Test
-    public void testGetTopic() throws Exception {
+    public void testGetTopic() {
         assertEquals(s.getTopic(), "test/sub");
     }
 
     @Test
-    public void testSetAttribute() throws Exception {
+    public void testSetAttribute() {
         s.setAttribute("flag", "value");
         assertEquals(s.getAttribute("flag"), "value");
         assertNull(s.getAttribute("FLAG"));
     }
 
     @Test
-    public void testGetAttribute() throws Exception {
+    public void testGetAttribute() {
         assertNull(s.getAttribute("flag"));
         s.setAttribute("flag", "value");
         assertEquals(s.getAttribute("flag"), "value");
@@ -89,7 +89,7 @@ public class SubscriberTest {
     }
 
     @Test
-    public void testGetTimeout() throws Exception {
+    public void testGetTimeout() {
         Long timeout = System.currentTimeMillis() + 20000L;
         assertNull(s.getTimeout());
         s.setTimeout(timeout);
@@ -97,7 +97,7 @@ public class SubscriberTest {
     }
 
     @Test
-    public void testGetSubscriberID() throws Exception {
+    public void testGetSubscriberID() {
         HashSet<String> ids = new HashSet<>();
         assertNotNull(s.getSubscriberID());
         // Hex regex
@@ -112,7 +112,7 @@ public class SubscriberTest {
     }
 
     @Test
-    public void testSetTimeout() throws Exception {
+    public void testSetTimeout() {
         Long timeout = System.currentTimeMillis();
         try {
             s.setTimeout(timeout - 20000L);
@@ -126,21 +126,21 @@ public class SubscriberTest {
     }
 
     @Test
-    public void testShouldExpire() throws Exception {
+    public void testShouldExpire() {
         assertFalse(s.shouldExpire());
         s.setTimeout(System.currentTimeMillis() + 20000L);
         assertTrue(s.shouldExpire());
     }
 
     @Test
-    public void testAddFilter() throws Exception {
+    public void testAddFilter() {
         assertFalse(s.getFilterSet().contains("filterstring"));
         s.addFilter("filterstring");
         assertTrue(s.getFilterSet().contains("filterstring"));
     }
 
     @Test
-    public void testRemoveFilter() throws Exception {
+    public void testRemoveFilter() {
         s.addFilter("filterstring");
         assertTrue(s.getFilterSet().contains("filterstring"));
         s.removeFilter("filterstring");
@@ -148,7 +148,7 @@ public class SubscriberTest {
     }
 
     @Test
-    public void testGetFilterSet() throws Exception {
+    public void testGetFilterSet() {
         assertNotNull(s.getFilterSet());
         assertTrue(s.getFilterSet() instanceof HashSet);
         assertTrue(s.getFilterSet().isEmpty());
@@ -164,12 +164,12 @@ public class SubscriberTest {
     }
 
     @Test
-    public void testGetOriginProtocol() throws Exception {
+    public void testGetOriginProtocol() {
         assertEquals(s.getOriginProtocol(), "Test");
     }
 
     @Test
-    public void testToString() throws Exception {
+    public void testToString() {
         assertNotNull(s.toString());
         assertTrue(s.toString() instanceof String);
     }

@@ -32,7 +32,7 @@ public class Publisher {
     private final String topic;
     private final String host;
     private final Integer port;
-    private HashMap<String, String> attributes;
+    private final HashMap<String, String> attributes;
     private Long timeout;
 
     /**

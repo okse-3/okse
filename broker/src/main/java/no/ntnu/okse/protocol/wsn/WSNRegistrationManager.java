@@ -57,9 +57,9 @@ public class WSNRegistrationManager extends AbstractPublisherRegistrationManager
 
     private static Logger log;
     private SubscriptionService _subscriptionService = null;
-    private HashMap<String, Publisher> localPublisherMap;
-    private HashMap<String, AbstractNotificationBroker.PublisherHandle> localPublisherHandle;
-    private WSNotificationServer _protocolserver;
+    private final HashMap<String, Publisher> localPublisherMap;
+    private final HashMap<String, AbstractNotificationBroker.PublisherHandle> localPublisherHandle;
+    private final WSNotificationServer _protocolserver;
 
     /**
      * Empty constructor that initializes the log and local mappings
@@ -190,7 +190,7 @@ public class WSNRegistrationManager extends AbstractPublisherRegistrationManager
      * Note that the subscription-reference is contained in the request-url.
      *
      * @param destroyRegistrationRequest The parsed object.
-     * @return The DestryoRegistrationtResponse if everything went fine.
+     * @return The DestroyRegistrationResponse if everything went fine.
      * @throws ResourceNotDestroyedFault This is thrown if either the publisher-reference is ill-formatted,
      *                                   or does not represent an existing publisher registration
      * @throws ResourceUnknownFault      As of 0.3 this is never thrown as WS-Resources is not implemented
@@ -202,7 +202,7 @@ public class WSNRegistrationManager extends AbstractPublisherRegistrationManager
     (
             @WebParam(partName = "DestroyRegistrationRequest", name = "DestroyRegistration", targetNamespace = "http://docs.oasis-open.org/wsn/br-2")
             DestroyRegistration destroyRegistrationRequest
-    ) throws ResourceNotDestroyedFault, ResourceUnknownFault {
+    ) throws ResourceNotDestroyedFault {
         log.debug("Received DestroyRegistration request");
         RequestInformation requestInformation = connection.getRequestInformation();
 

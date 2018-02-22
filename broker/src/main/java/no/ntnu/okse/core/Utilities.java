@@ -16,7 +16,7 @@ import java.util.TimeZone;
 
 public class Utilities {
 
-    public static Logger log = Logger.getLogger(Utilities.class.getName());
+    public static final Logger log = Logger.getLogger(Utilities.class.getName());
 
     /**
      * Returns a ISO 8601 HH:mm:ss.SSS formatted string of a Duration object

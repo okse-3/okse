@@ -39,7 +39,11 @@ public abstract class AbstractProtocolServer implements ProtocolServer {
 
     // Name and statistics
     protected String protocolServerType;
-    protected AtomicInteger totalRequests, totalBadRequests, totalErrors, totalMessagesReceived, totalMessagesSent;
+    protected final AtomicInteger totalRequests;
+    protected final AtomicInteger totalBadRequests;
+    protected final AtomicInteger totalErrors;
+    protected final AtomicInteger totalMessagesReceived;
+    protected final AtomicInteger totalMessagesSent;
 
     /**
      * Constructor that just initializes the fields to default values

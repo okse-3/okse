@@ -234,7 +234,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
                         totalRequests.incrementAndGet();
 
                         // Write a response
-                        byte[] response = new String("Executing: " + command + "\n").getBytes();
+                        byte[] response = ("Executing: " + command + "\n").getBytes();
                         writeBuffer = ByteBuffer.wrap(response);
                         client.write(writeBuffer);
 
@@ -341,7 +341,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
                 if (args.length > 2) {
                     StringBuilder builder = new StringBuilder();
                     for (int i = 2; i < args.length; i++) {
-                        builder.append(args[i] + " ");
+                        builder.append(args[i]).append(" ");
                     }
                     String msg = builder.toString().trim();
                     Message message = new Message(msg, args[1], null, protocolServerType);
@@ -368,7 +368,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
                 log.debug(WSNotificationServer.getInstance().getURI());
             */
             } else if (args[0].equalsIgnoreCase("shutdownprotocolservers")) {
-                log.debug("SHUTDOWN PROTOCOL SERVERS RECIEVED");
+                log.debug("SHUTDOWN PROTOCOL SERVERS RECEIVED");
                 try {
                     CoreService.getInstance().getEventQueue().put(new SystemEvent(
                             SystemEvent.Type.SHUTDOWN_PROTOCOL_SERVERS,

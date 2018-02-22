@@ -47,7 +47,7 @@ public class IncrementTotalRequestsListenerTest {
     }
 
     @Test
-    public void messageReceived() throws Exception {
+    public void messageReceived() {
         listener_spy.messageReceived(null, null);
         Mockito.verify(ps_spy).incrementTotalRequests();
     }

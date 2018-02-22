@@ -9,13 +9,13 @@ import org.w3c.dom.Element;
 
 public class WSNSubscriber extends SubscribeClient {
     @Parameter(names = {"--port", "-p"}, description = "Port")
-    public int port = 61000;
+    public final int port = 61000;
 
     @Parameter(names = {"--client-host", "-ch"}, description = "Client Port")
-    public String clientHost = "localhost";
+    public final String clientHost = "localhost";
 
     @Parameter(names = {"--client-port", "-cp"}, description = "Client Port")
-    public int clientPort = 9000;
+    public final int clientPort = 9000;
 
     private WSNClient client;
 

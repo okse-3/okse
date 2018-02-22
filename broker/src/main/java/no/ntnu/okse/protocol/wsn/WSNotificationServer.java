@@ -53,7 +53,6 @@ import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.XMLConstants;
@@ -78,13 +77,13 @@ public class WSNotificationServer extends AbstractProtocolServer {
     private static final String DEFAULT_MESSAGE_CONTENT_WRAPPER_NAME = "Content";
 
     // Flag and defaults for operation behind NAT
-    private boolean behindNAT;
-    private String publicWANHost;
-    private Integer publicWANPort;
+    private final boolean behindNAT;
+    private final String publicWANHost;
+    private final Integer publicWANPort;
 
     // HTTP Client fields
-    private Long connectionTimeout;
-    private Integer clientPoolSize;
+    private final Long connectionTimeout;
+    private final Integer clientPoolSize;
 
     // Non-XMl Content Wrapper Name
     private String contentWrapperElementName;
@@ -97,7 +96,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
     private HttpClient _client;
     private HashSet<ServiceConnection> _services;
     private ExecutorService clientPool;
-    private TreeSet<String> relays = new TreeSet<>();
+    private final TreeSet<String> relays = new TreeSet<>();
 
     /**
      * Constructor that takes in configuration options for the WSNotification
@@ -283,13 +282,9 @@ public class WSNotificationServer extends AbstractProtocolServer {
         try {
             log.info("Stopping WSNServer...");
             // Removing all subscribers
-            _commandProxy.getAllRecipients().forEach(s -> {
-                _commandProxy.getProxySubscriptionManager().removeSubscriber(s);
-            });
+            _commandProxy.getAllRecipients().forEach(s -> _commandProxy.getProxySubscriptionManager().removeSubscriber(s));
             // Removing all publishers
-            _commandProxy.getProxyRegistrationManager().getAllPublishers().forEach(p -> {
-                _commandProxy.getProxyRegistrationManager().removePublisher(p);
-            });
+            _commandProxy.getProxyRegistrationManager().getAllPublishers().forEach(p -> _commandProxy.getProxyRegistrationManager().removePublisher(p));
 
             // Stop the HTTP Client
             this._client.stop();
@@ -546,7 +541,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
 
         @Override
         public void handle(String target, Request baseRequest, HttpServletRequest request,
-                           HttpServletResponse response) throws IOException, ServletException {
+                           HttpServletResponse response) throws IOException {
 
             log.debug("HttpHandle invoked on target: " + target);
 
@@ -837,7 +832,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
                 log.debug("Same port, invalid relay command");
                 return false;
             }
-            // else check relay.host mot publicWANHost, så sjekk port
+            // else check relay.host mot publicWANHost, then check port
         } else if (host.equals(getPublicWANHost())) {
             log.info("Same host (WAN), need to check port");
             if (getPublicWANPort().equals(port)) {

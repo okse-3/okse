@@ -38,13 +38,13 @@ public class Subscriber {
 
     private final String host;
     private final Integer port;
-    private HashMap<String, String> attributes;
+    private final HashMap<String, String> attributes;
     private final String topic;
     private Long timeout;
     private final String originProtocol;
     private final String subscriberID;
     private static Logger log;
-    private HashSet<String> filters;
+    private final HashSet<String> filters;
 
     /**
      * Constructs a Subscriber object from the required fields
@@ -151,14 +151,14 @@ public class Subscriber {
     /**
      * Retrieve the timeout for this subscriber
      *
-     * @return The timout if it should expire, null otherwise
+     * @return The timeout if it should expire, null otherwise
      */
     public Long getTimeout() {
         return timeout;
     }
 
     /**
-     * Retrive the subscriber ID for this subscriber
+     * Retrieve the subscriber ID for this subscriber
      *
      * @return The subscriber ID
      */
@@ -167,7 +167,7 @@ public class Subscriber {
     }
 
     /**
-     * Sets the timeout for this subcriber (can be null if it should not expire)
+     * Sets the timeout for this subscriber (can be null if it should not expire)
      *
      * @param timeout The time of expiry as seconds since unix epoch, null if infinite
      */

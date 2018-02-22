@@ -28,11 +28,7 @@ import no.ntnu.okse.core.messaging.Message;
 import org.ntnunotif.wsnu.base.net.NuNamespaceContextResolver;
 import org.ntnunotif.wsnu.base.topics.TopicUtils;
 import org.ntnunotif.wsnu.base.util.InternalMessage;
-import org.ntnunotif.wsnu.base.util.Utilities;
-import org.ntnunotif.wsnu.services.general.ServiceUtilities;
 import org.oasis_open.docs.wsn.b_2.Notify;
-import org.oasis_open.docs.wsn.b_2.Subscribe;
-import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 import org.oasis_open.docs.wsn.bw_2.UnacceptableTerminationTimeFault;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -47,16 +43,16 @@ import static org.testng.Assert.*;
 
 public class WSNToolsTest {
 
-    String dialect = WSNTools._ConcreteTopicExpression;
-    Message message = new Message("<data>test</data>", "test/sub", null, "Test");
+    final String dialect = WSNTools._ConcreteTopicExpression;
+    final Message message = new Message("<data>test</data>", "test/sub", null, "Test");
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
 
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
 
     }
 
@@ -88,7 +84,7 @@ public class WSNToolsTest {
     }
 
     @Test
-    public void testExtractRawXmlContentFromDomNode() throws Exception {
+    public void testExtractRawXmlContentFromDomNode() {
         assertTrue(WSNTools.buildGenericContentElement("Content", "data") instanceof org.w3c.dom.Element);
         org.w3c.dom.Element genericContentElement = WSNTools.buildGenericContentElement("Content", "data");
         assertEquals(genericContentElement.getTextContent(), "data");
@@ -96,7 +92,7 @@ public class WSNToolsTest {
     }
 
     @Test
-    public void testParseRawXmlString() throws Exception {
+    public void testParseRawXmlString() {
         String rawXml = WSNTools.generateRawSoapEnvelopedNotifyString(message);
         InternalMessage result = WSNTools.parseRawXmlString(rawXml);
         assertNotNull(result.getMessage());
@@ -105,7 +101,7 @@ public class WSNToolsTest {
     }
 
     @Test
-    public void testCreateNotify() throws Exception {
+    public void testCreateNotify() {
         Object result = WSNTools.createNotify(message);
         assertTrue(result instanceof Notify);
         Object content = WSNTools.extractMessageContentFromNotify((Notify) result);
@@ -113,14 +109,14 @@ public class WSNToolsTest {
     }
 
     @Test
-    public void testExtractMessageContentFromNotify() throws Exception {
+    public void testExtractMessageContentFromNotify() {
         Notify msg = WSNTools.createNotify(message);
         Object content = WSNTools.extractMessageContentFromNotify(msg);
         assertEquals(((Node) content).getTextContent(), "test");
     }
 
     @Test
-    public void testInjectMessageContentIntoNotify() throws Exception {
+    public void testInjectMessageContentIntoNotify() {
         Notify msg = WSNTools.createNotify(message);
         Element generatedContent = WSNTools.buildGenericContentElement("Content", "updated");
         WSNTools.injectMessageContentIntoNotify(generatedContent, msg);
@@ -131,7 +127,7 @@ public class WSNToolsTest {
     }
 
     @Test
-    public void testRemoveNameSpacePrefixesFromTopicExpression() throws Exception {
+    public void testRemoveNameSpacePrefixesFromTopicExpression() {
         String topicExpression = "ns:topic/ns2:topicsub";
         String topicExpression2 = "topic/ns3:topic2/ns4:topic5";
         String topicExpression3 = "ns3:topic/skeet/ns5:topic1";
@@ -163,7 +159,7 @@ public class WSNToolsTest {
     }
 
     @Test
-    public void testBuildGenericContentElement() throws Exception {
+    public void testBuildGenericContentElement() {
         Element result = WSNTools.buildGenericContentElement("Content","elementtest");
         assertTrue(result instanceof Element);
         assertEquals(result.getTextContent(), "elementtest");
@@ -171,7 +167,7 @@ public class WSNToolsTest {
     }
 
     @Test
-    public void testExtractSubscriptionReferenceFromRawXmlResponse() throws Exception {
+    public void testExtractSubscriptionReferenceFromRawXmlResponse() {
         String xmlSubscribeResponse = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
                 "<ns8:Envelope xmlns:ns2=\"http://www.w3.org/2001/12/soap-envelope\" " +
                 "xmlns:ns3=\"http://docs.oasis-open.org/wsrf/bf-2\" " +
@@ -196,7 +192,7 @@ public class WSNToolsTest {
     }
 
     @Test
-    public void testGenerateSubscriptionRequestWithTopic() throws Exception {
+    public void testGenerateSubscriptionRequestWithTopic() {
         /* This has been re-written, test needs to take that into account
         String topic = "topic";
         String endpointReference = "http://localhost:61000";
@@ -222,7 +218,7 @@ public class WSNToolsTest {
     }
 
     @Test
-    public void testIsXsdDatetime() throws Exception {
+    public void testIsXsdDatetime() {
         // Correct
         assertTrue(WSNTools.isXsdDatetime("2016-02-01T01:02:03"));
         assertTrue(WSNTools.isXsdDatetime("2015-12-31T23:59:59"));
@@ -251,7 +247,7 @@ public class WSNToolsTest {
     }
 
     @Test
-    public void testIsXsdDuration() throws Exception {
+    public void testIsXsdDuration() {
         // Correct
         assertTrue(WSNTools.isXsdDuration("P1Y"));
         assertTrue(WSNTools.isXsdDuration("P10Y"));
@@ -269,7 +265,7 @@ public class WSNToolsTest {
     }
 
     @Test
-    public void testExtractXsdDuration() throws Exception {
+    public void testExtractXsdDuration() {
 
         Long Y, M, D, H, m, S;
         S = 1000L;

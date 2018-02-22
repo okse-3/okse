@@ -50,7 +50,7 @@ public class SubscriptionListenerTest {
     }
 
     @Test
-    public void messageReceived() throws Exception {
+    public void messageReceived() {
         StampyMessage msg = createSubMessage();
         HostPort hostport = createHostPort();
         listener_spy.messageReceived(msg, hostport);

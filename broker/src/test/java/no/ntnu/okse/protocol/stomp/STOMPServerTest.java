@@ -23,7 +23,7 @@ public class STOMPServerTest {
     private ServerNettyMessageGateway gateway;
     private STOMPSubscriptionManager subManager_spy;
     private int port = 61634;
-    private String host = "localhost";
+    private final String host = "localhost";
 
 
     @BeforeMethod
@@ -51,7 +51,7 @@ public class STOMPServerTest {
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         server_spy.stopServer();
         server_spy = null;
         ps_spy = null;
@@ -84,17 +84,14 @@ public class STOMPServerTest {
 
         ArgumentCaptor<StampyMessage> stampy = ArgumentCaptor.forClass(StampyMessage.class);
         ArgumentCaptor<HostPort> hp = ArgumentCaptor.forClass(HostPort.class);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                throw new InterceptException("Intercepting to increment total number of errors");
-            }
+        Mockito.doAnswer(invocation -> {
+            throw new InterceptException("Intercepting to increment total number of errors");
         }).when(gateway).sendMessage(stampy.capture(), hp.capture());
         server_spy.sendMessage(msg);
     }
 
     @Test
-    public void init() throws Exception {
+    public void init() {
         assertEquals(port, gateway.getPort());
         assertNotNull(null, gateway);
     }

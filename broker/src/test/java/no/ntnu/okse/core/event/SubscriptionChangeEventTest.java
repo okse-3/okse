@@ -37,26 +37,26 @@ public class SubscriptionChangeEventTest {
     SubscriptionChangeEvent sce;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         s = new Subscriber("0.0.0.0", 8080, "topic", "Test");
         sce = new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.SUBSCRIBE, s);
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         s = null;
         sce = null;
     }
 
     @Test
-    public void testGetData() throws Exception {
+    public void testGetData() {
         assertNotNull(sce.getData());
         assertEquals(sce.getData().getTopic(), "topic");
         assertSame(sce.getData(), s);
     }
 
     @Test
-    public void testGetType() throws Exception {
+    public void testGetType() {
         assertNotNull(sce.getType());
         assertEquals(sce.getType(), SubscriptionChangeEvent.Type.SUBSCRIBE);
         sce = new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.UNSUBSCRIBE, s);

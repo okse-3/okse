@@ -6,7 +6,7 @@ import no.ntnu.okse.clients.TestClient;
 
 public class STOMPPublisher extends PublishClient {
     @Parameter(names = {"--port", "-p"}, description = "Port")
-    public int port = 61613;
+    public final int port = 61613;
 
     private StompClient client;
 

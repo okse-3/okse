@@ -28,7 +28,7 @@ public class DisconnectListenerTest{
     private AbstractStampyMessageGateway gateway_spy;
 
     @BeforeTest
-    public void setUp() throws Exception {
+    public void setUp() {
         listener = new DisconnectListener();
 
         STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager();
@@ -61,7 +61,7 @@ public class DisconnectListenerTest{
     }
 
     @Test
-    public void messageReceived() throws Exception {
+    public void messageReceived() {
         StampyMessage msg = createSendMessage();
         HostPort hostPort = new HostPort("localhost", 61613);
 
@@ -80,33 +80,30 @@ public class DisconnectListenerTest{
     public void forcefulDisconnect(){
         ServerNettyMessageGateway gateway_spy = Mockito.spy(new ServerNettyMessageGateway());
 
-        ArgumentCaptor<SimpleChannelUpstreamHandler> SimpleChannelUpstreamHandlerArgumentcapto= ArgumentCaptor.forClass(SimpleChannelUpstreamHandler.class);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object handler = invocation.getArguments()[0];
-                ChannelHandlerContext ctx = createCTX();
-                Channel channel = createChannel();
-                InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1881);
-                    HostPort hostPort = new HostPort("127.0.0.1", addr.getPort());
+        ArgumentCaptor<SimpleChannelUpstreamHandler> SimpleChannelUpstreamHandlerArgumentCaptor = ArgumentCaptor.forClass(SimpleChannelUpstreamHandler.class);
+        Mockito.doAnswer(invocation -> {
+            Object handler = invocation.getArguments()[0];
+            ChannelHandlerContext ctx = createCTX();
+            Channel channel = createChannel();
+            InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1881);
+                HostPort hostPort = new HostPort("127.0.0.1", addr.getPort());
 
-                SimpleChannelUpstreamHandler _handler = (SimpleChannelUpstreamHandler) handler;
+            SimpleChannelUpstreamHandler _handler = (SimpleChannelUpstreamHandler) handler;
 
-                Mockito.doReturn(channel).when(ctx).getChannel();
-                Mockito.doReturn(addr).when(channel).getRemoteAddress();
+            Mockito.doReturn(channel).when(ctx).getChannel();
+            Mockito.doReturn(addr).when(channel).getRemoteAddress();
 
-                _handler.channelDisconnected(ctx, null);
+            _handler.channelDisconnected(ctx, null);
 
-                ArgumentCaptor<HostPort> hostPortArgumentCaptor = ArgumentCaptor.forClass(HostPort.class);
-                Mockito.verify(listener_spy).cleanUp(hostPortArgumentCaptor.capture());
-                Mockito.doNothing().when(listener_spy).cleanUp(hostPort);
+            ArgumentCaptor<HostPort> hostPortArgumentCaptor = ArgumentCaptor.forClass(HostPort.class);
+            Mockito.verify(listener_spy).cleanUp(hostPortArgumentCaptor.capture());
+            Mockito.doNothing().when(listener_spy).cleanUp(hostPort);
 
-                assertEquals( hostPort.getHost(), hostPortArgumentCaptor.getValue().getHost());
-                assertEquals( hostPort.getPort(), hostPortArgumentCaptor.getValue().getPort());
-                Mockito.reset(listener_spy);
-                return null;
-            }
-        }).when(gateway_spy).addHandler(SimpleChannelUpstreamHandlerArgumentcapto.capture());
+            assertEquals( hostPort.getHost(), hostPortArgumentCaptor.getValue().getHost());
+            assertEquals( hostPort.getPort(), hostPortArgumentCaptor.getValue().getPort());
+            Mockito.reset(listener_spy);
+            return null;
+        }).when(gateway_spy).addHandler(SimpleChannelUpstreamHandlerArgumentCaptor .capture());
         listener_spy.setGateway(gateway_spy);
     }
 

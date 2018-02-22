@@ -1,7 +1,6 @@
 package no.ntnu.okse.protocol.stomp;
 
 import asia.stampy.common.gateway.*;
-import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.interceptor.InterceptException;
 import asia.stampy.examples.system.server.SystemAcknowledgementHandler;
 import asia.stampy.server.message.message.MessageMessage;
@@ -13,7 +12,6 @@ import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.protocol.stomp.listeners.*;
 import no.ntnu.okse.protocol.stomp.listeners.ErrorInterceptor;
-import no.ntnu.okse.protocol.stomp.listeners.MessageListener;
 import org.apache.log4j.Logger;
 
 import javax.validation.constraints.NotNull;
@@ -25,10 +23,10 @@ public class STOMPServer extends Server {
     private static STOMPSubscriptionManager subscriptionManager;
     public ServerNettyMessageGateway gateway;
     private static STOMPProtocolServer ps;
-    private Logger log;
-    private LinkedBlockingQueue<Message> messageQueue;
+    private final Logger log;
+    private final LinkedBlockingQueue<Message> messageQueue;
     private Thread messageSenderThread;
-    private AtomicBoolean running;
+    private final AtomicBoolean running;
 
     /**
      * Sets up the logger when we create a new instance of this class
@@ -44,7 +42,7 @@ public class STOMPServer extends Server {
      * @param subscriptionManager the subscription manager instance
      */
     public void setSubscriptionManager(STOMPSubscriptionManager subscriptionManager) {
-        this.subscriptionManager = subscriptionManager;
+        STOMPServer.subscriptionManager = subscriptionManager;
     }
 
     /**
@@ -113,7 +111,7 @@ public class STOMPServer extends Server {
     }
 
     /**
-     * Inits the actual gateway and all its listeners, also binds the to a specific host and port
+     * Init the actual gateway and all its listeners, also binds the to a specific host and port
      * @param host the host to bind to
      * @param port the port to bind to
      * @throws Exception
@@ -144,7 +142,7 @@ public class STOMPServer extends Server {
      * @param ps the protocol server to be set
      */
     public void setProtocolServer(STOMPProtocolServer ps){
-        this.ps = ps;
+        STOMPServer.ps = ps;
     }
 
     /**

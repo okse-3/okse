@@ -20,5 +20,5 @@ public class DummySecurityListener implements SecurityMessageListener {
     }
 
     @Override
-    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) throws Exception {}
+    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) {}
 }

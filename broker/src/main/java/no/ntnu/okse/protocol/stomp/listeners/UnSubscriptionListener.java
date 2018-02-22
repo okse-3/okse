@@ -25,7 +25,7 @@ public class UnSubscriptionListener implements StampyMessageListener {
     }
 
     @Override
-    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) throws Exception {
+    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) {
         UnsubscribeMessage unsubMessage = (UnsubscribeMessage )stampyMessage;
         subscriptionManager.removeSubscriber(unsubMessage.getHeader().getId());
     }

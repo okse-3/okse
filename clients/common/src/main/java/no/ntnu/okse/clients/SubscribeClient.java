@@ -8,12 +8,10 @@ public abstract class SubscribeClient extends CommandClient {
         client.connect();
         topics.forEach(this::subscribe);
         // Graceful disconnect
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                topics.forEach(client::unsubscribe);
-                client.disconnect();
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            topics.forEach(client::unsubscribe);
+            client.disconnect();
+        }));
         System.out.println("Listening for messages...");
     }
 

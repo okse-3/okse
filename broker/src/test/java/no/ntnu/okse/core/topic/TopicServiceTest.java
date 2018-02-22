@@ -35,12 +35,12 @@ import static org.testng.Assert.*;
 
 public class TopicServiceTest {
 
-    TopicService ts = TopicService.getInstance();
+    final TopicService ts = TopicService.getInstance();
     Topic rootOne, rootTwo, one, two, three;
     HashSet<Topic> roots, leafs, all;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         ts.boot();
 
         roots = new HashSet<>();
@@ -78,52 +78,52 @@ public class TopicServiceTest {
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         ts.stop();
     }
 
     @Test
-    public void testGetInstance() throws Exception {
-        assertTrue(ts.getInstance() instanceof TopicService);
+    public void testGetInstance() {
+        assertTrue(TopicService.getInstance() instanceof TopicService);
     }
 
     @Test
-    public void testAllGetRootTopics() throws Exception {
+    public void testAllGetRootTopics() {
         HashSet<Topic> rootTopics = ts.getAllRootTopics();
         roots.forEach(t -> assertTrue(rootTopics.contains(t)));
     }
 
     @Test
-    public void testGetAllTopics() throws Exception {
+    public void testGetAllTopics() {
         HashSet<Topic> allTopics = ts.getAllTopics();
         all.forEach(t -> assertTrue(allTopics.contains(t)));
     }
 
     @Test
-    public void testGetTopic() throws Exception {
+    public void testGetTopic() {
         assertEquals(three, ts.getTopic(three.getFullTopicString()));
     }
 
     @Test
-    public void testGetAllLeafTopics() throws Exception {
+    public void testGetAllLeafTopics() {
         HashSet<Topic> leafTopics = ts.getAllLeafTopics();
         leafs.forEach(t -> assertTrue(leafTopics.contains(t)));
     }
 
     @Test
-    public void testTopicExists() throws Exception {
+    public void testTopicExists() {
         assertTrue(ts.topicExists(one));
         assertTrue(ts.topicExists(rootTwo));
     }
 
     @Test
-    public void testTopicExists1() throws Exception {
+    public void testTopicExists1() {
         assertTrue(ts.topicExists(one.getFullTopicString()));
         assertTrue(ts.topicExists(two.getFullTopicString()));
     }
 
     @Test
-    public void testGenerateTopicNodesFromRawTopicString() throws Exception {
+    public void testGenerateTopicNodesFromRawTopicString() {
         HashSet<Topic> collector = ts.generateTopicNodesFromRawTopicString("no/ffi/test");
         assertEquals(collector.size(), 3);
         HashMap<String, Topic> partNames = new HashMap<>();

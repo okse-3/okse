@@ -19,7 +19,7 @@ public class MIMETypeListenerTest {
     private AbstractStampyMessageGateway gateway_spy;
 
     @BeforeTest
-    public void setUp() throws Exception {
+    public void setUp() {
         listener = new MIMEtypeListener();
         listener_spy = Mockito.spy(listener);
     }

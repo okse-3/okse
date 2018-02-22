@@ -38,7 +38,7 @@ public class TopicChangeEventTest {
     TopicChangeEvent tce;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         one = new Topic("root", "DEFAULT");
         two = new Topic("sub", "DEFAULT");
         two.setParent(one);
@@ -46,21 +46,21 @@ public class TopicChangeEventTest {
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         one = null;
         two = null;
         tce = null;
     }
 
     @Test
-    public void testGetData() throws Exception {
+    public void testGetData() {
         assertNotNull(tce.getData());
         assertEquals(tce.getData().getFullTopicString(), "root/sub");
         assertSame(tce.getData(), two);
     }
 
     @Test
-    public void testGetType() throws Exception {
+    public void testGetType() {
         assertNotNull(tce.getType());
         assertEquals(tce.getType(), TopicChangeEvent.Type.NEW);
         tce = new TopicChangeEvent(TopicChangeEvent.Type.DELETE, one);

@@ -3,7 +3,6 @@ package no.ntnu.okse.protocol.stomp.listeners;
 import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
-import asia.stampy.common.message.interceptor.InterceptException;
 import asia.stampy.common.message.interceptor.StampyOutgoingMessageInterceptor;
 import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
 
@@ -21,12 +20,12 @@ public class ErrorListener implements StampyOutgoingMessageInterceptor {
     }
 
     @Override
-    public void interceptMessage(StampyMessage<?> message) throws InterceptException {
+    public void interceptMessage(StampyMessage<?> message) {
         protocolServer.incrementTotalBadRequests();
     }
 
     @Override
-    public void interceptMessage(StampyMessage<?> message, HostPort hostPort) throws InterceptException {
+    public void interceptMessage(StampyMessage<?> message, HostPort hostPort) {
         protocolServer.incrementTotalBadRequests();
     }
 

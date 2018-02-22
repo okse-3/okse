@@ -6,11 +6,11 @@ import no.ntnu.okse.core.subscription.Subscriber;
  * This class is represents a subscriber for MQTT
  */
 public class MQTTSubscriber {
-    private String host;
-    private int port;
-    private String topic;
-    private String clientID;
-    private Subscriber subscriber;
+    private final String host;
+    private final int port;
+    private final String topic;
+    private final String clientID;
+    private final Subscriber subscriber;
 
     /**
      * Creates the MQTT subscriber

@@ -40,7 +40,7 @@ public class TopicController {
     private static final String DELETE_ALL_TOPICS = "/delete/all";
     private static final String DELETE_SINGLE_TOPIC = "/delete/single";
 
-    private static Logger log = Logger.getLogger(TopicController.class.getName());
+    private static final Logger log = Logger.getLogger(TopicController.class.getName());
 
     /**
      * This method returns all topics registered in the TopicService
@@ -50,7 +50,7 @@ public class TopicController {
     @RequestMapping(method = RequestMethod.GET, value = GET_ALL_TOPICS)
     public
     @ResponseBody
-    List<HashMap<String, Object>> getAlltopics() {
+    List<HashMap<String, Object>> getAllTopics() {
         TopicService ts = TopicService.getInstance();
         SubscriptionService ss = SubscriptionService.getInstance();
         HashSet<Topic> allTopics = ts.getAllTopics();

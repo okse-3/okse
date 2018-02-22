@@ -45,27 +45,27 @@ public class PublisherTest {
     }
 
     @Test
-    public void testGetOriginProtocol() throws Exception {
+    public void testGetOriginProtocol() {
         assertEquals(p.getOriginProtocol(), "Test");
     }
 
     @Test
-    public void testGetHost() throws Exception {
+    public void testGetHost() {
         assertEquals(p.getHost(), "123.123.123.123");
     }
 
     @Test
-    public void testGetTopic() throws Exception {
+    public void testGetTopic() {
         assertEquals(p.getTopic(), "test/sub");
     }
 
     @Test
-    public void testGetPort() throws Exception {
+    public void testGetPort() {
         assertTrue(p.getPort() == 8080);
     }
 
     @Test
-    public void testSetTimeout() throws Exception {
+    public void testSetTimeout() {
         Long timeout = System.currentTimeMillis();
         try {
             p.setTimeout(timeout - 20000L);
@@ -79,7 +79,7 @@ public class PublisherTest {
     }
 
     @Test
-    public void testGetTimeout() throws Exception {
+    public void testGetTimeout() {
         Long timeout = System.currentTimeMillis() + 20000L;
         assertNull(p.getTimeout());
         p.setTimeout(timeout);
@@ -87,7 +87,7 @@ public class PublisherTest {
     }
 
     @Test
-    public void testSetAttribute() throws Exception {
+    public void testSetAttribute() {
         assertNull(p.getAttribute("flag"));
         p.setAttribute("flag", "value");
         assertEquals(p.getAttribute("flag"), "value");
@@ -96,7 +96,7 @@ public class PublisherTest {
     }
 
     @Test
-    public void testGetAttribute() throws Exception {
+    public void testGetAttribute() {
         assertNull(p.getAttribute("flag"));
         p.setAttribute("flag", "value");
         assertEquals(p.getAttribute("flag"), "value");
@@ -104,7 +104,7 @@ public class PublisherTest {
     }
 
     @Test
-    public void testShouldExpire() throws Exception {
+    public void testShouldExpire() {
         assertFalse(p.shouldExpire());
         p.setTimeout(System.currentTimeMillis() + 20000L);
         assertTrue(p.shouldExpire());
@@ -120,12 +120,12 @@ public class PublisherTest {
     }
 
     @Test
-    public void testGetHostAndPort() throws Exception {
+    public void testGetHostAndPort() {
         assertEquals(p.getHostAndPort(), "123.123.123.123:8080");
     }
 
     @Test
-    public void testToString() throws Exception {
+    public void testToString() {
         assertNotNull(p.toString());
         assertTrue(p.toString() instanceof String);
     }

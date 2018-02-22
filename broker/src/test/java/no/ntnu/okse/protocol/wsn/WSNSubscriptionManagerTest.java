@@ -25,8 +25,6 @@
 package no.ntnu.okse.protocol.wsn;
 
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
-import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
-import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.ntnunotif.wsnu.base.internal.ServiceConnection;
@@ -42,8 +40,6 @@ import org.oasis_open.docs.wsn.bw_2.UnacceptableTerminationTimeFault;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -61,7 +57,7 @@ public class WSNSubscriptionManagerTest {
     WSNotificationServer ps;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         // Set up WSN server
         ps = new WSNotificationServer("0.0.0.0", 61000, 5L, 50, "Content", false, "0.0.0.0", 61000);
         // Set up sub manager
@@ -95,24 +91,24 @@ public class WSNSubscriptionManagerTest {
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         s = null;
     }
 
     @Test
-    public void testKeyExists() throws Exception {
+    public void testKeyExists() {
         assertTrue(sm.keyExists("1234567890abcdef"));
         assertFalse(sm.keyExists("0987654321"));
     }
 
     @Test
-    public void testHasSubscription() throws Exception {
+    public void testHasSubscription() {
         assertTrue(sm.keyExists("1234567890abcdef"));
         assertFalse(sm.keyExists("0987654321"));
     }
 
     @Test
-    public void testSubscriptionIsPaused() throws Exception {
+    public void testSubscriptionIsPaused() {
         assertFalse(sm.subscriptionIsPaused("1234567890abcdef"));
         s.setAttribute("paused", "true");
         assertTrue(sm.subscriptionIsPaused("1234567890abcdef"));
@@ -120,7 +116,7 @@ public class WSNSubscriptionManagerTest {
     }
 
     @Test
-    public void testAddSubscriber() throws Exception {
+    public void testAddSubscriber() {
         Subscriber s2 = new Subscriber("0.0.0.0", 8080, "test", "test");
         s2.setAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN, "addtest");
         sm.addSubscriber(s2, sh);
@@ -130,7 +126,7 @@ public class WSNSubscriptionManagerTest {
     }
 
     @Test
-    public void testAddSubscriber1() throws Exception {
+    public void testAddSubscriber1() {
         int count = tss.getAllSubscribers().size();
         sm.addSubscriber("1234567890abcdef", 10L);
         int count2 = tss.getAllSubscribers().size();
@@ -138,7 +134,7 @@ public class WSNSubscriptionManagerTest {
     }
 
     @Test
-    public void testRemoveSubscriber() throws Exception {
+    public void testRemoveSubscriber() {
         assertTrue(sm.hasSubscription(s.getAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN)));
         tss.removeSubscriber(s);
         assertFalse(sm.keyExists(s.getAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN)));
@@ -146,7 +142,7 @@ public class WSNSubscriptionManagerTest {
     }
 
     @Test
-    public void testGetAllRecipients() throws Exception {
+    public void testGetAllRecipients() {
         assertTrue(sm.getAllRecipients().contains("1234567890abcdef"));
         assertTrue(sm.getAllRecipients().size() == 1);
         Subscriber s2 = new Subscriber("0.0.0.0", 8001, "test2", "WSNotification");
@@ -156,28 +152,28 @@ public class WSNSubscriptionManagerTest {
     }
 
     @Test
-    public void testGetSubscriptionHandle() throws Exception {
+    public void testGetSubscriptionHandle() {
         AbstractNotificationProducer.SubscriptionHandle handle = sm.getSubscriptionHandle(s.getAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN));
         assertNotNull(handle);
         assertSame(handle, sh);
     }
 
     @Test
-    public void testGetSubscriptionHandle1() throws Exception {
+    public void testGetSubscriptionHandle1() {
         AbstractNotificationProducer.SubscriptionHandle handle = sm.getSubscriptionHandle(s);
         assertNotNull(handle);
         assertSame(handle, sh);
     }
 
     @Test
-    public void testGetSubscriber() throws Exception {
+    public void testGetSubscriber() {
         Subscriber s2 = sm.getSubscriber(s.getAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN));
         assertNotNull(s2);
         assertSame(s, s2);
     }
 
     @Test
-    public void testUpdate() throws Exception {
+    public void testUpdate() {
         assertTrue(true);
     }
 
@@ -227,7 +223,7 @@ public class WSNSubscriptionManagerTest {
     /* HELPER CLASSES */
 
     public class TestSubscriptionService extends SubscriptionService {
-        private HashSet<Subscriber> subscribers = new HashSet<>();
+        private final HashSet<Subscriber> subscribers = new HashSet<>();
         @Override
         public void addSubscriber(Subscriber s) { subscribers.add(s); }
         @Override
@@ -240,7 +236,7 @@ public class WSNSubscriptionManagerTest {
     }
 
     public class TestServiceConnection implements ServiceConnection {
-        private RequestInformation requestInformation = new RequestInformation();
+        private final RequestInformation requestInformation = new RequestInformation();
         public InternalMessage acceptMessage(InternalMessage internalMessage) { return null; }
         public InternalMessage acceptRequest(InternalMessage internalMessage) { return null; }
         public Class getServiceType() { return null; }

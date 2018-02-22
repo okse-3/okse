@@ -11,11 +11,9 @@ import io.moquette.spi.impl.subscriptions.Subscription;
 import io.netty.channel.Channel;
 import no.ntnu.okse.core.messaging.Message;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.mockito.stubbing.OngoingStubbing;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -153,12 +151,7 @@ public class MQTTServerTest {
         MQTTServer.MQTTListener listenerClass = mqtt_spy.createListeners();
 
         InterceptUnsubscribeMessage msg = new InterceptUnsubscribeMessage("testTopic", "testID", "username");
-        Mockito.doAnswer(new Answer<Void>(){
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                return null;
-            }
-        }).when(mqtt_spy).HandleUnsubscribe(msg);
+        Mockito.doAnswer((Answer<Void>) invocation -> null).when(mqtt_spy).HandleUnsubscribe(msg);
 
         listenerClass.onUnsubscribe(msg);
 
@@ -213,7 +206,7 @@ public class MQTTServerTest {
     }
 
     @Test
-    public void HandleSubscribe() throws InterruptedException {
+    public void HandleSubscribe() {
         MQTTServer mqtt = getInstance();
         MQTTServer mqtt_spy = Mockito.spy(mqtt);
 

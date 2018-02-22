@@ -49,7 +49,7 @@ public class PublisherChangeEventTest {
     }
 
     @Test
-    public void testGetData() throws Exception {
+    public void testGetData() {
         assertNotNull(e.getData());
         assertTrue(e.getData() instanceof Publisher);
         assertSame(e.getData(), p);
@@ -57,7 +57,7 @@ public class PublisherChangeEventTest {
     }
 
     @Test
-    public void testGetType() throws Exception {
+    public void testGetType() {
         assertNotNull(e.getType());
         assertEquals(e.getType(), PublisherChangeEvent.Type.REGISTER);
         e = new PublisherChangeEvent(PublisherChangeEvent.Type.UNREGISTER, p);

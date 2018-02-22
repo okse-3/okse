@@ -18,7 +18,7 @@ public class PasswordChangeController {
     private static final String CHANGE_PASSWORD = "/auth/password";
 
     // Log4j logger
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(PasswordChangeController.class.getName());
+    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(PasswordChangeController.class.getName());
 
     /**
      * This method returns the changePassword view if the user is logged in (index page if not)

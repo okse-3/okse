@@ -37,7 +37,7 @@ public class SubscriptionChangeEvent extends Event {
         RESUME
     }
 
-    private Type eventType;
+    private final Type eventType;
 
     /**
      * Constructs a SubscriptionChangeEvent of a certain Type, with associated Subscriber object.

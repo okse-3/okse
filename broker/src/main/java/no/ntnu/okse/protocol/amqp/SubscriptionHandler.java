@@ -52,7 +52,7 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
      */
     public static class Routes<T extends Link> {
 
-        List<T> routes = new ArrayList<>();
+        final List<T> routes = new ArrayList<>();
 
         void add(T route) {
             routes.add(route);
@@ -90,9 +90,7 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
         }
 
         public void printRouteTable() {
-            routes.forEach((route) -> {
-                System.out.println(route.toString());
-            });
+            routes.forEach((route) -> System.out.println(route.toString()));
         }
 
     }
@@ -100,17 +98,17 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
 
     private final Routes<Sender> EMPTY_OUT = new Routes<>();
     private final Routes<Receiver> EMPTY_IN = new Routes<>();
-    private Logger log = Logger.getLogger(SubscriptionHandler.class.getName());
+    private final Logger log = Logger.getLogger(SubscriptionHandler.class.getName());
 
-    private ConcurrentHashMap<Sender, Subscriber> localSenderSubscriberMap = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<Subscriber, Sender> localSubscriberSenderMap = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, Sender> localRemoteContainerSenderMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Sender, Subscriber> localSenderSubscriberMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Subscriber, Sender> localSubscriberSenderMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Sender> localRemoteContainerSenderMap = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Sender, AbstractNotificationProducer.SubscriptionHandle> localSubscriberHandle = new ConcurrentHashMap<>();
 
     final private Map<String, Routes<Sender>> outgoing = new ConcurrentHashMap<>();
     final private Map<String, Routes<Receiver>> incoming = new ConcurrentHashMap<>();
 
-    AMQProtocolServer ps;
+    final AMQProtocolServer ps;
 
     public SubscriptionHandler(AMQProtocolServer ps) {
         this.ps = ps;

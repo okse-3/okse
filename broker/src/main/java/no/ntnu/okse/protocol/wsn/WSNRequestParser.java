@@ -41,8 +41,8 @@ import java.util.Collection;
 
 public class WSNRequestParser implements Hub {
 
-    private Logger log;
-    private WSNotificationServer _protocolServer;
+    private final Logger log;
+    private final WSNotificationServer _protocolServer;
 
     public WSNRequestParser(WSNotificationServer server) {
         log = Logger.getLogger(WSNRequestParser.class.getName());
@@ -233,7 +233,7 @@ public class WSNRequestParser implements Hub {
                     return new InternalMessage(InternalMessage.STATUS_FAULT, null);
 
                 } catch (IllegalArgumentException e) {
-                    log.error("parseMessage(): Error not parseable, the error can not be a wsdl-specified one.");
+                    log.error("parseMessage(): Error not parsable, the error can not be a wsdl-specified one.");
                     return new InternalMessage(InternalMessage.STATUS_FAULT | InternalMessage.STATUS_FAULT_INVALID_PAYLOAD, null);
 
                 } catch (ClassCastException e) {

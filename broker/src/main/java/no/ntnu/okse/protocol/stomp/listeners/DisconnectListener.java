@@ -34,7 +34,7 @@ public class DisconnectListener implements StampyMessageListener{
      */
     protected void ensureCleanup() {
         gateway.addHandler(new SimpleChannelUpstreamHandler() {
-            public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+            public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
                 log.info("Cleaning up after a forceful disconnect");
                 HostPort hostPort = new HostPort((InetSocketAddress) ctx.getChannel().getRemoteAddress());
                 cleanUp(hostPort);
@@ -80,7 +80,7 @@ public class DisconnectListener implements StampyMessageListener{
     }
     
     @Override
-    public void messageReceived(StampyMessage<?> message, HostPort hostPort) throws Exception {
+    public void messageReceived(StampyMessage<?> message, HostPort hostPort) {
         log.info("Cleaning up after a disconnect");
         cleanUp(hostPort);
     }

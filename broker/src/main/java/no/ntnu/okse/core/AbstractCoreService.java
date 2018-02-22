@@ -30,7 +30,7 @@ public abstract class AbstractCoreService {
 
     // Instance-specific fields
     protected boolean _running;
-    protected Logger log;
+    protected final Logger log;
 
     /**
      * Protected constructor that takes in the className string from the subclass (for logger initializing)

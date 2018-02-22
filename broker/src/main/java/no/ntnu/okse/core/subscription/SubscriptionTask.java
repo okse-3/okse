@@ -38,8 +38,8 @@ public class SubscriptionTask {
     }
 
     // Needed fields
-    private Type type;
-    private Runnable job;
+    private final Type type;
+    private final Runnable job;
 
     // Public constructor
     public SubscriptionTask(Type type, Runnable job) {

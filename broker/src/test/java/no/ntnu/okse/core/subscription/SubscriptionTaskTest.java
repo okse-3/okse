@@ -37,21 +37,21 @@ public class SubscriptionTaskTest {
     Runnable job;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         jobComplete = false;
         job = () -> jobComplete = true;
         task = new SubscriptionTask(SubscriptionTask.Type.NEW_SUBSCRIBER, job);
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         jobComplete = false;
         job = null;
         task = null;
     }
 
     @Test
-    public void testGetType() throws Exception {
+    public void testGetType() {
         assertNotNull(task.getType());
         assertEquals(task.getType(), SubscriptionTask.Type.NEW_SUBSCRIBER);
         task = new SubscriptionTask(SubscriptionTask.Type.DELETE_SUBSCRIBER, job);
@@ -59,7 +59,7 @@ public class SubscriptionTaskTest {
     }
 
     @Test
-    public void testRun() throws Exception {
+    public void testRun() {
         task.run();
         assertTrue(jobComplete);
     }

@@ -40,22 +40,22 @@ public class MessageServiceTest {
     MessageService m;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         m = MessageService.getInstance();
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         m = null;
     }
 
     @Test
-    public void testIsCachingMessages() throws Exception {
+    public void testIsCachingMessages() {
         assertEquals(Application.CACHE_MESSAGES, m.isCachingMessages());
     }
 
     @Test
-    public void testGenerateMessageForAGivenTopicSet() throws Exception {
+    public void testGenerateMessageForAGivenTopicSet() {
         HashSet<Topic> topics = new HashSet<>();
         topics.add(new Topic("test", "TEST"));
         topics.add(new Topic("test2", "TEST"));

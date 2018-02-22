@@ -46,17 +46,17 @@ public class DBTest {
     }
 
     @Test
-    public void testConDB() throws Exception {
+    public void testConDB() {
         assertTrue(DB.conDB());
     }
 
     @Test
-    public void testCloseDB() throws Exception {
+    public void testCloseDB() {
         assertTrue(DB.closeDB());
     }
 
     @Test
-    public void testInitDB() throws Exception {
+    public void testInitDB() {
         assertTrue(DB.initDB());
     }
 

@@ -36,25 +36,25 @@ public class SystemEventTest {
     SystemEvent e;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         o = new Object();
         e = new SystemEvent(SystemEvent.Type.SHUTDOWN, o);
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         o = null;
         e = null;
     }
 
     @Test
-    public void testGetData() throws Exception {
+    public void testGetData() {
         assertNotNull(e.getData());
         assertSame(e.getData(), o);
     }
 
     @Test
-    public void testGetType() throws Exception {
+    public void testGetType() {
         assertNotNull(e.getType());
         assertEquals(e.getType(), SystemEvent.Type.SHUTDOWN);
         e = new SystemEvent(SystemEvent.Type.BOOT_PROTOCOL_SERVERS, o);

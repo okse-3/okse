@@ -18,7 +18,6 @@ import static org.mockito.Matchers.any;
 @Test
 public class AMQP091MessageListenerTest {
     private AMQP091MessageListener messageListener;
-    @Mock
     private AMQP091ProtocolServer protocolServer;
     @Mock
     private SubscriptionService subscriptionService;
@@ -28,6 +27,7 @@ public class AMQP091MessageListenerTest {
     @BeforeMethod
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        protocolServer = new AMQP091ProtocolServer("localhost", 5672);
         messageListener = new AMQP091MessageListener(protocolServer);
         messageListener.setSubscriberMap(subscriberMap);
         messageListener.setSubscriptionService(subscriptionService);

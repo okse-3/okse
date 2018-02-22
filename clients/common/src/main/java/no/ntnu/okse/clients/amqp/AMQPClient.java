@@ -3,7 +3,6 @@ package no.ntnu.okse.clients.amqp;
 import no.ntnu.okse.clients.TestClient;
 import org.apache.log4j.Logger;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
-import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.messenger.Messenger;
 
@@ -13,14 +12,14 @@ import java.io.IOException;
  * AMQP 1.0 Test Client
  */
 public class AMQPClient implements TestClient {
-    private static Logger log = Logger.getLogger(AMQPClient.class);
+    private static final Logger log = Logger.getLogger(AMQPClient.class);
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 5672;
-    private Messenger messenger;
-    private String host;
-    private int port;
+    private final Messenger messenger;
+    private final String host;
+    private final int port;
     private AMQPCallback callback;
-    private AMQPClientListener listener;
+    private final AMQPClientListener listener;
 
     /**
      * Create an instance of test client

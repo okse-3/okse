@@ -32,13 +32,11 @@ import org.ntnunotif.wsnu.base.soap.Soap;
 import org.ntnunotif.wsnu.base.topics.ConcreteEvaluator;
 import org.ntnunotif.wsnu.base.topics.SimpleEvaluator;
 import org.ntnunotif.wsnu.base.util.InternalMessage;
-import org.ntnunotif.wsnu.base.util.Utilities;
 import org.ntnunotif.wsnu.services.general.ExceptionUtilities;
 import org.ntnunotif.wsnu.services.general.ServiceUtilities;
 import org.oasis_open.docs.wsn.b_2.*;
 import org.oasis_open.docs.wsn.b_2.ObjectFactory;
 import org.oasis_open.docs.wsn.bw_2.UnacceptableTerminationTimeFault;
-import org.w3._2005._08.addressing.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -66,7 +64,7 @@ import java.util.regex.Pattern;
 public class WSNTools {
 
     // Initialize the logger
-    private static Logger log = Logger.getLogger(WSNTools.class.getName());
+    private static final Logger log = Logger.getLogger(WSNTools.class.getName());
 
     // Initialize the WSN XML Object factories
     public static org.oasis_open.docs.wsn.b_2.ObjectFactory b2_factory = new org.oasis_open.docs.wsn.b_2.ObjectFactory();

@@ -12,13 +12,13 @@ import java.util.List;
 
 abstract class CommandClient {
     @Parameter(names = {"--host"}, description = "Server hostname")
-    public String host = "localhost";
+    public final String host = "localhost";
 
     @Parameter(names = {"--topic", "-t"}, description = "Topic", required = true)
     public List<String> topics;
 
     @Parameter(names = {"--verbose", "-v"}, description = "Verbose")
-    public boolean verbose = false;
+    public final boolean verbose = false;
 
     @Parameter(names = {"--help", "-h"}, help = true, hidden = true)
     public boolean help;

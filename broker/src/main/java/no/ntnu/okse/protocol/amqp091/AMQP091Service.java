@@ -20,12 +20,12 @@ public class AMQP091Service {
 
     private final String host;
     private final int port;
-    private static Logger log = Logger.getLogger(AMQP091Service.class.getName());
-    private AMQP091MessageListener messageListener;
-    private AMQP091ProtocolServer protocolServer;
-    private LinkedBlockingQueue<Message> messageQueue;
+    private static final Logger log = Logger.getLogger(AMQP091Service.class.getName());
+    private final AMQP091MessageListener messageListener;
+    private final AMQP091ProtocolServer protocolServer;
+    private final LinkedBlockingQueue<Message> messageQueue;
     private Thread messageSenderThread;
-    private AtomicBoolean running;
+    private final AtomicBoolean running;
 
     /**
      * Dependency injection constructor for protocol server

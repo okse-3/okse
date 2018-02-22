@@ -34,7 +34,7 @@ public class TopicChangeEvent extends Event {
         DELETE
     }
 
-    Type type;
+    final Type type;
 
     /**
      * Constructs an Event containing an operation, some data and a dataType.
@@ -52,7 +52,7 @@ public class TopicChangeEvent extends Event {
      * A method to retrieve the data payload.
      * <p>
      *
-     * @return: An object containing the data payload casted to proper type.
+     * @return An object containing the data payload casted to proper type.
      */
     @Override
     public Topic getData() {
@@ -60,7 +60,7 @@ public class TopicChangeEvent extends Event {
     }
 
     /**
-     * A method that returns the type of topic change event that occured.
+     * A method that returns the type of topic change event that occurred.
      *
      * @return Type enum implemented in subclass
      */

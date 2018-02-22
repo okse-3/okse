@@ -23,7 +23,7 @@ public class IDontNeedSecurity implements StampyMessageListener, SecurityMessage
     }
 
     @Override
-    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) throws Exception {
+    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) {
 
     }
 }

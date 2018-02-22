@@ -6,7 +6,7 @@ import no.ntnu.okse.clients.TestClient;
 
 public class AMQP091Subscriber extends SubscribeClient {
     @Parameter(names = {"--port", "-p"}, description = "Port")
-    public int port = 56720;
+    public final int port = 56720;
 
     private AMQP091Client client;
 

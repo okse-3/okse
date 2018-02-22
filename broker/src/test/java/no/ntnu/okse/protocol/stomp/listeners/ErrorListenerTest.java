@@ -21,7 +21,7 @@ public class ErrorListenerTest {
     private STOMPProtocolServer ps_spy;
 
     @BeforeTest
-    public void setUp() throws Exception {
+    public void setUp() {
         listener = new ErrorListener();
         ps = new STOMPProtocolServer("localhost", 61613);
 

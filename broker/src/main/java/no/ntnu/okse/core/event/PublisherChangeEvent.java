@@ -33,7 +33,7 @@ public class PublisherChangeEvent extends Event {
         UNREGISTER
     }
 
-    Type type;
+    final Type type;
 
     /**
      * Constructs an Event containing an operation, some data and a dataType.

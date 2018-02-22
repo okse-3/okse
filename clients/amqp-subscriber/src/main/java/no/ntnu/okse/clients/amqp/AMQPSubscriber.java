@@ -28,7 +28,7 @@ public class AMQPSubscriber extends SubscribeClient {
     }
 
     private static class Callback implements AMQPCallback {
-        private boolean verbose = false;
+        private final boolean verbose = false;
         private int counter = 0;
 
         public void onReceive(Message message) {

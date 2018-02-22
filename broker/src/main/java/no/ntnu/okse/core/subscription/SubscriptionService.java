@@ -51,7 +51,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
     private static boolean _invoked = false;
 
     // Is the scheduled auto removal of expired subs and pubs active?
-    private boolean autoPurgeRunning = false;
+    private final boolean autoPurgeRunning = false;
 
     private LinkedBlockingQueue<SubscriptionTask> queue;
     private ScheduledExecutorService scheduler;
@@ -213,7 +213,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
             _subscribers.add(s);
             log.info("Added new subscriber: " + s);
             // Fire the subscribe event
-            fireSubcriptionChangeEvent(s, SubscriptionChangeEvent.Type.SUBSCRIBE);
+            fireSubscriptionChangeEvent(s, SubscriptionChangeEvent.Type.SUBSCRIBE);
         } else {
             log.warn("Attempt to add a subscriber that already exists!");
         }
@@ -230,7 +230,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
             _subscribers.remove(s);
             log.info("Removed subscriber: " + s);
             // Fire the unsubscribe event
-            fireSubcriptionChangeEvent(s, SubscriptionChangeEvent.Type.UNSUBSCRIBE);
+            fireSubscriptionChangeEvent(s, SubscriptionChangeEvent.Type.UNSUBSCRIBE);
         } else {
             log.warn("Attempt to remove a subscriber that did not exist!");
         }
@@ -248,7 +248,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
             s.setTimeout(timeout);
             log.info("Renewed subscriber: " + s);
             // Fire the renew event
-            fireSubcriptionChangeEvent(s, SubscriptionChangeEvent.Type.RENEW);
+            fireSubscriptionChangeEvent(s, SubscriptionChangeEvent.Type.RENEW);
         } else {
             log.warn("Attempt to modify a subscriber that does not exist in the service!");
         }
@@ -265,7 +265,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
             s.setAttribute("paused", "true");
             log.info("Paused subscriber: " + s);
             // Fire the pause event
-            fireSubcriptionChangeEvent(s, SubscriptionChangeEvent.Type.PAUSE);
+            fireSubscriptionChangeEvent(s, SubscriptionChangeEvent.Type.PAUSE);
         } else {
             log.warn("Attempt to modify a subscriber that does not exist in the service!");
         }
@@ -282,7 +282,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
             s.setAttribute("paused", "false");
             log.info("Resumed subscriber: " + s);
             // FIre the resume event
-            fireSubcriptionChangeEvent(s, SubscriptionChangeEvent.Type.RESUME);
+            fireSubscriptionChangeEvent(s, SubscriptionChangeEvent.Type.RESUME);
         } else {
             log.warn("Attempt to modify a subscriber that does not exist in the service!");
         }
@@ -547,7 +547,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
     }
 
     /**
-     * Retrive a HashSet of all subscribers on the broker. This HashSet is a shallow clone of the internal
+     * Retrieve a HashSet of all subscribers on the broker. This HashSet is a shallow clone of the internal
      * data structure, preventing unintended modification.
      *
      * @return A HashSet of Subscriber objects that have subscribed on the broker
@@ -619,12 +619,12 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
     }
 
     /**
-     * Private helper method fo fire the subscriptionChange method on all listners.
+     * Private helper method fo fire the subscriptionChange method on all listeners.
      *
      * @param sub  : The particular subscriber object that has changed.
      * @param type : What type of action is associated with the subscriber object.
      */
-    private void fireSubcriptionChangeEvent(Subscriber sub, SubscriptionChangeEvent.Type type) {
+    private void fireSubscriptionChangeEvent(Subscriber sub, SubscriptionChangeEvent.Type type) {
         SubscriptionChangeEvent sce = new SubscriptionChangeEvent(type, sub);
         _subscriptionListeners.forEach(l -> l.subscriptionChanged(sce));
     }

@@ -10,8 +10,8 @@ import java.util.*;
 public class SubscriberMap {
 
     private class Client {
-        private String host;
-        private Integer port;
+        private final String host;
+        private final Integer port;
         private String topic;
 
         Client(Subscriber subscriber) {
@@ -46,8 +46,8 @@ public class SubscriberMap {
         }
     }
 
-    private Map<Client, Subscriber> topicSubscriberMap = new HashMap<>();
-    private Map<Client, List<Subscriber>> subscribersMap = new HashMap<>();
+    private final Map<Client, Subscriber> topicSubscriberMap = new HashMap<>();
+    private final Map<Client, List<Subscriber>> subscribersMap = new HashMap<>();
 
     /**
      * Put subscriber in map

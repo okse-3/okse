@@ -47,7 +47,7 @@ public class TopicService extends AbstractCoreService {
     private ConcurrentHashMap<String, HashSet<String>> mappings;
 
     /**
-     * Private constructor that passes this classname to superclass log instance. Uses getInstance to instanciate.
+     * Private constructor that passes this classname to superclass log instance. Uses getInstance to instantiate.
      */
     protected TopicService() {
         super(TopicService.class.getName());
@@ -182,7 +182,7 @@ public class TopicService extends AbstractCoreService {
      * @return A HashSet of all the root topic nodes.
      */
     public HashSet<Topic> getAllRootTopics() {
-        HashSet<Topic> collector = new HashSet<Topic>();
+        HashSet<Topic> collector = new HashSet<>();
         // Iterate over the key value pairs and add topic to roots if it is indeed a root topic node
         allTopics.forEach((k, t) -> {
             if (t.isRoot()) collector.add(t);
@@ -322,7 +322,7 @@ public class TopicService extends AbstractCoreService {
     /**
      * Checks to see if a topic node exists based on the raw topic string.
      *
-     * @param topic The raw topic string you wish to check existance for.
+     * @param topic The raw topic string you wish to check if exists.
      * @return true if it exists, false otherwise.
      */
     public boolean topicExists(String topic) {
@@ -338,7 +338,7 @@ public class TopicService extends AbstractCoreService {
      * Topic node through the parent field.
      *
      * @param topic The full raw topic string you want to generate needed Topic nodes from
-     * @return An empty set if we do not need create new nodes. A set of newly instanciated nodes that can be added
+     * @return An empty set if we do not need create new nodes. A set of newly instantiated nodes that can be added
      * to the containers from the invoking method.
      */
     public HashSet<Topic> generateTopicNodesFromRawTopicString(String topic) {
@@ -405,7 +405,7 @@ public class TopicService extends AbstractCoreService {
 
     /**
      * Removes a Topic given by a full raw topic string. Also locates all potential children from this topic
-     * and removes them aswell.
+     * and removes them as well.
      *
      * @param topic The full raw topic string representing the topic to be deleted
      */
@@ -449,7 +449,7 @@ public class TopicService extends AbstractCoreService {
         addTopic(toTopic);
 
         if (!mappings.containsKey(fromTopic)) {
-            mappings.put(fromTopic, new HashSet<>(Arrays.asList(toTopic)));
+            mappings.put(fromTopic, new HashSet<>(Collections.singletonList(toTopic)));
         } else {
             mappings.get(fromTopic).add(toTopic);
         }
@@ -506,7 +506,7 @@ public class TopicService extends AbstractCoreService {
     /**
      * This method allows removal of TopicChange listeners.
      *
-     * @param listener The object implementing TopigChangeListener interface that is to be removed.
+     * @param listener The object implementing TopicChangeListener interface that is to be removed.
      */
     public synchronized void removeTopicChangeListener(TopicChangeListener listener) {
         if (this._listeners.contains(listener)) this._listeners.remove(listener);
@@ -516,7 +516,7 @@ public class TopicService extends AbstractCoreService {
      * Public helper method to fire a topic change event on all listeners
      *
      * @param topic The topic that has had an event
-     * @param type  The type of topic event that occured
+     * @param type  The type of topic event that occurred
      */
     public void fireTopicChangeEvent(Topic topic, TopicChangeEvent.Type type) {
         TopicChangeEvent topicEvent = new TopicChangeEvent(type, topic);

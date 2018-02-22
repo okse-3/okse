@@ -13,15 +13,15 @@ import java.util.concurrent.TimeoutException;
  * AMQP 0.9.1 Test Client
  */
 public class AMQP091Client implements TestClient {
-    private static Logger log = Logger.getLogger(AMQP091Client.class);
+    private static final Logger log = Logger.getLogger(AMQP091Client.class);
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 56720;
     private Channel channel;
-    private ConnectionFactory factory;
+    private final ConnectionFactory factory;
     private String queueName;
     private Connection connection;
     private AMQP091Callback callback;
-    private Map<String, String> topicToQueue;
+    private final Map<String, String> topicToQueue;
 
     /**
      * Create an instance of test client with default configuration

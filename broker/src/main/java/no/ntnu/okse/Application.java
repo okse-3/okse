@@ -48,7 +48,7 @@ public class Application {
     public static long startedAt = System.currentTimeMillis();
 
     /* Default global fields */
-    public static String OKSE_SYSTEM_NAME = "OKSE System";
+    public static final String OKSE_SYSTEM_NAME = "OKSE System";
     public static boolean BROADCAST_SYSTEM_MESSAGES_TO_SUBSCRIBERS = false;
     public static boolean CACHE_MESSAGES = true;
     public static long DEFAULT_SUBSCRIPTION_TERMINATION_TIME = 15552000000L; // Half a year

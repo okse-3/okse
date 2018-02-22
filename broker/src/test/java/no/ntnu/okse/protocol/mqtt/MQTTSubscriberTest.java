@@ -9,10 +9,10 @@ import static org.testng.AssertJUnit.assertEquals;
 
 public class MQTTSubscriberTest {
 
-    private String host = "127.0.0.1";
-    private int port = 1883;
-    private String topic = "testing";
-    private String clientID = "ogdans3";
+    private final String host = "127.0.0.1";
+    private final int port = 1883;
+    private final String topic = "testing";
+    private final String clientID = "ogdans3";
     private Subscriber okseSub;
     private MQTTSubscriber sub;
 

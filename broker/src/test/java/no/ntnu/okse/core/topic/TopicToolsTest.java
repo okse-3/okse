@@ -38,7 +38,7 @@ public class TopicToolsTest {
     HashSet<Topic> leafNodes, childSetOne, childSetTwo, all;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
 
         all = new HashSet<>();
         leafNodes = new HashSet<>();
@@ -98,7 +98,7 @@ public class TopicToolsTest {
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
 
     }
 
@@ -117,7 +117,7 @@ public class TopicToolsTest {
     }
 
     @Test
-    public void testGetAllTopicNodesFromNodeSet() throws Exception {
+    public void testGetAllTopicNodesFromNodeSet() {
 
         HashSet<Topic> nodeSet = new HashSet<>();
         nodeSet.add(five);
@@ -133,7 +133,7 @@ public class TopicToolsTest {
     }
 
     @Test
-    public void testGetAllChildrenFromNode() throws Exception {
+    public void testGetAllChildrenFromNode() {
         HashSet<Topic> results = TopicTools.getAllChildrenFromNode(one);
         for (Topic t : childSetOne) {
             assertTrue(results.contains(t));
@@ -147,7 +147,7 @@ public class TopicToolsTest {
     }
 
     @Test
-    public void testGetAllLeafNodesFromNode() throws Exception {
+    public void testGetAllLeafNodesFromNode() {
         HashSet<Topic> results = TopicTools.getAllLeafNodesFromNode(one);
 
         for (Topic t : results) {

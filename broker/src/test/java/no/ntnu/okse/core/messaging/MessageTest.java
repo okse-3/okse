@@ -30,11 +30,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalUnit;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.*;
 
@@ -44,19 +40,19 @@ public class MessageTest {
     Publisher p;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         p = new Publisher("test/sub", "0.0.0.0", 8080, "Test");
         m = new Message("test", "test/sub", p, "Test");
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         m = null;
         p = null;
     }
 
     @Test
-    public void testGetMessageID() throws Exception {
+    public void testGetMessageID() {
         HashSet<String> ids = new HashSet<>();
         assertNotNull(m.getMessageID());
         // Hex regex
@@ -71,25 +67,25 @@ public class MessageTest {
     }
 
     @Test
-    public void testGetMessage() throws Exception {
+    public void testGetMessage() {
         assertNotNull(m.getMessage());
         assertEquals(m.getMessage(), "test");
     }
 
     @Test
-    public void testGetTopic() throws Exception {
+    public void testGetTopic() {
         assertEquals(m.getTopic(), "test/sub");
     }
 
     @Test
-    public void testGetPublisher() throws Exception {
+    public void testGetPublisher() {
         assertNotNull(m.getPublisher());
         assertEquals(m.getPublisher().getTopic(), "test/sub");
         assertEquals(m.getPublisher().getOriginProtocol(), "Test");
     }
 
     @Test
-    public void testMessageSentFromRegisteredPublisher() throws Exception {
+    public void testMessageSentFromRegisteredPublisher() {
         assertNotNull(m.getPublisher());
         assertTrue(m.messageSentFromRegisteredPublisher());
         p = null;
@@ -99,76 +95,76 @@ public class MessageTest {
     }
 
     @Test
-    public void testSetOriginProtocol() throws Exception {
+    public void testSetOriginProtocol() {
         m.setOriginProtocol("OKSE");
         assertEquals(m.getOriginProtocol(), "OKSE");
     }
 
     @Test
-    public void testGetOriginProtocol() throws Exception {
+    public void testGetOriginProtocol() {
         assertEquals(m.getOriginProtocol(), "Test");
     }
 
     @Test
-    public void testGetCreationTime() throws Exception {
+    public void testGetCreationTime() {
         assertTrue(m.getCreationTime() instanceof LocalDateTime);
         assertTrue(m.getCreationTime().isBefore(LocalDateTime.now().plusSeconds(1)));
     }
 
     @Test
-    public void testIsProcessed() throws Exception {
+    public void testIsProcessed() {
         assertFalse(m.isProcessed());
     }
 
     @Test
-    public void testSetProcessed() throws Exception {
+    public void testSetProcessed() {
         m.setProcessed();
         assertTrue(m.isProcessed());
     }
 
     @Test
-    public void testSetAttribute() throws Exception {
+    public void testSetAttribute() {
         m.setAttribute("flag", "value");
         assertEquals(m.getAttribute("flag"), "value");
         assertNull(m.getAttribute("FLAG"));
     }
 
     @Test
-    public void testGetAttribute() throws Exception {
+    public void testGetAttribute() {
         assertNull(m.getAttribute("flag"));
         m.setAttribute("flag", "value");
         assertEquals(m.getAttribute("flag"), "value");
     }
 
     @Test
-    public void testGetAttributes() throws Exception {
+    public void testGetAttributes() {
         assertEquals(0, m.getAttributes().size());
         m.setAttribute("flag", "value");
         assertEquals(1, m.getAttributes().size());
     }
 
     @Test
-    public void testGetCompletionTime() throws Exception {
+    public void testGetCompletionTime() {
         LocalDateTime completed = m.setProcessed();
         assertTrue(completed.equals(m.getCompletionTime()));
     }
 
     @Test
-    public void testSetSystemMessage() throws Exception {
+    public void testSetSystemMessage() {
         assertFalse(m.isSystemMessage());
         m.setSystemMessage(true);
         assertTrue(m.isSystemMessage());
     }
 
     @Test
-    public void testIsSystemMessage() throws Exception {
+    public void testIsSystemMessage() {
         assertFalse(m.isSystemMessage());
         m.setSystemMessage(true);
         assertTrue(m.isSystemMessage());
     }
 
     @Test
-    public void testToString() throws Exception {
+    public void testToString() {
         assertNotNull(m.toString());
         assertTrue(m.toString() instanceof String);
     }

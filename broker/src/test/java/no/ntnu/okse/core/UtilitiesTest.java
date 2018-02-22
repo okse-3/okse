@@ -35,7 +35,7 @@ import static org.testng.Assert.*;
 public class UtilitiesTest {
 
     @Test
-    public void testGetDurationAsISO8601() throws Exception {
+    public void testGetDurationAsISO8601() {
         Duration d = Duration.ofHours(1);
         String ISOstring = Utilities.getDurationAsISO8601(d);
         assertEquals(ISOstring, "01:00:00.000");
@@ -72,10 +72,8 @@ public class UtilitiesTest {
     }
 
     @Test
-    public void testReadConfigurationsFromFile() throws Exception {
+    public void testReadConfigurationsFromFile() {
         Utilities.createConfigDirectoryAndFilesIfNotExists();
-        Arrays.stream(Utilities.configFiles).filter(file -> file.endsWith(".properties")).forEach(file -> {
-            assertNotNull(Utilities.readConfigurationFromFile(file));
-        });
+        Arrays.stream(Utilities.configFiles).filter(file -> file.endsWith(".properties")).forEach(file -> assertNotNull(Utilities.readConfigurationFromFile(file)));
     }
 }

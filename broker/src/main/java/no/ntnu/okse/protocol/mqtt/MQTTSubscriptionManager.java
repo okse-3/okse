@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class MQTTSubscriptionManager implements SubscriptionChangeListener {
     private static Logger log;
     private SubscriptionService subscriptionService = null;
-    private ArrayList<MQTTSubscriber> subscriberList;
+    private final ArrayList<MQTTSubscriber> subscriberList;
 
     /**
      * Constructor
@@ -97,7 +97,7 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
         for (Integer aList : list) {
             int index = aList;
             //Each time we delete from the lists we also have to subtract 1 from all the indexes
-            //We achieve this easiest by counting the number of the removed subscribers and simply subsctracting
+            //We achieve this easiest by counting the number of the removed subscribers and simply subtracting
             //that number from the correct index.
             subscriptionService.removeSubscriber(subscriberList.get(index - count).getSubscriber());
             subscriberList.remove(index - count);

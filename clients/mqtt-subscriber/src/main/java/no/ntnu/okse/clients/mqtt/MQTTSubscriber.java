@@ -11,11 +11,11 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 public class MQTTSubscriber extends SubscribeClient {
     @Parameter(names = {"--port", "-p"}, description = "Port")
-    public int port = 1883;
+    public final int port = 1883;
 
     private MQTTClient client;
 
-    private static Logger log = Logger.getLogger(MQTTSubscriber.class);
+    private static final Logger log = Logger.getLogger(MQTTSubscriber.class);
 
     public static void main(String[] args) {
         launch(new MQTTSubscriber(), args);

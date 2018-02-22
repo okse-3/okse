@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 
 public class MessageSendingTest {
     private SubscriptionChangeListener subscriptionMock;
-    private SubscriptionService subscriptionService = SubscriptionService.getInstance();
+    private final SubscriptionService subscriptionService = SubscriptionService.getInstance();
 
     @BeforeClass
     public void classSetUp() throws InterruptedException {

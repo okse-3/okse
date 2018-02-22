@@ -19,7 +19,7 @@ public class MessageListener implements StampyMessageListener {
     }
 
     @Override
-    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) throws Exception {
+    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) {
         System.out.println(stampyMessage);
         System.out.println((String) ((SendMessage)stampyMessage).getBody());
     }

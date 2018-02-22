@@ -1,9 +1,9 @@
 package no.ntnu.okse.protocol.stomp.commons;
 
 public class MIMEType {
-    private String contentType;
-    private String charset;
-    private String mediaType;
+    private final String contentType;
+    private final String charset;
+    private final String mediaType;
 
     /**
      * Sets the content type, media type and charset.
@@ -59,8 +59,6 @@ public class MIMEType {
      * @return true if the mime type and charset is valid
      */
     public boolean isValid() {
-        if(charset == null)
-            return true;
-        return !charset.equals("");
+        return charset == null || !charset.equals("");
     }
 }

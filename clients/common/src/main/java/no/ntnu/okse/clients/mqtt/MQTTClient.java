@@ -11,7 +11,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
  */
 public class MQTTClient implements TestClient {
 
-    private static Logger log = Logger.getLogger(MQTTClient.class);
+    private static final Logger log = Logger.getLogger(MQTTClient.class);
     private MqttClient mqttClient;
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 1883;

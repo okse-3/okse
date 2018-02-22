@@ -1,7 +1,6 @@
 package no.ntnu.okse.protocol.mqtt;
 
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
-import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.mockito.Mockito;

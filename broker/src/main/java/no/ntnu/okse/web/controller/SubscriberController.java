@@ -44,7 +44,7 @@ public class SubscriberController {
     private static final String DELETE_ALL_SUBSCRIBERS = "/delete/all";
 
     // Log4j logger
-    private static Logger log = Logger.getLogger(SubscriberController.class.getName());
+    private static final Logger log = Logger.getLogger(SubscriberController.class.getName());
 
     /**
      * This method returns all subscribers registered in the SubscriptionService
