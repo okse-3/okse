@@ -188,6 +188,11 @@
             <artifactId>netty</artifactId>
             <version>3.2.7.Final</version>
         </dependency>
+        <dependency>
+            <groupId>com.isode</groupId>
+            <artifactId>stroke</artifactId>
+            <version>1.0-OKSE</version>
+        </dependency>
     </dependencies>
 
     <build>
