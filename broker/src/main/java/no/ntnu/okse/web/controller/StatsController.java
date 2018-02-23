@@ -42,55 +42,55 @@ import java.util.HashMap;
 @RequestMapping(value = "/api/statistics")
 public class StatsController {
 
-    // URL routes
-    private static final String GET_STATS = "/get/all";
+  // URL routes
+  private static final String GET_STATS = "/get/all";
 
-    // Log4j logger
-    private static Logger log = Logger.getLogger(StatsController.class.getName());
+  // Log4j logger
+  private static Logger log = Logger.getLogger(StatsController.class.getName());
 
-    /**
-     * Returns all the information needed to refresh the stats-pane
-     *
-     * @return A HashMap containing all the information
-     */
-    @RequestMapping(method = RequestMethod.GET, value = GET_STATS)
-    public
-    @ResponseBody
-    HashMap<String, Object> getAllStats() {
-        CoreService cs = CoreService.getInstance();
-        SubscriptionService ss = SubscriptionService.getInstance();
-        TopicService ts = TopicService.getInstance();
+  /**
+   * Returns all the information needed to refresh the stats-pane
+   *
+   * @return A HashMap containing all the information
+   */
+  @RequestMapping(method = RequestMethod.GET, value = GET_STATS)
+  public
+  @ResponseBody
+  HashMap<String, Object> getAllStats() {
+    CoreService cs = CoreService.getInstance();
+    SubscriptionService ss = SubscriptionService.getInstance();
+    TopicService ts = TopicService.getInstance();
 
-        HashMap<String, Object> result = new HashMap<>();
+    HashMap<String, Object> result = new HashMap<>();
 
-        // CoreService statistics
-        result.put("coreServiceStatistics", new HashMap<String, Object>() {{
-            put("totalMessagesSent", cs.getTotalMessagesSentFromProtocolServers());
-            put("totalMessagesReceived", cs.getTotalMessagesReceivedFromProtocolServers());
-            put("totalRequests", cs.getTotalRequestsFromProtocolServers());
-            put("totalBadRequests", cs.getTotalBadRequestsFromProtocolServers());
-            put("totalErrors", cs.getTotalErrorsFromProtocolServers());
-            put("publishers", ss.getNumberOfPublishers());
-            put("subscribers", ss.getNumberOfSubscribers());
-            put("topics", ts.getTotalNumberOfTopics());
-        }});
+    // CoreService statistics
+    result.put("coreServiceStatistics", new HashMap<String, Object>() {{
+      put("totalMessagesSent", cs.getTotalMessagesSentFromProtocolServers());
+      put("totalMessagesReceived", cs.getTotalMessagesReceivedFromProtocolServers());
+      put("totalRequests", cs.getTotalRequestsFromProtocolServers());
+      put("totalBadRequests", cs.getTotalBadRequestsFromProtocolServers());
+      put("totalErrors", cs.getTotalErrorsFromProtocolServers());
+      put("publishers", ss.getNumberOfPublishers());
+      put("subscribers", ss.getNumberOfSubscribers());
+      put("topics", ts.getTotalNumberOfTopics());
+    }});
 
-        // ProtocolServer statistics
-        ArrayList<ProtocolServer> protocols = cs.getAllProtocolServers();
-        ArrayList<ProtocolStats> protocolStats = new ArrayList<>();
+    // ProtocolServer statistics
+    ArrayList<ProtocolServer> protocols = cs.getAllProtocolServers();
+    ArrayList<ProtocolStats> protocolStats = new ArrayList<>();
 
-        protocols.forEach(p -> protocolStats.add(new ProtocolStats(
-                p.getProtocolServerType(),
-                p.getTotalMessagesSent(),
-                p.getTotalMessagesReceived(),
-                p.getTotalRequests(),
-                p.getTotalBadRequests(),
-                p.getTotalErrors()
-        )));
-        result.put("protocolServerStatistics", protocolStats);
+    protocols.forEach(p -> protocolStats.add(new ProtocolStats(
+        p.getProtocolServerType(),
+        p.getTotalMessagesSent(),
+        p.getTotalMessagesReceived(),
+        p.getTotalRequests(),
+        p.getTotalBadRequests(),
+        p.getTotalErrors()
+    )));
+    result.put("protocolServerStatistics", protocolStats);
 
-        return result;
-    }
+    return result;
+  }
 }
 
 

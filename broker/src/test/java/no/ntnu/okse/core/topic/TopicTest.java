@@ -34,246 +34,246 @@ import static org.testng.Assert.*;
 
 public class TopicTest {
 
-    Topic noNameNoTypeTopic;
-    Topic namedAndTypedTopic;
-    Topic childOne;
-    Topic childTwo;
-    Topic childThree;
-    Topic rootOne;
-    Topic rootTwo;
+  Topic noNameNoTypeTopic;
+  Topic namedAndTypedTopic;
+  Topic childOne;
+  Topic childTwo;
+  Topic childThree;
+  Topic rootOne;
+  Topic rootTwo;
 
-    @BeforeMethod
-    public void setUp() {
-        noNameNoTypeTopic = new Topic();
-        namedAndTypedTopic = new Topic("SomeName", "SomeType");
-        childOne = new Topic("ChildOne", "Topic");
-        childTwo = new Topic("ChildTwo", "Topic");
-        childThree = new Topic("ChildThree", "Topic");
-        rootOne = new Topic("RootOne", "Topic");
-        rootTwo = new Topic("RootTwo", "Topic");
-        rootOne.addChild(childOne);
-        rootOne.addChild(childTwo);
-        rootTwo.addChild(childThree);
+  @BeforeMethod
+  public void setUp() {
+    noNameNoTypeTopic = new Topic();
+    namedAndTypedTopic = new Topic("SomeName", "SomeType");
+    childOne = new Topic("ChildOne", "Topic");
+    childTwo = new Topic("ChildTwo", "Topic");
+    childThree = new Topic("ChildThree", "Topic");
+    rootOne = new Topic("RootOne", "Topic");
+    rootTwo = new Topic("RootTwo", "Topic");
+    rootOne.addChild(childOne);
+    rootOne.addChild(childTwo);
+    rootTwo.addChild(childThree);
+  }
+
+  @AfterMethod
+  public void tearDown() {
+
+  }
+
+  @Test
+  public void testGetTopicID() {
+    Topic one = new Topic();
+    HashSet<String> ids = new HashSet<>();
+    assertNotNull(one.getTopicID());
+    // Hex regex
+    assertTrue(one.getTopicID().matches("-?[0-9a-fA-F]+"));
+    // Do a mass test and check for colliding ID's
+    for (int i = 0; i < 1337; i++) {
+      one = new Topic();
+      ids.add(one.getTopicID());
     }
+    assertEquals(ids.size(), 1337);
 
-    @AfterMethod
-    public void tearDown() {
+  }
 
+  @Test
+  public void testGetName() {
+    assertEquals(noNameNoTypeTopic.getName(), "UNNAMED");
+    assertEquals(namedAndTypedTopic.getName(), "SomeName");
+  }
+
+  @Test
+  public void testGetNameIgnoreCase() {
+    assertEquals(noNameNoTypeTopic.getNameIgnoreCase(), "unnamed");
+    assertEquals(namedAndTypedTopic.getNameIgnoreCase(), "somename");
+  }
+
+  @Test
+  public void testSetName() {
+    noNameNoTypeTopic.setName("SomeOtherName");
+    assertEquals(noNameNoTypeTopic.getName(), "SomeOtherName");
+    assertEquals(noNameNoTypeTopic.getNameIgnoreCase(), "someothername");
+  }
+
+  @Test
+  public void testGetType() {
+    assertEquals(noNameNoTypeTopic.getType(), "UNKNOWN");
+  }
+
+  @Test
+  public void testSetType() {
+    noNameNoTypeTopic.setType("SomeTopic");
+    assertEquals(noNameNoTypeTopic.getType(), "SomeTopic");
+  }
+
+  @Test
+  public void testGetParent() {
+    assertEquals(childOne.getParent(), rootOne);
+    assertEquals(childTwo.getParent(), rootOne);
+    assertEquals(childThree.getParent(), rootTwo);
+  }
+
+  @Test
+  public void testSetParent() {
+    assertEquals(childThree.getParent(), rootTwo);
+    assertEquals(rootOne.getChildren().size(), 2);
+    childThree.setParent(rootOne);
+    assertEquals(childThree.getParent(), rootOne);
+    assertEquals(rootOne.getChildren().size(), 3);
+    assertEquals(rootTwo.getChildren().size(), 0);
+    childThree.setParent(null);
+    assertFalse(rootOne.getChildren().contains(childThree));
+    assertEquals(childThree.getParent(), null);
+  }
+
+  @Test
+  public void testAddChild() {
+    Topic childFour = new Topic();
+    Topic childFive = new Topic();
+    assertEquals(childFour.getParent(), null);
+    assertEquals(childFive.getParent(), null);
+    int origChildCount = rootTwo.getChildren().size();
+    rootTwo.addChild(childFour);
+    rootTwo.addChild(childFive);
+    assertEquals(rootTwo.getChildren().size(), origChildCount + 2);
+    assertTrue(rootTwo.getChildren().contains(childFour));
+    assertTrue(rootTwo.getChildren().contains(childFive));
+    assertEquals(childFour.getParent(), rootTwo);
+    assertEquals(childFive.getParent(), rootTwo);
+  }
+
+  @Test
+  public void testRemoveChild() {
+    Topic childSix = new Topic();
+    rootTwo.addChild(childSix);
+    assertTrue(rootTwo.getChildren().contains(childSix));
+    assertEquals(childSix.getParent(), rootTwo);
+    rootTwo.removeChild(childSix);
+
+  }
+
+  @Test
+  public void testGetChildren() {
+    HashSet<Topic> localChildren = rootTwo.getChildren();
+
+    assertFalse(rootTwo.getChildren() == localChildren);
+
+    rootTwo.getChildren().forEach(c -> assertTrue(localChildren.contains(c)));
+
+    Topic childSeven = new Topic();
+    Topic childEight = new Topic();
+
+    localChildren.add(childSeven);
+    localChildren.add(childEight);
+
+    rootTwo.addChild(childSeven);
+    rootTwo.addChild(childEight);
+
+    for (Topic t : rootTwo.getChildren()) {
+      assertTrue(localChildren.contains(t));
     }
+  }
 
-    @Test
-    public void testGetTopicID() {
-        Topic one = new Topic();
-        HashSet<String> ids = new HashSet<>();
-        assertNotNull(one.getTopicID());
-        // Hex regex
-        assertTrue(one.getTopicID().matches("-?[0-9a-fA-F]+"));
-        // Do a mass test and check for colliding ID's
-        for (int i = 0; i < 1337; i++) {
-            one = new Topic();
-            ids.add(one.getTopicID());
-        }
-        assertEquals(ids.size(), 1337);
+  @Test
+  public void testClearChildren() {
+    HashSet<Topic> localChildren = rootTwo.getChildren();
+    localChildren.forEach(c -> assertEquals(c.getParent(), rootTwo));
+    rootTwo.clearChildren();
+    assertEquals(rootTwo.getChildren().size(), 0);
+    localChildren.forEach(c -> assertEquals(c.getParent(), null));
+  }
 
-    }
+  @Test
+  public void testIsRoot() {
+    assertTrue(rootOne.isRoot());
+    assertTrue(rootTwo.isRoot());
+    Topic t = new Topic();
+    rootOne.setParent(t);
+    assertFalse(rootOne.isRoot());
+    assertTrue(t.isRoot());
+  }
 
-    @Test
-    public void testGetName() {
-        assertEquals(noNameNoTypeTopic.getName(), "UNNAMED");
-        assertEquals(namedAndTypedTopic.getName(), "SomeName");
-    }
+  @Test
+  public void testIsLeaf() {
+    assertTrue(childOne.isLeaf());
+    assertTrue(childTwo.isLeaf());
+    assertTrue(childThree.isLeaf());
+    Topic t = new Topic();
+    childThree.addChild(t);
+    assertFalse(childThree.isLeaf());
+    assertFalse(childThree.isRoot());
+    assertTrue(t.isLeaf());
+  }
 
-    @Test
-    public void testGetNameIgnoreCase() {
-        assertEquals(noNameNoTypeTopic.getNameIgnoreCase(), "unnamed");
-        assertEquals(namedAndTypedTopic.getNameIgnoreCase(), "somename");
-    }
+  @Test
+  public void testGetFullTopicString() {
+    Topic childTen = new Topic();
+    Topic childEleven = new Topic();
+    childTen.setName("ChildTen");
+    childEleven.setName("ChildEleven");
+    childTen.addChild(childEleven);
+    childThree.addChild(childTen);
 
-    @Test
-    public void testSetName() {
-        noNameNoTypeTopic.setName("SomeOtherName");
-        assertEquals(noNameNoTypeTopic.getName(), "SomeOtherName");
-        assertEquals(noNameNoTypeTopic.getNameIgnoreCase(), "someothername");
-    }
+    String fullTopicForChildEleven = "RootTwo/ChildThree/ChildTen/ChildEleven";
+    String fullTopicForChildTen = "RootTwo/ChildThree/ChildTen";
+    String fullTopicForChildThree = "RootTwo/ChildThree";
 
-    @Test
-    public void testGetType() {
-        assertEquals(noNameNoTypeTopic.getType(), "UNKNOWN");
-    }
+    assertEquals(childEleven.getFullTopicString(), fullTopicForChildEleven);
+    assertEquals(childTen.getFullTopicString(), fullTopicForChildTen);
+    assertEquals(childThree.getFullTopicString(), fullTopicForChildThree);
+  }
 
-    @Test
-    public void testSetType() {
-        noNameNoTypeTopic.setType("SomeTopic");
-        assertEquals(noNameNoTypeTopic.getType(), "SomeTopic");
-    }
+  @Test
+  public void testGetFullTopicStringIgnoreCase() {
+    Topic childTen = new Topic();
+    Topic childEleven = new Topic();
+    childTen.setName("ChildTen");
+    childEleven.setName("ChildEleven");
+    childTen.addChild(childEleven);
+    childThree.addChild(childTen);
 
-    @Test
-    public void testGetParent() {
-        assertEquals(childOne.getParent(), rootOne);
-        assertEquals(childTwo.getParent(), rootOne);
-        assertEquals(childThree.getParent(), rootTwo);
-    }
+    String fullTopicForChildEleven = "roottwo/childthree/childten/childeleven";
+    String fullTopicForChildTen = "roottwo/childthree/childten";
+    String fullTopicForChildThree = "roottwo/childthree";
 
-    @Test
-    public void testSetParent() {
-        assertEquals(childThree.getParent(), rootTwo);
-        assertEquals(rootOne.getChildren().size(), 2);
-        childThree.setParent(rootOne);
-        assertEquals(childThree.getParent(), rootOne);
-        assertEquals(rootOne.getChildren().size(), 3);
-        assertEquals(rootTwo.getChildren().size(), 0);
-        childThree.setParent(null);
-        assertFalse(rootOne.getChildren().contains(childThree));
-        assertEquals(childThree.getParent(), null);
-    }
+    assertEquals(childEleven.getFullTopicStringIgnoreCase(), fullTopicForChildEleven);
+    assertEquals(childTen.getFullTopicStringIgnoreCase(), fullTopicForChildTen);
+    assertEquals(childThree.getFullTopicStringIgnoreCase(), fullTopicForChildThree);
+  }
 
-    @Test
-    public void testAddChild() {
-        Topic childFour = new Topic();
-        Topic childFive = new Topic();
-        assertEquals(childFour.getParent(), null);
-        assertEquals(childFive.getParent(), null);
-        int origChildCount = rootTwo.getChildren().size();
-        rootTwo.addChild(childFour);
-        rootTwo.addChild(childFive);
-        assertEquals(rootTwo.getChildren().size(), origChildCount + 2);
-        assertTrue(rootTwo.getChildren().contains(childFour));
-        assertTrue(rootTwo.getChildren().contains(childFive));
-        assertEquals(childFour.getParent(), rootTwo);
-        assertEquals(childFive.getParent(), rootTwo);
-    }
+  @Test
+  public void testIsAncestorOf() {
+    Topic parent = new Topic();
+    Topic child = new Topic();
+    Topic grandchild = new Topic();
+    grandchild.setParent(child);
+    child.setParent(parent);
 
-    @Test
-    public void testRemoveChild() {
-        Topic childSix = new Topic();
-        rootTwo.addChild(childSix);
-        assertTrue(rootTwo.getChildren().contains(childSix));
-        assertEquals(childSix.getParent(), rootTwo);
-        rootTwo.removeChild(childSix);
+    assertTrue(parent.isAncestorOf(child));
+    assertTrue(parent.isAncestorOf(grandchild));
+    assertFalse(parent.isAncestorOf(parent));
+  }
 
-    }
+  @Test
+  public void testIsDescendantOf() {
+    Topic parent = new Topic();
+    Topic child = new Topic();
+    Topic grandchild = new Topic();
+    grandchild.setParent(child);
+    child.setParent(parent);
 
-    @Test
-    public void testGetChildren() {
-        HashSet<Topic> localChildren = rootTwo.getChildren();
+    assertTrue(grandchild.isDescendantOf(child));
+    assertTrue(grandchild.isDescendantOf(parent));
+    assertFalse(grandchild.isDescendantOf(grandchild));
+  }
 
-        assertFalse(rootTwo.getChildren() == localChildren);
-
-        rootTwo.getChildren().forEach(c -> assertTrue(localChildren.contains(c)));
-
-        Topic childSeven = new Topic();
-        Topic childEight = new Topic();
-
-        localChildren.add(childSeven);
-        localChildren.add(childEight);
-
-        rootTwo.addChild(childSeven);
-        rootTwo.addChild(childEight);
-
-        for (Topic t: rootTwo.getChildren()) {
-            assertTrue(localChildren.contains(t));
-        }
-    }
-
-    @Test
-    public void testClearChildren() {
-        HashSet<Topic> localChildren = rootTwo.getChildren();
-        localChildren.forEach(c -> assertEquals(c.getParent(), rootTwo));
-        rootTwo.clearChildren();
-        assertEquals(rootTwo.getChildren().size(), 0);
-        localChildren.forEach(c -> assertEquals(c.getParent(), null));
-    }
-
-    @Test
-    public void testIsRoot() {
-        assertTrue(rootOne.isRoot());
-        assertTrue(rootTwo.isRoot());
-        Topic t = new Topic();
-        rootOne.setParent(t);
-        assertFalse(rootOne.isRoot());
-        assertTrue(t.isRoot());
-    }
-
-    @Test
-    public void testIsLeaf() {
-        assertTrue(childOne.isLeaf());
-        assertTrue(childTwo.isLeaf());
-        assertTrue(childThree.isLeaf());
-        Topic t = new Topic();
-        childThree.addChild(t);
-        assertFalse(childThree.isLeaf());
-        assertFalse(childThree.isRoot());
-        assertTrue(t.isLeaf());
-    }
-
-    @Test
-    public void testGetFullTopicString() {
-        Topic childTen = new Topic();
-        Topic childEleven = new Topic();
-        childTen.setName("ChildTen");
-        childEleven.setName("ChildEleven");
-        childTen.addChild(childEleven);
-        childThree.addChild(childTen);
-
-        String fullTopicForChildEleven = "RootTwo/ChildThree/ChildTen/ChildEleven";
-        String fullTopicForChildTen = "RootTwo/ChildThree/ChildTen";
-        String fullTopicForChildThree = "RootTwo/ChildThree";
-
-        assertEquals(childEleven.getFullTopicString(), fullTopicForChildEleven);
-        assertEquals(childTen.getFullTopicString(), fullTopicForChildTen);
-        assertEquals(childThree.getFullTopicString(), fullTopicForChildThree);
-    }
-
-    @Test
-    public void testGetFullTopicStringIgnoreCase() {
-        Topic childTen = new Topic();
-        Topic childEleven = new Topic();
-        childTen.setName("ChildTen");
-        childEleven.setName("ChildEleven");
-        childTen.addChild(childEleven);
-        childThree.addChild(childTen);
-
-        String fullTopicForChildEleven = "roottwo/childthree/childten/childeleven";
-        String fullTopicForChildTen = "roottwo/childthree/childten";
-        String fullTopicForChildThree = "roottwo/childthree";
-
-        assertEquals(childEleven.getFullTopicStringIgnoreCase(), fullTopicForChildEleven);
-        assertEquals(childTen.getFullTopicStringIgnoreCase(), fullTopicForChildTen);
-        assertEquals(childThree.getFullTopicStringIgnoreCase(), fullTopicForChildThree);
-    }
-
-    @Test
-    public void testIsAncestorOf() {
-        Topic parent = new Topic();
-        Topic child = new Topic();
-        Topic grandchild = new Topic();
-        grandchild.setParent(child);
-        child.setParent(parent);
-
-        assertTrue(parent.isAncestorOf(child));
-        assertTrue(parent.isAncestorOf(grandchild));
-        assertFalse(parent.isAncestorOf(parent));
-    }
-
-    @Test
-    public void testIsDescendantOf() {
-        Topic parent = new Topic();
-        Topic child = new Topic();
-        Topic grandchild = new Topic();
-        grandchild.setParent(child);
-        child.setParent(parent);
-
-        assertTrue(grandchild.isDescendantOf(child));
-        assertTrue(grandchild.isDescendantOf(parent));
-        assertFalse(grandchild.isDescendantOf(grandchild));
-    }
-
-    @Test
-    public void testToString() {
-        Topic parent = new Topic("parent", "TEST");
-        Topic child = new Topic("child", "TEST");
-        child.setParent(parent);
-        assertEquals(child.toString(), "Topic{parent/child}");
-        assertEquals(parent.toString(), "Topic{parent}");
-}
+  @Test
+  public void testToString() {
+    Topic parent = new Topic("parent", "TEST");
+    Topic child = new Topic("child", "TEST");
+    child.setParent(parent);
+    assertEquals(child.toString(), "Topic{parent/child}");
+    assertEquals(parent.toString(), "Topic{parent}");
+  }
 }

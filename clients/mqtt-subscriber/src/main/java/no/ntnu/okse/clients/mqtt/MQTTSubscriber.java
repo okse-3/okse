@@ -10,37 +10,40 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 
 public class MQTTSubscriber extends SubscribeClient {
-    @Parameter(names = {"--port", "-p"}, description = "Port")
-    public final int port = 1883;
 
-    private MQTTClient client;
+  @Parameter(names = {"--port", "-p"}, description = "Port")
+  public final int port = 1883;
 
-    private static final Logger log = Logger.getLogger(MQTTSubscriber.class);
+  private MQTTClient client;
 
-    public static void main(String[] args) {
-        launch(new MQTTSubscriber(), args);
+  private static final Logger log = Logger.getLogger(MQTTSubscriber.class);
+
+  public static void main(String[] args) {
+    launch(new MQTTSubscriber(), args);
+  }
+
+  protected void createClient() {
+    client = new MQTTClient(host, port, "MQTTSubscriber");
+    client.setCallback(new Callback());
+  }
+
+  protected TestClient getClient() {
+    return client;
+  }
+
+  private static class Callback implements MqttCallback {
+
+    public void connectionLost(Throwable throwable) {
+      log.warn("Connection lost", throwable);
     }
 
-    protected void createClient() {
-        client = new MQTTClient(host, port, "MQTTSubscriber");
-        client.setCallback(new Callback());
+    public void messageArrived(String topic, MqttMessage message) {
+      System.out
+          .println(String.format("Message arrived on topic %s with content %s", topic, message));
     }
 
-    protected TestClient getClient() {
-        return client;
+    public void deliveryComplete(IMqttDeliveryToken token) {
+      log.debug("Message delivered");
     }
-
-    private static class Callback implements MqttCallback {
-        public void connectionLost(Throwable throwable) {
-            log.warn("Connection lost", throwable);
-        }
-
-        public void messageArrived(String topic, MqttMessage message) {
-            System.out.println(String.format("Message arrived on topic %s with content %s", topic, message));
-        }
-
-        public void deliveryComplete(IMqttDeliveryToken token) {
-            log.debug("Message delivered");
-        }
-    }
+  }
 }

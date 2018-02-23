@@ -5,20 +5,21 @@ import no.ntnu.okse.clients.PublishClient;
 import no.ntnu.okse.clients.TestClient;
 
 public class WSNPublisher extends PublishClient {
-    @Parameter(names = {"--port", "-p"}, description = "Port")
-    public final int port = 61000;
 
-    private WSNClient client;
+  @Parameter(names = {"--port", "-p"}, description = "Port")
+  public final int port = 61000;
 
-    public static void main(String[] args) {
-        launch(new WSNPublisher(), args);
-    }
+  private WSNClient client;
 
-    public void createClient() {
-        client = new WSNClient(host, port);
-    }
+  public static void main(String[] args) {
+    launch(new WSNPublisher(), args);
+  }
 
-    public TestClient getClient() {
-        return client;
-    }
+  public void createClient() {
+    client = new WSNClient(host, port);
+  }
+
+  public TestClient getClient() {
+    return client;
+  }
 }

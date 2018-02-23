@@ -5,20 +5,21 @@ import no.ntnu.okse.clients.PublishClient;
 import no.ntnu.okse.clients.TestClient;
 
 public class STOMPPublisher extends PublishClient {
-    @Parameter(names = {"--port", "-p"}, description = "Port")
-    public final int port = 61613;
 
-    private StompClient client;
+  @Parameter(names = {"--port", "-p"}, description = "Port")
+  public final int port = 61613;
 
-    public static void main(String[] args) {
-        launch(new STOMPPublisher(), args);
-    }
+  private StompClient client;
 
-    protected void createClient() {
-        client = new StompClient(host, port);
-    }
+  public static void main(String[] args) {
+    launch(new STOMPPublisher(), args);
+  }
 
-    protected TestClient getClient() {
-        return client;
-    }
+  protected void createClient() {
+    client = new StompClient(host, port);
+  }
+
+  protected TestClient getClient() {
+    return client;
+  }
 }

@@ -45,73 +45,74 @@ import java.sql.SQLException;
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(WebSecurityConfig.class.getName());
+  private static final org.apache.log4j.Logger log = org.apache.log4j.Logger
+      .getLogger(WebSecurityConfig.class.getName());
 
-    private BCryptPasswordEncoder encoder;
+  private BCryptPasswordEncoder encoder;
 
-    @Autowired
-    DataSource dataSource;
+  @Autowired
+  DataSource dataSource;
 
-    /**
-     * Connects to the dataSource and validates a user log in
-     *
-     * @param auth An AuthenticationManagerBuilder instance
-     * @throws Exception general exception
-     */
+  /**
+   * Connects to the dataSource and validates a user log in
+   *
+   * @param auth An AuthenticationManagerBuilder instance
+   * @throws Exception general exception
+   */
 
-    @Autowired
-    public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-        auth.jdbcAuthentication().dataSource(dataSource)
-                .usersByUsernameQuery(
-                        "select username, password, enabled from users where username=?")
-                .authoritiesByUsernameQuery(
-                        "select username, authority from authorities where username=?")
-                .passwordEncoder(passwordEncoder());
+  @Autowired
+  public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception {
+    auth.jdbcAuthentication().dataSource(dataSource)
+        .usersByUsernameQuery(
+            "select username, password, enabled from users where username=?")
+        .authoritiesByUsernameQuery(
+            "select username, authority from authorities where username=?")
+        .passwordEncoder(passwordEncoder());
+  }
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    if (encoder == null) {
+      encoder = new BCryptPasswordEncoder();
     }
+    return encoder;
+  }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        if (encoder == null) {
-            encoder = new BCryptPasswordEncoder();
-        }
-        return encoder;
-    }
+  /**
+   * Defines rules and access for http-requests
+   *
+   * @param http A HttpSecurity instance
+   * @throws Exception general exception
+   */
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    http
+        .authorizeRequests()
+        .antMatchers("/", "/js/**", "/gfx/*", "/css/**", "/fonts/**").permitAll()
+        .anyRequest().authenticated()
+        .and()
+        .formLogin()
+        .loginProcessingUrl("/auth/login")
+        .loginPage("/").usernameParameter("username").passwordParameter("password")
+        .permitAll()
+        .and()
+        .logout()
+        .logoutUrl("/auth/logout")
+        .permitAll()
+        .and()
+        .csrf();
+  }
 
-    /**
-     * Defines rules and access for http-requests
-     *
-     * @param http A HttpSecurity instance
-     * @throws Exception general exception
-     */
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
-                .antMatchers("/", "/js/**", "/gfx/*", "/css/**", "/fonts/**").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .formLogin()
-                .loginProcessingUrl("/auth/login")
-                .loginPage("/").usernameParameter("username").passwordParameter("password")
-                .permitAll()
-                .and()
-                .logout()
-                .logoutUrl("/auth/logout")
-                .permitAll()
-                .and()
-                .csrf();
+  public static boolean changeUserPassword(String password) {
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    String hashedPW = encoder.encode(password);
+    try {
+      DB.conDB();
+      DB.changePassword("admin", hashedPW);
+    } catch (SQLException e) {
+      log.debug("Unable to change password for admin user");
+      return false;
     }
-
-    public static boolean changeUserPassword(String password) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hashedPW = encoder.encode(password);
-        try {
-            DB.conDB();
-            DB.changePassword("admin", hashedPW);
-        } catch (SQLException e) {
-            log.debug("Unable to change password for admin user");
-            return false;
-        }
-        return true;
-    }
+    return true;
+  }
 }

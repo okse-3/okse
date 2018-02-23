@@ -8,20 +8,20 @@ import asia.stampy.common.message.StompMessageType;
 
 public class MessageListener implements StampyMessageListener {
 
-    @Override
-    public boolean isForMessage(StampyMessage<?> message) {
-        return true;
-    }
+  @Override
+  public boolean isForMessage(StampyMessage<?> message) {
+    return true;
+  }
 
-    @Override
-    public StompMessageType[] getMessageTypes() {
-        return StompMessageType.values();
-    }
+  @Override
+  public StompMessageType[] getMessageTypes() {
+    return StompMessageType.values();
+  }
 
-    @Override
-    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) {
-        System.out.println(stampyMessage);
-        System.out.println((String) ((SendMessage)stampyMessage).getBody());
-    }
+  @Override
+  public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) {
+    System.out.println(stampyMessage);
+    System.out.println((String) ((SendMessage) stampyMessage).getBody());
+  }
 
 }

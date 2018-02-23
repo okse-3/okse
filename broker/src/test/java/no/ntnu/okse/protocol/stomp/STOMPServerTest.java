@@ -9,6 +9,7 @@ import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 
@@ -18,100 +19,100 @@ import org.testng.annotations.*;
 
 public class STOMPServerTest {
 
-    private STOMPServer server_spy;
-    private STOMPProtocolServer ps_spy;
-    private ServerNettyMessageGateway gateway;
-    private STOMPSubscriptionManager subManager_spy;
-    private int port = 61634;
-    private final String host = "localhost";
+  private STOMPServer server_spy;
+  private STOMPProtocolServer ps_spy;
+  private ServerNettyMessageGateway gateway;
+  private STOMPSubscriptionManager subManager_spy;
+  private int port = 61634;
+  private final String host = "localhost";
 
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        STOMPServer server = new STOMPServer();
-        port ++;
-        STOMPProtocolServer ps = new STOMPProtocolServer(host, port);
-        STOMPSubscriptionManager subManager = new STOMPSubscriptionManager();
+  @BeforeMethod
+  public void setUp() throws Exception {
+    STOMPServer server = new STOMPServer();
+    port++;
+    STOMPProtocolServer ps = new STOMPProtocolServer(host, port);
+    STOMPSubscriptionManager subManager = new STOMPSubscriptionManager();
 
-        subManager.initCoreSubscriptionService(SubscriptionService.getInstance());
-        subManager_spy = Mockito.spy(subManager);
-        server.setSubscriptionManager(subManager_spy);
+    subManager.initCoreSubscriptionService(SubscriptionService.getInstance());
+    subManager_spy = Mockito.spy(subManager);
+    server.setSubscriptionManager(subManager_spy);
 
-        server_spy = Mockito.spy(server);
-        ps_spy = Mockito.spy(ps);
+    server_spy = Mockito.spy(server);
+    ps_spy = Mockito.spy(ps);
 
-        startGateway(host, port);
+    startGateway(host, port);
+  }
+
+  private void startGateway(String host, int port) throws Exception {
+    server_spy.setProtocolServer(ps_spy);
+    gateway = no.ntnu.okse.protocol.stomp.common.Gateway.initialize(host, port);
+    gateway.connect();
+    server_spy.gateway = gateway;
+  }
+
+  @AfterMethod
+  public void tearDown() {
+    server_spy.stopServer();
+    server_spy = null;
+    ps_spy = null;
+    try {
+      gateway.shutdown();
+    } catch (Exception ignored) {
     }
+    gateway = null;
+  }
 
-    private void startGateway(String host, int port) throws Exception {
-        server_spy.setProtocolServer(ps_spy);
-        gateway = no.ntnu.okse.protocol.stomp.common.Gateway.initialize(host, port);
-        gateway.connect();
-        server_spy.gateway = gateway;
-    }
+  @Test
+  public void sendMessage() throws Exception {
+    subManager_spy.addSubscriber(new Subscriber("localhost", 61613, "testing", "stomp"), "ogdans3");
 
-    @AfterMethod
-    public void tearDown() {
-        server_spy.stopServer();
-        server_spy = null;
-        ps_spy = null;
-        try{
-            gateway.shutdown();
-        }catch(Exception ignored){}
-        gateway = null;
-    }
+    ArgumentCaptor<StampyMessage> messageArgument = ArgumentCaptor.forClass(StampyMessage.class);
+    ArgumentCaptor<HostPort> hostPortArgument = ArgumentCaptor.forClass(HostPort.class);
 
-    @Test
-    public void sendMessage() throws Exception {
-        subManager_spy.addSubscriber(new Subscriber("localhost", 61613, "testing", "stomp"), "ogdans3");
+    Message msg = new Message("testing", "testing", null, "stomp");
+    msg.setAttribute("test", "user defined attribute");
+    server_spy.sendMessage(msg);
+    Mockito.verify(gateway).sendMessage(messageArgument.capture(), hostPortArgument.capture());
+  }
 
-        ArgumentCaptor<StampyMessage> messageArgument = ArgumentCaptor.forClass(StampyMessage.class);
-        ArgumentCaptor<HostPort> hostPortArgument = ArgumentCaptor.forClass(HostPort.class);
+  @Test
+  public void incrementTotalErrors() throws InterceptException {
+    subManager_spy.addSubscriber(new Subscriber("localhost", 61613, "testing", "stomp"), "ogdans3");
 
-        Message msg = new Message("testing", "testing", null, "stomp");
-        msg.setAttribute("test", "user defined attribute");
-        server_spy.sendMessage(msg);
-        Mockito.verify(gateway).sendMessage(messageArgument.capture(), hostPortArgument.capture());
-    }
+    Message msg = new Message("testing", "testing", null, "stomp");
+    msg.setAttribute("test", "user defined attribute");
 
-    @Test
-    public void incrementTotalErrors() throws InterceptException {
-        subManager_spy.addSubscriber(new Subscriber("localhost", 61613, "testing", "stomp"), "ogdans3");
+    ArgumentCaptor<StampyMessage> stampy = ArgumentCaptor.forClass(StampyMessage.class);
+    ArgumentCaptor<HostPort> hp = ArgumentCaptor.forClass(HostPort.class);
+    Mockito.doAnswer(invocation -> {
+      throw new InterceptException("Intercepting to increment total number of errors");
+    }).when(gateway).sendMessage(stampy.capture(), hp.capture());
+    server_spy.sendMessage(msg);
+  }
 
+  @Test
+  public void init() {
+    assertEquals(port, gateway.getPort());
+    assertNotNull(null, gateway);
+  }
 
-        Message msg = new Message("testing", "testing", null, "stomp");
-        msg.setAttribute("test", "user defined attribute");
+  @Test
+  public void getGateway() {
+    assertEquals(gateway, server_spy.getGateway());
+  }
 
-        ArgumentCaptor<StampyMessage> stampy = ArgumentCaptor.forClass(StampyMessage.class);
-        ArgumentCaptor<HostPort> hp = ArgumentCaptor.forClass(HostPort.class);
-        Mockito.doAnswer(invocation -> {
-            throw new InterceptException("Intercepting to increment total number of errors");
-        }).when(gateway).sendMessage(stampy.capture(), hp.capture());
-        server_spy.sendMessage(msg);
-    }
+  @Test
+  public void stopServer() throws Exception {
+    assertEquals(port, gateway.getPort());
+    server_spy.stopServer();
+    Mockito.verify(gateway).shutdown();
+    assertEquals(null, server_spy.gateway);
+  }
 
-    @Test
-    public void init() {
-        assertEquals(port, gateway.getPort());
-        assertNotNull(null, gateway);
-    }
-
-    @Test
-    public void getGateway(){
-        assertEquals(gateway, server_spy.getGateway());
-    }
-
-    @Test
-    public void stopServer() throws Exception {
-        assertEquals(port, gateway.getPort());
-        server_spy.stopServer();
-        Mockito.verify(gateway).shutdown();
-        assertEquals(null, server_spy.gateway);
-    }
-
-    @Test
-    public void stopServerCatchException() throws Exception {
-        Mockito.doThrow(new Exception("Test Exception")).when(gateway).shutdown();
-        server_spy.stopServer();
-    }
+  @Test
+  public void stopServerCatchException() throws Exception {
+    Mockito.doThrow(new Exception("Test Exception")).when(gateway).shutdown();
+    server_spy.stopServer();
+  }
 }

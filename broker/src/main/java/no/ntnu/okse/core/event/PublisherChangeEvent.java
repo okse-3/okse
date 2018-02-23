@@ -28,32 +28,31 @@ import no.ntnu.okse.core.subscription.Publisher;
 
 public class PublisherChangeEvent extends Event {
 
-    public enum Type {
-        REGISTER,
-        UNREGISTER
-    }
+  public enum Type {
+    REGISTER,
+    UNREGISTER
+  }
 
-    final Type type;
+  final Type type;
 
-    /**
-     * Constructs an Event containing an operation, some data and a dataType.
-     * <p>
-     *
-     * @param type : A Type enum value from RegistrationChangeEvent class.
-     * @param data : An object containing the data payload.
-     */
-    public PublisherChangeEvent(PublisherChangeEvent.Type type, Publisher data) {
-        super(data);
-        this.type = type;
-    }
+  /**
+   * Constructs an Event containing an operation, some data and a dataType. <p>
+   *
+   * @param type : A Type enum value from RegistrationChangeEvent class.
+   * @param data : An object containing the data payload.
+   */
+  public PublisherChangeEvent(PublisherChangeEvent.Type type, Publisher data) {
+    super(data);
+    this.type = type;
+  }
 
-    @Override
-    public Publisher getData() {
-        return (Publisher) this.data;
-    }
+  @Override
+  public Publisher getData() {
+    return (Publisher) this.data;
+  }
 
-    @Override
-    public Object getType() {
-        return this.type;
-    }
+  @Override
+  public Object getType() {
+    return this.type;
+  }
 }

@@ -26,34 +26,34 @@ package no.ntnu.okse.core.subscription;
 
 public class SubscriptionTask {
 
-    // The different Task types
-    public enum Type {
-        NEW_SUBSCRIBER,
-        NEW_PUBLISHER,
-        UPDATE_SUBSCRIBER,
-        UPDATE_PUBLISHER,
-        DELETE_SUBSCRIBER,
-        DELETE_PUBLISHER,
-        SHUTDOWN
-    }
+  // The different Task types
+  public enum Type {
+    NEW_SUBSCRIBER,
+    NEW_PUBLISHER,
+    UPDATE_SUBSCRIBER,
+    UPDATE_PUBLISHER,
+    DELETE_SUBSCRIBER,
+    DELETE_PUBLISHER,
+    SHUTDOWN
+  }
 
-    // Needed fields
-    private final Type type;
-    private final Runnable job;
+  // Needed fields
+  private final Type type;
+  private final Runnable job;
 
-    // Public constructor
-    public SubscriptionTask(Type type, Runnable job) {
-        this.type = type;
-        this.job = job;
-    }
+  // Public constructor
+  public SubscriptionTask(Type type, Runnable job) {
+    this.type = type;
+    this.job = job;
+  }
 
-    // Public getter for Type
-    public Type getType() {
-        return this.type;
-    }
+  // Public getter for Type
+  public Type getType() {
+    return this.type;
+  }
 
-    // Public run-delegation method
-    public void run() {
-        this.job.run();
-    }
+  // Public run-delegation method
+  public void run() {
+    this.job.run();
+  }
 }

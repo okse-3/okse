@@ -7,25 +7,26 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class ErrorInterceptorTest {
-    ErrorInterceptor interceptor;
-    STOMPProtocolServer ps;
 
-    @BeforeTest
-    public void setup(){
-        interceptor = Mockito.spy(new ErrorInterceptor());
-        ps = Mockito.spy(new STOMPProtocolServer("localhost", 1883));
-        interceptor.setProtocolServer(ps);
-    }
+  ErrorInterceptor interceptor;
+  STOMPProtocolServer ps;
 
-    @AfterTest
-    public void tearDown(){
-        interceptor = null;
-        ps = null;
-    }
+  @BeforeTest
+  public void setup() {
+    interceptor = Mockito.spy(new ErrorInterceptor());
+    ps = Mockito.spy(new STOMPProtocolServer("localhost", 1883));
+    interceptor.setProtocolServer(ps);
+  }
 
-    @Test
-    public void onError(){
-        interceptor.onError(null);
-        Mockito.verify(ps).incrementTotalErrors();
-    }
+  @AfterTest
+  public void tearDown() {
+    interceptor = null;
+    ps = null;
+  }
+
+  @Test
+  public void onError() {
+    interceptor.onError(null);
+    Mockito.verify(ps).incrementTotalErrors();
+  }
 }

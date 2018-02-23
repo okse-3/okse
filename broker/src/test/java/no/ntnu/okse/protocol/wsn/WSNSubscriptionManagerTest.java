@@ -48,201 +48,232 @@ import static org.testng.Assert.*;
 
 public class WSNSubscriptionManagerTest {
 
-    WSNSubscriptionManager sm;
-    TestSubscriptionService tss;
-    Subscriber s;
-    AbstractNotificationProducer.SubscriptionHandle sh;
-    HelperClasses.EndpointTerminationTuple ett;
-    FilterSupport.SubscriptionInfo si;
-    WSNotificationServer ps;
+  WSNSubscriptionManager sm;
+  TestSubscriptionService tss;
+  Subscriber s;
+  AbstractNotificationProducer.SubscriptionHandle sh;
+  HelperClasses.EndpointTerminationTuple ett;
+  FilterSupport.SubscriptionInfo si;
+  WSNotificationServer ps;
 
-    @BeforeMethod
-    public void setUp() {
-        // Set up WSN server
-        ps = new WSNotificationServer("0.0.0.0", 61000, 5L, 50, "Content", false, "0.0.0.0", 61000);
-        // Set up sub manager
-        sm = new WSNSubscriptionManager(ps);
-        // Set up dummy subscription service
-        tss = new TestSubscriptionService();
-        // Initialize sub manager with sub service
-        sm.initCoreSubscriptionService(tss);
-        // Add listener support
-        tss.addSubscriptionChangeListener(sm);
-        // Create a subscriber
-        s = new Subscriber("0.0.0.0", 8080, "test", "WSNotification");
-        // Set its subscription reference
-        s.setAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN, "1234567890abcdef");
-        // Add WS-Nu endpoint termination tuple
-        ett = new HelperClasses.EndpointTerminationTuple("test", 10L);
-        // Add WS-Nu SubscriptionInfo
-        si = new FilterSupport.SubscriptionInfo(null, new NuNamespaceContextResolver());
-        // Add WS-Nu SubscriptionHandle
-        sh = new AbstractNotificationBroker.SubscriptionHandle(ett, si);
-        // Create dummy request URL params
-        Map<String, String[]> params = new HashMap<>();
-        // Insert ref of our subscriber
-        params.put(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN, new String[]{"1234567890abcdef"});
-        // Create and set a dummy service connection
-        sm.setConnection(new TestServiceConnection());
-        // Set our dummy request params
-        sm.getConnection().getRequestInformation().setParameters(params);
-        // Add the subscriber to the subscription service
-        sm.addSubscriber(s, sh);
+  @BeforeMethod
+  public void setUp() {
+    // Set up WSN server
+    ps = new WSNotificationServer("0.0.0.0", 61000, 5L, 50, "Content", false, "0.0.0.0", 61000);
+    // Set up sub manager
+    sm = new WSNSubscriptionManager(ps);
+    // Set up dummy subscription service
+    tss = new TestSubscriptionService();
+    // Initialize sub manager with sub service
+    sm.initCoreSubscriptionService(tss);
+    // Add listener support
+    tss.addSubscriptionChangeListener(sm);
+    // Create a subscriber
+    s = new Subscriber("0.0.0.0", 8080, "test", "WSNotification");
+    // Set its subscription reference
+    s.setAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN, "1234567890abcdef");
+    // Add WS-Nu endpoint termination tuple
+    ett = new HelperClasses.EndpointTerminationTuple("test", 10L);
+    // Add WS-Nu SubscriptionInfo
+    si = new FilterSupport.SubscriptionInfo(null, new NuNamespaceContextResolver());
+    // Add WS-Nu SubscriptionHandle
+    sh = new AbstractNotificationBroker.SubscriptionHandle(ett, si);
+    // Create dummy request URL params
+    Map<String, String[]> params = new HashMap<>();
+    // Insert ref of our subscriber
+    params.put(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN, new String[]{"1234567890abcdef"});
+    // Create and set a dummy service connection
+    sm.setConnection(new TestServiceConnection());
+    // Set our dummy request params
+    sm.getConnection().getRequestInformation().setParameters(params);
+    // Add the subscriber to the subscription service
+    sm.addSubscriber(s, sh);
+  }
+
+  @AfterMethod
+  public void tearDown() {
+    s = null;
+  }
+
+  @Test
+  public void testKeyExists() {
+    assertTrue(sm.keyExists("1234567890abcdef"));
+    assertFalse(sm.keyExists("0987654321"));
+  }
+
+  @Test
+  public void testHasSubscription() {
+    assertTrue(sm.keyExists("1234567890abcdef"));
+    assertFalse(sm.keyExists("0987654321"));
+  }
+
+  @Test
+  public void testSubscriptionIsPaused() {
+    assertFalse(sm.subscriptionIsPaused("1234567890abcdef"));
+    s.setAttribute("paused", "true");
+    assertTrue(sm.subscriptionIsPaused("1234567890abcdef"));
+    s.setAttribute("paused", "false");
+  }
+
+  @Test
+  public void testAddSubscriber() {
+    Subscriber s2 = new Subscriber("0.0.0.0", 8080, "test", "test");
+    s2.setAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN, "addtest");
+    sm.addSubscriber(s2, sh);
+    assertTrue(sm.keyExists("addtest"));
+    assertTrue(tss.getAllSubscribers().contains(s2));
+    tss.removeSubscriber(s2);
+  }
+
+  @Test
+  public void testAddSubscriber1() {
+    int count = tss.getAllSubscribers().size();
+    sm.addSubscriber("1234567890abcdef", 10L);
+    int count2 = tss.getAllSubscribers().size();
+    assertEquals(count, count2);
+  }
+
+  @Test
+  public void testRemoveSubscriber() {
+    assertTrue(sm.hasSubscription(s.getAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN)));
+    tss.removeSubscriber(s);
+    assertFalse(sm.keyExists(s.getAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN)));
+    assertFalse(tss.getAllSubscribers().contains(s));
+  }
+
+  @Test
+  public void testGetAllRecipients() {
+    assertTrue(sm.getAllRecipients().contains("1234567890abcdef"));
+    assertTrue(sm.getAllRecipients().size() == 1);
+    Subscriber s2 = new Subscriber("0.0.0.0", 8001, "test2", "WSNotification");
+    s2.setAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN, "asdf");
+    sm.addSubscriber(s2, sh);
+    assertTrue(sm.getAllRecipients().contains("asdf"));
+  }
+
+  @Test
+  public void testGetSubscriptionHandle() {
+    AbstractNotificationProducer.SubscriptionHandle handle = sm
+        .getSubscriptionHandle(s.getAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN));
+    assertNotNull(handle);
+    assertSame(handle, sh);
+  }
+
+  @Test
+  public void testGetSubscriptionHandle1() {
+    AbstractNotificationProducer.SubscriptionHandle handle = sm.getSubscriptionHandle(s);
+    assertNotNull(handle);
+    assertSame(handle, sh);
+  }
+
+  @Test
+  public void testGetSubscriber() {
+    Subscriber s2 = sm.getSubscriber(s.getAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN));
+    assertNotNull(s2);
+    assertSame(s, s2);
+  }
+
+  @Test
+  public void testUpdate() {
+    assertTrue(true);
+  }
+
+  @Test
+  public void testUnsubscribe() throws Exception {
+    assertTrue(sm.hasSubscription("1234567890abcdef"));
+    Unsubscribe unsub = new Unsubscribe();
+    UnsubscribeResponse response = sm.unsubscribe(unsub);
+    assertNotNull(response);
+    assertFalse(sm.hasSubscription("1234567890abcdef"));
+  }
+
+  @Test
+  public void testRenew() throws Exception {
+    Renew renew = new Renew();
+    renew.setTerminationTime("9999-01-01T00:00:00");
+    RenewResponse response = sm.renew(renew);
+    assertEquals(response.getTerminationTime().getYear(), 9999);
+    assertEquals(response.getTerminationTime().getMonth(), 1);
+    assertEquals(response.getTerminationTime().getDay(), 1);
+    assertEquals(response.getTerminationTime().getHour(), 0);
+    assertEquals(response.getTerminationTime().getMinute(), 0);
+    assertEquals(response.getTerminationTime().getSecond(), 0);
+    LocalDateTime now = LocalDateTime.now();
+    renew.setTerminationTime("P2Y");
+    response = sm.renew(renew);
+    assertEquals(response.getTerminationTime().getYear(), now.getYear() + 2);
+    renew.setTerminationTime("P1D");
+    response = sm.renew(renew);
+    assertFalse(response.getTerminationTime().getDay() == now.getDayOfMonth());
+    renew.setTerminationTime("gibberish");
+    try {
+      sm.renew(renew);
+      fail();
+    } catch (UnacceptableTerminationTimeFault e) {
+      // This should be caught
+    }
+    try {
+      renew.setTerminationTime("P48H2M1S");
+      sm.renew(renew);
+      fail();
+    } catch (UnacceptableTerminationTimeFault e) {
+      // This should be caught
+    }
+  }
+
+  /* HELPER CLASSES */
+
+  public class TestSubscriptionService extends SubscriptionService {
+
+    private final HashSet<Subscriber> subscribers = new HashSet<>();
+
+    @Override
+    public void addSubscriber(Subscriber s) {
+      subscribers.add(s);
     }
 
-    @AfterMethod
-    public void tearDown() {
-        s = null;
+    @Override
+    public void removeSubscriber(Subscriber s) {
+      subscribers.remove(s);
+      sm.subscriptionChanged(
+          new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.UNSUBSCRIBE, s));
     }
 
-    @Test
-    public void testKeyExists() {
-        assertTrue(sm.keyExists("1234567890abcdef"));
-        assertFalse(sm.keyExists("0987654321"));
+    @Override
+    public HashSet<Subscriber> getAllSubscribers() {
+      return subscribers;
+    }
+  }
+
+  public class TestServiceConnection implements ServiceConnection {
+
+    private final RequestInformation requestInformation = new RequestInformation();
+
+    public InternalMessage acceptMessage(InternalMessage internalMessage) {
+      return null;
     }
 
-    @Test
-    public void testHasSubscription() {
-        assertTrue(sm.keyExists("1234567890abcdef"));
-        assertFalse(sm.keyExists("0987654321"));
+    public InternalMessage acceptRequest(InternalMessage internalMessage) {
+      return null;
     }
 
-    @Test
-    public void testSubscriptionIsPaused() {
-        assertFalse(sm.subscriptionIsPaused("1234567890abcdef"));
-        s.setAttribute("paused", "true");
-        assertTrue(sm.subscriptionIsPaused("1234567890abcdef"));
-        s.setAttribute("paused", "false");
+    public Class getServiceType() {
+      return null;
     }
 
-    @Test
-    public void testAddSubscriber() {
-        Subscriber s2 = new Subscriber("0.0.0.0", 8080, "test", "test");
-        s2.setAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN, "addtest");
-        sm.addSubscriber(s2, sh);
-        assertTrue(sm.keyExists("addtest"));
-        assertTrue(tss.getAllSubscribers().contains(s2));
-        tss.removeSubscriber(s2);
+    public String getServiceEndpoint() {
+      return null;
     }
 
-    @Test
-    public void testAddSubscriber1() {
-        int count = tss.getAllSubscribers().size();
-        sm.addSubscriber("1234567890abcdef", 10L);
-        int count2 = tss.getAllSubscribers().size();
-        assertEquals(count, count2);
+    public RequestInformation getRequestInformation() {
+      return requestInformation;
     }
 
-    @Test
-    public void testRemoveSubscriber() {
-        assertTrue(sm.hasSubscription(s.getAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN)));
-        tss.removeSubscriber(s);
-        assertFalse(sm.keyExists(s.getAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN)));
-        assertFalse(tss.getAllSubscribers().contains(s));
+    public void endpointUpdated(String s) {
     }
 
-    @Test
-    public void testGetAllRecipients() {
-        assertTrue(sm.getAllRecipients().contains("1234567890abcdef"));
-        assertTrue(sm.getAllRecipients().size() == 1);
-        Subscriber s2 = new Subscriber("0.0.0.0", 8001, "test2", "WSNotification");
-        s2.setAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN, "asdf");
-        sm.addSubscriber(s2, sh);
-        assertTrue(sm.getAllRecipients().contains("asdf"));
+    public Object getWebService() {
+      return null;
     }
-
-    @Test
-    public void testGetSubscriptionHandle() {
-        AbstractNotificationProducer.SubscriptionHandle handle = sm.getSubscriptionHandle(s.getAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN));
-        assertNotNull(handle);
-        assertSame(handle, sh);
-    }
-
-    @Test
-    public void testGetSubscriptionHandle1() {
-        AbstractNotificationProducer.SubscriptionHandle handle = sm.getSubscriptionHandle(s);
-        assertNotNull(handle);
-        assertSame(handle, sh);
-    }
-
-    @Test
-    public void testGetSubscriber() {
-        Subscriber s2 = sm.getSubscriber(s.getAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN));
-        assertNotNull(s2);
-        assertSame(s, s2);
-    }
-
-    @Test
-    public void testUpdate() {
-        assertTrue(true);
-    }
-
-    @Test
-    public void testUnsubscribe() throws Exception {
-        assertTrue(sm.hasSubscription("1234567890abcdef"));
-        Unsubscribe unsub = new Unsubscribe();
-        UnsubscribeResponse response = sm.unsubscribe(unsub);
-        assertNotNull(response);
-        assertFalse(sm.hasSubscription("1234567890abcdef"));
-    }
-
-    @Test
-    public void testRenew() throws Exception {
-        Renew renew = new Renew();
-        renew.setTerminationTime("9999-01-01T00:00:00");
-        RenewResponse response = sm.renew(renew);
-        assertEquals(response.getTerminationTime().getYear(), 9999);
-        assertEquals(response.getTerminationTime().getMonth(), 1);
-        assertEquals(response.getTerminationTime().getDay(), 1);
-        assertEquals(response.getTerminationTime().getHour(), 0);
-        assertEquals(response.getTerminationTime().getMinute(), 0);
-        assertEquals(response.getTerminationTime().getSecond(), 0);
-        LocalDateTime now = LocalDateTime.now();
-        renew.setTerminationTime("P2Y");
-        response = sm.renew(renew);
-        assertEquals(response.getTerminationTime().getYear(), now.getYear() + 2);
-        renew.setTerminationTime("P1D");
-        response = sm.renew(renew);
-        assertFalse(response.getTerminationTime().getDay() == now.getDayOfMonth());
-        renew.setTerminationTime("gibberish");
-        try {
-            sm.renew(renew);
-            fail();
-        } catch (UnacceptableTerminationTimeFault e) {
-            // This should be caught
-        }
-        try {
-            renew.setTerminationTime("P48H2M1S");
-            sm.renew(renew);
-            fail();
-        } catch (UnacceptableTerminationTimeFault e) {
-            // This should be caught
-        }
-    }
-
-    /* HELPER CLASSES */
-
-    public class TestSubscriptionService extends SubscriptionService {
-        private final HashSet<Subscriber> subscribers = new HashSet<>();
-        @Override
-        public void addSubscriber(Subscriber s) { subscribers.add(s); }
-        @Override
-        public void removeSubscriber(Subscriber s) {
-            subscribers.remove(s);
-            sm.subscriptionChanged(new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.UNSUBSCRIBE, s));
-        }
-        @Override
-        public HashSet<Subscriber> getAllSubscribers() { return subscribers; }
-    }
-
-    public class TestServiceConnection implements ServiceConnection {
-        private final RequestInformation requestInformation = new RequestInformation();
-        public InternalMessage acceptMessage(InternalMessage internalMessage) { return null; }
-        public InternalMessage acceptRequest(InternalMessage internalMessage) { return null; }
-        public Class getServiceType() { return null; }
-        public String getServiceEndpoint() { return null; }
-        public RequestInformation getRequestInformation() { return requestInformation; }
-        public void endpointUpdated(String s) {}
-        public Object getWebService() { return null; }
-    }
+  }
 }

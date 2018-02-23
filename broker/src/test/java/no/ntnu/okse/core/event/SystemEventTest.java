@@ -32,33 +32,33 @@ import static org.testng.Assert.*;
 
 public class SystemEventTest {
 
-    Object o;
-    SystemEvent e;
+  Object o;
+  SystemEvent e;
 
-    @BeforeMethod
-    public void setUp() {
-        o = new Object();
-        e = new SystemEvent(SystemEvent.Type.SHUTDOWN, o);
-    }
+  @BeforeMethod
+  public void setUp() {
+    o = new Object();
+    e = new SystemEvent(SystemEvent.Type.SHUTDOWN, o);
+  }
 
-    @AfterMethod
-    public void tearDown() {
-        o = null;
-        e = null;
-    }
+  @AfterMethod
+  public void tearDown() {
+    o = null;
+    e = null;
+  }
 
-    @Test
-    public void testGetData() {
-        assertNotNull(e.getData());
-        assertSame(e.getData(), o);
-    }
+  @Test
+  public void testGetData() {
+    assertNotNull(e.getData());
+    assertSame(e.getData(), o);
+  }
 
-    @Test
-    public void testGetType() {
-        assertNotNull(e.getType());
-        assertEquals(e.getType(), SystemEvent.Type.SHUTDOWN);
-        e = new SystemEvent(SystemEvent.Type.BOOT_PROTOCOL_SERVERS, o);
-        assertEquals(e.getType(), SystemEvent.Type.BOOT_PROTOCOL_SERVERS);
+  @Test
+  public void testGetType() {
+    assertNotNull(e.getType());
+    assertEquals(e.getType(), SystemEvent.Type.SHUTDOWN);
+    e = new SystemEvent(SystemEvent.Type.BOOT_PROTOCOL_SERVERS, o);
+    assertEquals(e.getType(), SystemEvent.Type.BOOT_PROTOCOL_SERVERS);
 
-    }
+  }
 }

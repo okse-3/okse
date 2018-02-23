@@ -32,11 +32,11 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource(value = {"file:config/okse.properties"}, ignoreResourceNotFound = true)
 public class Server {
 
-    /**
-     * Initiates the Spring web server
-     */
-    public void run() {
-        SpringApplication.run(Server.class);
-    }
+  /**
+   * Initiates the Spring web server
+   */
+  public void run() {
+    SpringApplication.run(Server.class);
+  }
 
 }

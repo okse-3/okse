@@ -9,16 +9,18 @@ import asia.stampy.common.message.StompMessageType;
  * Security listener that accepts everything
  */
 public class DummySecurityListener implements SecurityMessageListener {
-    @Override
-    public StompMessageType[] getMessageTypes() {
-        return null;
-    }
 
-    @Override
-    public boolean isForMessage(StampyMessage<?> stampyMessage) {
-        return false;
-    }
+  @Override
+  public StompMessageType[] getMessageTypes() {
+    return null;
+  }
 
-    @Override
-    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) {}
+  @Override
+  public boolean isForMessage(StampyMessage<?> stampyMessage) {
+    return false;
+  }
+
+  @Override
+  public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) {
+  }
 }

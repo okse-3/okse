@@ -35,65 +35,65 @@ import static org.testng.Assert.*;
 @Test(singleThreaded = true)
 public class DBTest {
 
-    @BeforeMethod(alwaysRun = true)
-    public void setUp() throws Exception {
-        DB.setTestMode(true);
-    }
+  @BeforeMethod(alwaysRun = true)
+  public void setUp() throws Exception {
+    DB.setTestMode(true);
+  }
 
-    @AfterMethod(alwaysRun = true)
-    public void tearDown() throws Exception {
-        DB.setTestMode(false);
-    }
+  @AfterMethod(alwaysRun = true)
+  public void tearDown() throws Exception {
+    DB.setTestMode(false);
+  }
 
-    @Test
-    public void testConDB() {
-        assertTrue(DB.conDB());
-    }
+  @Test
+  public void testConDB() {
+    assertTrue(DB.conDB());
+  }
 
-    @Test
-    public void testCloseDB() {
-        assertTrue(DB.closeDB());
-    }
+  @Test
+  public void testCloseDB() {
+    assertTrue(DB.closeDB());
+  }
 
-    @Test
-    public void testInitDB() {
-        assertTrue(DB.initDB());
-    }
+  @Test
+  public void testInitDB() {
+    assertTrue(DB.initDB());
+  }
 
-    @Test
-    public void testChangePassword() throws Exception {
-        assertTrue(DB.initDB());
-        assertTrue(DB.changePassword("admin", "password"));
-    }
+  @Test
+  public void testChangePassword() throws Exception {
+    assertTrue(DB.initDB());
+    assertTrue(DB.changePassword("admin", "password"));
+  }
 
-    @Test
-    public void testSelectAllUsers() throws Exception {
-        assertTrue(DB.initDB());
-        ResultSet rs = DB.selectAllUsers();
-        assertTrue(rs.next());
-        assertFalse(rs.next());
-    }
+  @Test
+  public void testSelectAllUsers() throws Exception {
+    assertTrue(DB.initDB());
+    ResultSet rs = DB.selectAllUsers();
+    assertTrue(rs.next());
+    assertFalse(rs.next());
+  }
 
-    @Test
-    public void testSelectUser() throws Exception {
-        assertTrue(DB.initDB());
-        ResultSet rs = DB.selectUser("admin");
-        assertTrue(rs.next());
-        assertFalse(rs.next());
-    }
+  @Test
+  public void testSelectUser() throws Exception {
+    assertTrue(DB.initDB());
+    ResultSet rs = DB.selectUser("admin");
+    assertTrue(rs.next());
+    assertFalse(rs.next());
+  }
 
-    @Test
-    public void testInsertPersistentMessage() throws Exception {
-        assertTrue(DB.initDB());
-        assertTrue(DB.insertPersistentMessage("test", "test", "test"));
-    }
+  @Test
+  public void testInsertPersistentMessage() throws Exception {
+    assertTrue(DB.initDB());
+    assertTrue(DB.insertPersistentMessage("test", "test", "test"));
+  }
 
-    @Test
-    public void testGetPersistentMessages() throws Exception {
-        assertTrue(DB.initDB());
-        assertTrue(DB.insertPersistentMessage("test", "test", "test"));
-        ResultSet rs = DB.getPersistentMessages("test");
-        assertTrue(rs.next());
-        assertFalse(rs.next());
-    }
+  @Test
+  public void testGetPersistentMessages() throws Exception {
+    assertTrue(DB.initDB());
+    assertTrue(DB.insertPersistentMessage("test", "test", "test"));
+    ResultSet rs = DB.getPersistentMessages("test");
+    assertTrue(rs.next());
+    assertFalse(rs.next());
+  }
 }

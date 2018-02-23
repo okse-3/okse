@@ -8,34 +8,36 @@ import asia.stampy.common.message.StompMessageType;
 import no.ntnu.okse.protocol.stomp.STOMPSubscriptionManager;
 
 /**
- * This class listens to the UNSUBSCRIBE message type
- * and handles any connection that wants to unsubscribe from the service
+ * This class listens to the UNSUBSCRIBE message type and handles any connection that wants to
+ * unsubscribe from the service
  */
 public class UnSubscriptionListener implements StampyMessageListener {
-    private STOMPSubscriptionManager subscriptionManager;
 
-    @Override
-    public StompMessageType[] getMessageTypes() {
-        return new StompMessageType[]{StompMessageType.UNSUBSCRIBE};
-    }
+  private STOMPSubscriptionManager subscriptionManager;
 
-    @Override
-    public boolean isForMessage(StampyMessage<?> stampyMessage) {
-        return true;
-    }
+  @Override
+  public StompMessageType[] getMessageTypes() {
+    return new StompMessageType[]{StompMessageType.UNSUBSCRIBE};
+  }
 
-    @Override
-    public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) {
-        UnsubscribeMessage unsubMessage = (UnsubscribeMessage )stampyMessage;
-        subscriptionManager.removeSubscriber(unsubMessage.getHeader().getId());
-    }
+  @Override
+  public boolean isForMessage(StampyMessage<?> stampyMessage) {
+    return true;
+  }
 
-    /**
-     * Sets the subscriptionManager for this class, it is used
-     * to remove any subscribers after they disconnect
-     * @param subscriptionManager the subscription manager instance
-     */
-    public void setSubscriptionManager(STOMPSubscriptionManager subscriptionManager) {
-        this.subscriptionManager = subscriptionManager;
-    }
+  @Override
+  public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) {
+    UnsubscribeMessage unsubMessage = (UnsubscribeMessage) stampyMessage;
+    subscriptionManager.removeSubscriber(unsubMessage.getHeader().getId());
+  }
+
+  /**
+   * Sets the subscriptionManager for this class, it is used to remove any subscribers after they
+   * disconnect
+   *
+   * @param subscriptionManager the subscription manager instance
+   */
+  public void setSubscriptionManager(STOMPSubscriptionManager subscriptionManager) {
+    this.subscriptionManager = subscriptionManager;
+  }
 }

@@ -8,40 +8,42 @@ import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.w3c.dom.Element;
 
 public class WSNSubscriber extends SubscribeClient {
-    @Parameter(names = {"--port", "-p"}, description = "Port")
-    public final int port = 61000;
 
-    @Parameter(names = {"--client-host", "-ch"}, description = "Client Port")
-    public final String clientHost = "localhost";
+  @Parameter(names = {"--port", "-p"}, description = "Port")
+  public final int port = 61000;
 
-    @Parameter(names = {"--client-port", "-cp"}, description = "Client Port")
-    public final int clientPort = 9000;
+  @Parameter(names = {"--client-host", "-ch"}, description = "Client Port")
+  public final String clientHost = "localhost";
 
-    private WSNClient client;
+  @Parameter(names = {"--client-port", "-cp"}, description = "Client Port")
+  public final int clientPort = 9000;
 
-    public static void main(String[] args) {
-        launch(new WSNSubscriber(), args);
+  private WSNClient client;
+
+  public static void main(String[] args) {
+    launch(new WSNSubscriber(), args);
+  }
+
+  protected void createClient() {
+    client = new WSNClient(host, port);
+    client.setCallback(new WSNConsumer());
+  }
+
+  protected TestClient getClient() {
+    return client;
+  }
+
+  public void subscribe(String topic) {
+    client.subscribe(topic, clientHost, clientPort);
+  }
+
+  private class WSNConsumer implements Consumer.Callback {
+
+    public void notify(NotificationMessageHolderType message) {
+      Object o = message.getMessage().getAny();
+      if (o instanceof Element) {
+        System.out.println(((Element) o).getTextContent());
+      }
     }
-
-    protected void createClient() {
-        client = new WSNClient(host, port);
-        client.setCallback(new WSNConsumer());
-    }
-
-    protected TestClient getClient() {
-        return client;
-    }
-
-    public void subscribe(String topic) {
-        client.subscribe(topic, clientHost, clientPort);
-    }
-
-    private class WSNConsumer implements Consumer.Callback {
-        public void notify(NotificationMessageHolderType message) {
-            Object o = message.getMessage().getAny();
-            if (o instanceof Element) {
-                System.out.println(((Element)o).getTextContent());
-            }
-        }
-    }
+  }
 }

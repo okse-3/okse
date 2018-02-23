@@ -26,30 +26,28 @@ package no.ntnu.okse.core.event;
 
 public abstract class Event {
 
-    protected final Object data;
+  protected final Object data;
 
-    /**
-     * Constructs an Event containing an operation, some data and a dataType.
-     * <p>
-     *
-     * @param data: An object containing the data payload.
-     */
-    protected Event(Object data) {
-        this.data = data;
-    }
+  /**
+   * Constructs an Event containing an operation, some data and a dataType. <p>
+   *
+   * @param data: An object containing the data payload.
+   */
+  protected Event(Object data) {
+    this.data = data;
+  }
 
-    /**
-     * An abstract method to retrieve the data payload.
-     * <p>
-     *
-     * @return An object containing the data payload casted to proper type in subclass.
-     */
-    public abstract Object getData();
+  /**
+   * An abstract method to retrieve the data payload. <p>
+   *
+   * @return An object containing the data payload casted to proper type in subclass.
+   */
+  public abstract Object getData();
 
-    /**
-     * An abstract method that should return a subclass enum type
-     *
-     * @return Type enum implemented in subclass
-     */
-    public abstract Object getType();
+  /**
+   * An abstract method that should return a subclass enum type
+   *
+   * @return Type enum implemented in subclass
+   */
+  public abstract Object getType();
 }

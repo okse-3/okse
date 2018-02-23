@@ -12,132 +12,139 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class STOMPSubscriptionManager implements SubscriptionChangeListener {
-    private static Logger log;
-    private SubscriptionService subscriptionService = null;
-    public final ConcurrentHashMap<String, Subscriber> localSubscriberMap;
 
-    /**
-     * Setup of variables
-     */
-    public STOMPSubscriptionManager () {
-        log = Logger.getLogger(SubscriptionManager.class.getName());
-        localSubscriberMap = new ConcurrentHashMap<>();
-    }
+  private static Logger log;
+  private SubscriptionService subscriptionService = null;
+  public final ConcurrentHashMap<String, Subscriber> localSubscriberMap;
 
-    /**
-     * Initialises the core subscription service. Basically a setter
-     * @param subService subscription service
-     */
-    public void initCoreSubscriptionService(SubscriptionService subService) {
-        this.subscriptionService = subService;
-    }
+  /**
+   * Setup of variables
+   */
+  public STOMPSubscriptionManager() {
+    log = Logger.getLogger(SubscriptionManager.class.getName());
+    localSubscriberMap = new ConcurrentHashMap<>();
+  }
 
-    /**
-     * Adds a subscriber to the local map, and to OKSE
-     * @param s OKSE subscriber
-     * @param clientID Some specific clientID
-     */
-    public void addSubscriber(Subscriber s, String clientID) {
-        if(containsSubscriber(clientID)){
-            log.warn("This subscriber is already added");
-            return;
-        }
-        subscriptionService.addSubscriber(s);
-        log.debug("Adding Subscriber to local mappings: " + clientID);
-        localSubscriberMap.put(clientID, s);
-    }
+  /**
+   * Initialises the core subscription service. Basically a setter
+   *
+   * @param subService subscription service
+   */
+  public void initCoreSubscriptionService(SubscriptionService subService) {
+    this.subscriptionService = subService;
+  }
 
-    /**
-     * Removes a subscriber
-     * @param clientID the client id of the message
-     */
-    public void removeSubscriber(String clientID){
-        if(containsSubscriber(clientID)){
-            subscriptionService.removeSubscriber(getSubscriber(clientID));
-            localSubscriberMap.remove(clientID);
-        }
+  /**
+   * Adds a subscriber to the local map, and to OKSE
+   *
+   * @param s OKSE subscriber
+   * @param clientID Some specific clientID
+   */
+  public void addSubscriber(Subscriber s, String clientID) {
+    if (containsSubscriber(clientID)) {
+      log.warn("This subscriber is already added");
+      return;
     }
+    subscriptionService.addSubscriber(s);
+    log.debug("Adding Subscriber to local mappings: " + clientID);
+    localSubscriberMap.put(clientID, s);
+  }
 
-    /**
-     * Removes a subscriber
-     * @param host the host of the connection
-     * @param port the port of the connection
-     */
-    public void removeSubscriber(String host, int port){
-        Enumeration<String> enum_keys = localSubscriberMap.keys();
-        while(enum_keys.hasMoreElements()){
-            String key = enum_keys.nextElement();
-            Subscriber sub = localSubscriberMap.get(key);
-            if(sub.getHost().equals(host) && sub.getPort() == port){
-                subscriptionService.removeSubscriber(sub);
-                localSubscriberMap.remove(key);
-            }
-        }
+  /**
+   * Removes a subscriber
+   *
+   * @param clientID the client id of the message
+   */
+  public void removeSubscriber(String clientID) {
+    if (containsSubscriber(clientID)) {
+      subscriptionService.removeSubscriber(getSubscriber(clientID));
+      localSubscriberMap.remove(clientID);
     }
+  }
 
-    /**
-     * Removes a subscriber based
-     * @param sub The subscriber to remove
-     */
-    public void removeSubscriber(Subscriber sub) {
-        Enumeration<String> enum_keys = localSubscriberMap.keys();
-        while(enum_keys.hasMoreElements()){
-            String key = enum_keys.nextElement();
-            Subscriber local_sub = localSubscriberMap.get(key);
-            if(local_sub.getSubscriberID().equals(sub.getSubscriberID())){
-                subscriptionService.removeSubscriber(sub);
-                localSubscriberMap.remove(key);
-            }
-        }
+  /**
+   * Removes a subscriber
+   *
+   * @param host the host of the connection
+   * @param port the port of the connection
+   */
+  public void removeSubscriber(String host, int port) {
+    Enumeration<String> enum_keys = localSubscriberMap.keys();
+    while (enum_keys.hasMoreElements()) {
+      String key = enum_keys.nextElement();
+      Subscriber sub = localSubscriberMap.get(key);
+      if (sub.getHost().equals(host) && sub.getPort() == port) {
+        subscriptionService.removeSubscriber(sub);
+        localSubscriberMap.remove(key);
+      }
     }
+  }
 
-    /**
-     * Looks up if the subscriber is already in the local map
-     * @param clientID the client id of the connection
-     * @return
-     */
-    public boolean containsSubscriber(String clientID){
-        return localSubscriberMap.containsKey(clientID);
+  /**
+   * Removes a subscriber based
+   *
+   * @param sub The subscriber to remove
+   */
+  public void removeSubscriber(Subscriber sub) {
+    Enumeration<String> enum_keys = localSubscriberMap.keys();
+    while (enum_keys.hasMoreElements()) {
+      String key = enum_keys.nextElement();
+      Subscriber local_sub = localSubscriberMap.get(key);
+      if (local_sub.getSubscriberID().equals(sub.getSubscriberID())) {
+        subscriptionService.removeSubscriber(sub);
+        localSubscriberMap.remove(key);
+      }
     }
+  }
 
-    /**
-     * Gets the subscriber from the local map
-     * @param clientID the client id of the connection
-     * @return
-     */
-    public Subscriber getSubscriber(String clientID){
-        return localSubscriberMap.get(clientID);
-    }
+  /**
+   * Looks up if the subscriber is already in the local map
+   *
+   * @param clientID the client id of the connection
+   */
+  public boolean containsSubscriber(String clientID) {
+    return localSubscriberMap.containsKey(clientID);
+  }
 
-    /**
-     * Gets all subscribers for some specific topic
-     * @param topic the topic to filter on
-     * @return
-     */
-    public HashMap<String, Subscriber> getAllSubscribersForTopic(String topic){
-        HashMap<String, Subscriber> newHashMap = new HashMap<>();
-        Object[] keyArr = localSubscriberMap.keySet().toArray();
-        for(int i = 0; i < localSubscriberMap.size(); i++){
-            String key = (String)keyArr[i];
-            Subscriber sub = localSubscriberMap.get(key);
-            if(sub.getTopic().equals(topic)){
-                newHashMap.put(key, sub);
-            }
-        }
-        return newHashMap;
-    }
+  /**
+   * Gets the subscriber from the local map
+   *
+   * @param clientID the client id of the connection
+   */
+  public Subscriber getSubscriber(String clientID) {
+    return localSubscriberMap.get(clientID);
+  }
 
-    /**
-     * Method that is called from OKSE whenever a subscription changes
-     * @param e the subscription change event
-     */
-    @Override
-    public void subscriptionChanged(SubscriptionChangeEvent e) {
-        if (e.getData().getOriginProtocol().equals("stomp")) {
-            if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
-                log.debug("Received a UNSUBSCRIBE event");
-                removeSubscriber(e.getData());
-            }
-        }
+  /**
+   * Gets all subscribers for some specific topic
+   *
+   * @param topic the topic to filter on
+   */
+  public HashMap<String, Subscriber> getAllSubscribersForTopic(String topic) {
+    HashMap<String, Subscriber> newHashMap = new HashMap<>();
+    Object[] keyArr = localSubscriberMap.keySet().toArray();
+    for (int i = 0; i < localSubscriberMap.size(); i++) {
+      String key = (String) keyArr[i];
+      Subscriber sub = localSubscriberMap.get(key);
+      if (sub.getTopic().equals(topic)) {
+        newHashMap.put(key, sub);
+      }
     }
+    return newHashMap;
+  }
+
+  /**
+   * Method that is called from OKSE whenever a subscription changes
+   *
+   * @param e the subscription change event
+   */
+  @Override
+  public void subscriptionChanged(SubscriptionChangeEvent e) {
+    if (e.getData().getOriginProtocol().equals("stomp")) {
+      if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
+        log.debug("Received a UNSUBSCRIBE event");
+        removeSubscriber(e.getData());
+      }
+    }
+  }
 }

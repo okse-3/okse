@@ -16,72 +16,70 @@ import java.lang.invoke.MethodHandles;
 import java.net.InetSocketAddress;
 
 /**
- * This class listens for any DISCONNECT message type that are sent to the
- * STOMP server.
+ * This class listens for any DISCONNECT message type that are sent to the STOMP server.
  *
- * IT also adds a handler to the gateway that cleans up
- * lingering subscribers if there is a forceful disconnect without
- * there being sent a disconnect message
+ * IT also adds a handler to the gateway that cleans up lingering subscribers if there is a forceful
+ * disconnect without there being sent a disconnect message
  */
-public class DisconnectListener implements StampyMessageListener{
-    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private STOMPSubscriptionManager subscriptionManager;
-    private ServerNettyMessageGateway gateway;
+public class DisconnectListener implements StampyMessageListener {
 
-    /**
-     * Cleans up any lingering subscribers if a connection
-     * is terminated without a disconnect message
-     */
-    protected void ensureCleanup() {
-        gateway.addHandler(new SimpleChannelUpstreamHandler() {
-            public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
-                log.info("Cleaning up after a forceful disconnect");
-                HostPort hostPort = new HostPort((InetSocketAddress) ctx.getChannel().getRemoteAddress());
-                cleanUp(hostPort);
-            }
-        });
-    }
+  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private STOMPSubscriptionManager subscriptionManager;
+  private ServerNettyMessageGateway gateway;
 
-    /**
-     * Actually the method that removes any lingering subscribers
-     * @param hostPort the host and port of the subscriber
-     */
-    public void cleanUp(HostPort hostPort){
-        subscriptionManager.removeSubscriber(hostPort.getHost(), hostPort.getPort());
-    }
-
-    /**
-     * Sets the subscriptionManager for this class, it is used
-     * to remove any subscribers after they disconnect
-     * @param subscriptionManager the subscription manager instance
-     */
-    public void setSubscriptionManager(STOMPSubscriptionManager subscriptionManager) {
-        this.subscriptionManager = subscriptionManager;
-    }
-
-    /**
-     * Sets the gateway
-     * Used to add the handler for forceful disconnects
-     * @param gateway
-     */
-    public void setGateway(ServerNettyMessageGateway gateway) {
-        this.gateway = gateway;
-        ensureCleanup();
-    }
-
-    @Override
-    public StompMessageType[] getMessageTypes() {
-        return new StompMessageType[]{StompMessageType.DISCONNECT};
-    }
-
-    @Override
-    public boolean isForMessage(StampyMessage<?> message) {
-        return true;
-    }
-    
-    @Override
-    public void messageReceived(StampyMessage<?> message, HostPort hostPort) {
-        log.info("Cleaning up after a disconnect");
+  /**
+   * Cleans up any lingering subscribers if a connection is terminated without a disconnect message
+   */
+  protected void ensureCleanup() {
+    gateway.addHandler(new SimpleChannelUpstreamHandler() {
+      public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
+        log.info("Cleaning up after a forceful disconnect");
+        HostPort hostPort = new HostPort((InetSocketAddress) ctx.getChannel().getRemoteAddress());
         cleanUp(hostPort);
-    }
+      }
+    });
+  }
+
+  /**
+   * Actually the method that removes any lingering subscribers
+   *
+   * @param hostPort the host and port of the subscriber
+   */
+  public void cleanUp(HostPort hostPort) {
+    subscriptionManager.removeSubscriber(hostPort.getHost(), hostPort.getPort());
+  }
+
+  /**
+   * Sets the subscriptionManager for this class, it is used to remove any subscribers after they
+   * disconnect
+   *
+   * @param subscriptionManager the subscription manager instance
+   */
+  public void setSubscriptionManager(STOMPSubscriptionManager subscriptionManager) {
+    this.subscriptionManager = subscriptionManager;
+  }
+
+  /**
+   * Sets the gateway Used to add the handler for forceful disconnects
+   */
+  public void setGateway(ServerNettyMessageGateway gateway) {
+    this.gateway = gateway;
+    ensureCleanup();
+  }
+
+  @Override
+  public StompMessageType[] getMessageTypes() {
+    return new StompMessageType[]{StompMessageType.DISCONNECT};
+  }
+
+  @Override
+  public boolean isForMessage(StampyMessage<?> message) {
+    return true;
+  }
+
+  @Override
+  public void messageReceived(StampyMessage<?> message, HostPort hostPort) {
+    log.info("Cleaning up after a disconnect");
+    cleanUp(hostPort);
+  }
 }

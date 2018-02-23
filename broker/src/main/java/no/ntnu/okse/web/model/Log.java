@@ -28,28 +28,28 @@ import java.util.List;
 
 public class Log {
 
-    private final String name;
-    private final List<String> lines;
+  private final String name;
+  private final List<String> lines;
 
-    /**
-     * Constructs a model for containing log information to be serialized
-     *
-     * @param name  The log file
-     * @param lines All contents of the file
-     */
-    public Log(String name, List<String> lines) {
-        this.name = name;
-        this.lines = lines;
+  /**
+   * Constructs a model for containing log information to be serialized
+   *
+   * @param name The log file
+   * @param lines All contents of the file
+   */
+  public Log(String name, List<String> lines) {
+    this.name = name;
+    this.lines = lines;
 
-    }
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public List<String> getLines() {
-        return lines;
-    }
+  public List<String> getLines() {
+    return lines;
+  }
 
 
 }

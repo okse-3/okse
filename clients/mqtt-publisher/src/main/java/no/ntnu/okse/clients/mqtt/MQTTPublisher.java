@@ -5,26 +5,27 @@ import no.ntnu.okse.clients.PublishClient;
 import no.ntnu.okse.clients.TestClient;
 
 public class MQTTPublisher extends PublishClient {
-    @Parameter(names = {"--port", "-p"}, description = "Port")
-    public final int port = 1883;
-    @Parameter(names = {"--qos", "-q"}, description = "Quality of Service")
-    public final int qos = 0;
 
-    private MQTTClient client;
+  @Parameter(names = {"--port", "-p"}, description = "Port")
+  public final int port = 1883;
+  @Parameter(names = {"--qos", "-q"}, description = "Quality of Service")
+  public final int qos = 0;
 
-    public static void main(String[] args) {
-        launch(new MQTTPublisher(), args);
-    }
+  private MQTTClient client;
 
-    protected void createClient() {
-        client = new MQTTClient(host, port, "MQTTPublisher");
-    }
+  public static void main(String[] args) {
+    launch(new MQTTPublisher(), args);
+  }
 
-    public void publish(String topic, String message) {
-        client.publish(topic, message, qos);
-    }
+  protected void createClient() {
+    client = new MQTTClient(host, port, "MQTTPublisher");
+  }
 
-    protected TestClient getClient() {
-        return client;
-    }
+  public void publish(String topic, String message) {
+    client.publish(topic, message, qos);
+  }
+
+  protected TestClient getClient() {
+    return client;
+  }
 }

@@ -28,46 +28,45 @@ import no.ntnu.okse.core.subscription.Subscriber;
 
 public class SubscriptionChangeEvent extends Event {
 
-    // The different types of subscription changes that might occur
-    public enum Type {
-        SUBSCRIBE,
-        UNSUBSCRIBE,
-        RENEW,
-        PAUSE,
-        RESUME
-    }
+  // The different types of subscription changes that might occur
+  public enum Type {
+    SUBSCRIBE,
+    UNSUBSCRIBE,
+    RENEW,
+    PAUSE,
+    RESUME
+  }
 
-    private final Type eventType;
+  private final Type eventType;
 
-    /**
-     * Constructs a SubscriptionChangeEvent of a certain Type, with associated Subscriber object.
-     * <p>
-     *
-     * @param eventType : The type of subscription event this is
-     * @param data      : The subscriber object in question.
-     */
-    public SubscriptionChangeEvent(Type eventType, Subscriber data) {
-        super(data);
-        this.eventType = eventType;
-    }
+  /**
+   * Constructs a SubscriptionChangeEvent of a certain Type, with associated Subscriber object. <p>
+   *
+   * @param eventType : The type of subscription event this is
+   * @param data : The subscriber object in question.
+   */
+  public SubscriptionChangeEvent(Type eventType, Subscriber data) {
+    super(data);
+    this.eventType = eventType;
+  }
 
-    /**
-     * Fetch the related Subscriber object.
-     *
-     * @return The Subscriber object associated with this event.
-     */
-    @Override
-    public Subscriber getData() {
-        return (Subscriber) data;
-    }
+  /**
+   * Fetch the related Subscriber object.
+   *
+   * @return The Subscriber object associated with this event.
+   */
+  @Override
+  public Subscriber getData() {
+    return (Subscriber) data;
+  }
 
-    /**
-     * Fetch the event type of this event.
-     *
-     * @return A SubscriptionChangeEvent
-     */
-    @Override
-    public Type getType() {
-        return this.eventType;
-    }
+  /**
+   * Fetch the event type of this event.
+   *
+   * @return A SubscriptionChangeEvent
+   */
+  @Override
+  public Type getType() {
+    return this.eventType;
+  }
 }

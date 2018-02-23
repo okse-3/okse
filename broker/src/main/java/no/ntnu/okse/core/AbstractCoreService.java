@@ -28,45 +28,46 @@ import org.apache.log4j.Logger;
 
 public abstract class AbstractCoreService {
 
-    // Instance-specific fields
-    protected boolean _running;
-    protected final Logger log;
+  // Instance-specific fields
+  protected boolean _running;
+  protected final Logger log;
 
-    /**
-     * Protected constructor that takes in the className string from the subclass (for logger initializing)
-     *
-     * @param className className as string
-     */
-    protected AbstractCoreService(String className) {
-        _running = false;
-        log = Logger.getLogger(className);
-    }
+  /**
+   * Protected constructor that takes in the className string from the subclass (for logger
+   * initializing)
+   *
+   * @param className className as string
+   */
+  protected AbstractCoreService(String className) {
+    _running = false;
+    log = Logger.getLogger(className);
+  }
 
-    /**
-     * Initializing method
-     */
-    protected abstract void init();
+  /**
+   * Initializing method
+   */
+  protected abstract void init();
 
-    /**
-     * Startup method that sets up the service
-     */
-    public abstract void boot();
+  /**
+   * Startup method that sets up the service
+   */
+  public abstract void boot();
 
-    /**
-     * This method must contain the operations needed for the subclass to register itself as a listener
-     * to the different objects it wants to listen to. This method will be called after all Core Services have
-     * been booted.
-     */
-    public abstract void registerListenerSupport();
+  /**
+   * This method must contain the operations needed for the subclass to register itself as a
+   * listener to the different objects it wants to listen to. This method will be called after all
+   * Core Services have been booted.
+   */
+  public abstract void registerListenerSupport();
 
-    /**
-     * Main run method that will be called when the subclass' serverThread is started
-     */
-    public abstract void run();
+  /**
+   * Main run method that will be called when the subclass' serverThread is started
+   */
+  public abstract void run();
 
-    /**
-     * Graceful shutdown method
-     */
-    public abstract void stop();
+  /**
+   * Graceful shutdown method
+   */
+  public abstract void stop();
 
 }

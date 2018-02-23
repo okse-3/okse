@@ -36,78 +36,78 @@ import java.util.*;
 @RequestMapping("/api/topic")
 public class TopicController {
 
-    private static final String GET_ALL_TOPICS = "/get/all";
-    private static final String DELETE_ALL_TOPICS = "/delete/all";
-    private static final String DELETE_SINGLE_TOPIC = "/delete/single";
+  private static final String GET_ALL_TOPICS = "/get/all";
+  private static final String DELETE_ALL_TOPICS = "/delete/all";
+  private static final String DELETE_SINGLE_TOPIC = "/delete/single";
 
-    private static final Logger log = Logger.getLogger(TopicController.class.getName());
+  private static final Logger log = Logger.getLogger(TopicController.class.getName());
 
-    /**
-     * This method returns all topics registered in the TopicService
-     *
-     * @return A JSON serialization of all registered topics
-     */
-    @RequestMapping(method = RequestMethod.GET, value = GET_ALL_TOPICS)
-    public
-    @ResponseBody
-    List<HashMap<String, Object>> getAllTopics() {
-        TopicService ts = TopicService.getInstance();
-        SubscriptionService ss = SubscriptionService.getInstance();
-        HashSet<Topic> allTopics = ts.getAllTopics();
+  /**
+   * This method returns all topics registered in the TopicService
+   *
+   * @return A JSON serialization of all registered topics
+   */
+  @RequestMapping(method = RequestMethod.GET, value = GET_ALL_TOPICS)
+  public
+  @ResponseBody
+  List<HashMap<String, Object>> getAllTopics() {
+    TopicService ts = TopicService.getInstance();
+    SubscriptionService ss = SubscriptionService.getInstance();
+    HashSet<Topic> allTopics = ts.getAllTopics();
 
-        List<HashMap<String, Object>> results = new ArrayList<>();
+    List<HashMap<String, Object>> results = new ArrayList<>();
 
-        allTopics
-                .forEach(t -> {
-                    int subscribers = ss.getAllSubscribersForTopic(t.getFullTopicString()).size();
-                    HashMap<String, Object> topicInfo = new HashMap<String, Object>() {{
-                        put("subscribers", subscribers);
-                        put("topic", t);
-                    }};
-                    results.add(topicInfo);
-                });
+    allTopics
+        .forEach(t -> {
+          int subscribers = ss.getAllSubscribersForTopic(t.getFullTopicString()).size();
+          HashMap<String, Object> topicInfo = new HashMap<String, Object>() {{
+            put("subscribers", subscribers);
+            put("topic", t);
+          }};
+          results.add(topicInfo);
+        });
 
-        results.sort(Comparator.comparing(t -> ((Topic) t.get("topic")).getFullTopicString()));
+    results.sort(Comparator.comparing(t -> ((Topic) t.get("topic")).getFullTopicString()));
 
-        return results;
-    }
+    return results;
+  }
 
-    /**
-     * This method deletes all topics registered in the TopicService
-     *
-     * @return A JSON serialized string
-     */
-    @RequestMapping(method = RequestMethod.DELETE, value = DELETE_ALL_TOPICS)
-    public
-    @ResponseBody
-    String deleteAllTopics() {
-        log.info("Deleting all topics");
-        TopicService ts = TopicService.getInstance();
-        HashSet<Topic> allRootTopics = ts.getAllRootTopics();
-        allRootTopics.forEach(t -> ts.deleteTopic(t.getFullTopicString()));
+  /**
+   * This method deletes all topics registered in the TopicService
+   *
+   * @return A JSON serialized string
+   */
+  @RequestMapping(method = RequestMethod.DELETE, value = DELETE_ALL_TOPICS)
+  public
+  @ResponseBody
+  String deleteAllTopics() {
+    log.info("Deleting all topics");
+    TopicService ts = TopicService.getInstance();
+    HashSet<Topic> allRootTopics = ts.getAllRootTopics();
+    allRootTopics.forEach(t -> ts.deleteTopic(t.getFullTopicString()));
 
-        return "{ \"messages\" :\"The topic were successfully deleted\" }";
-    }
+    return "{ \"messages\" :\"The topic were successfully deleted\" }";
+  }
 
-    /**
-     * This method returns a single topic registered in the TopicService, represented by a string id
-     *
-     * @param id The topic id to search for
-     * @return A JSON serialized Topic
-     */
-    @RequestMapping(method = RequestMethod.DELETE, value = DELETE_SINGLE_TOPIC)
-    public
-    @ResponseBody
-    HashMap<String, Object> deleteSingleTopic(@RequestParam(value = "topicID") String id) {
-        log.info("Deleting Topic with ID: " + id);
-        TopicService ts = TopicService.getInstance();
-        Topic t = ts.getTopicByID(id.trim());
-        ts.deleteTopic(t.getFullTopicString());
+  /**
+   * This method returns a single topic registered in the TopicService, represented by a string id
+   *
+   * @param id The topic id to search for
+   * @return A JSON serialized Topic
+   */
+  @RequestMapping(method = RequestMethod.DELETE, value = DELETE_SINGLE_TOPIC)
+  public
+  @ResponseBody
+  HashMap<String, Object> deleteSingleTopic(@RequestParam(value = "topicID") String id) {
+    log.info("Deleting Topic with ID: " + id);
+    TopicService ts = TopicService.getInstance();
+    Topic t = ts.getTopicByID(id.trim());
+    ts.deleteTopic(t.getFullTopicString());
 
-        return new HashMap<String, Object>() {{
-            put("topicID", t.getTopicID());
-            /*put("children", t.getChildren());*/
-        }};
-    }
+    return new HashMap<String, Object>() {{
+      put("topicID", t.getTopicID());
+      /*put("children", t.getChildren());*/
+    }};
+  }
 
 }

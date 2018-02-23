@@ -32,35 +32,35 @@ import static org.testng.Assert.*;
 
 public class SubscriptionTaskTest {
 
-    boolean jobComplete;
-    SubscriptionTask task;
-    Runnable job;
+  boolean jobComplete;
+  SubscriptionTask task;
+  Runnable job;
 
-    @BeforeMethod
-    public void setUp() {
-        jobComplete = false;
-        job = () -> jobComplete = true;
-        task = new SubscriptionTask(SubscriptionTask.Type.NEW_SUBSCRIBER, job);
-    }
+  @BeforeMethod
+  public void setUp() {
+    jobComplete = false;
+    job = () -> jobComplete = true;
+    task = new SubscriptionTask(SubscriptionTask.Type.NEW_SUBSCRIBER, job);
+  }
 
-    @AfterMethod
-    public void tearDown() {
-        jobComplete = false;
-        job = null;
-        task = null;
-    }
+  @AfterMethod
+  public void tearDown() {
+    jobComplete = false;
+    job = null;
+    task = null;
+  }
 
-    @Test
-    public void testGetType() {
-        assertNotNull(task.getType());
-        assertEquals(task.getType(), SubscriptionTask.Type.NEW_SUBSCRIBER);
-        task = new SubscriptionTask(SubscriptionTask.Type.DELETE_SUBSCRIBER, job);
-        assertEquals(task.getType(), SubscriptionTask.Type.DELETE_SUBSCRIBER);
-    }
+  @Test
+  public void testGetType() {
+    assertNotNull(task.getType());
+    assertEquals(task.getType(), SubscriptionTask.Type.NEW_SUBSCRIBER);
+    task = new SubscriptionTask(SubscriptionTask.Type.DELETE_SUBSCRIBER, job);
+    assertEquals(task.getType(), SubscriptionTask.Type.DELETE_SUBSCRIBER);
+  }
 
-    @Test
-    public void testRun() {
-        task.run();
-        assertTrue(jobComplete);
-    }
+  @Test
+  public void testRun() {
+    task.run();
+    assertTrue(jobComplete);
+  }
 }

@@ -33,33 +33,33 @@ import static org.testng.Assert.*;
 
 public class SubscriptionChangeEventTest {
 
-    Subscriber s;
-    SubscriptionChangeEvent sce;
+  Subscriber s;
+  SubscriptionChangeEvent sce;
 
-    @BeforeMethod
-    public void setUp() {
-        s = new Subscriber("0.0.0.0", 8080, "topic", "Test");
-        sce = new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.SUBSCRIBE, s);
-    }
+  @BeforeMethod
+  public void setUp() {
+    s = new Subscriber("0.0.0.0", 8080, "topic", "Test");
+    sce = new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.SUBSCRIBE, s);
+  }
 
-    @AfterMethod
-    public void tearDown() {
-        s = null;
-        sce = null;
-    }
+  @AfterMethod
+  public void tearDown() {
+    s = null;
+    sce = null;
+  }
 
-    @Test
-    public void testGetData() {
-        assertNotNull(sce.getData());
-        assertEquals(sce.getData().getTopic(), "topic");
-        assertSame(sce.getData(), s);
-    }
+  @Test
+  public void testGetData() {
+    assertNotNull(sce.getData());
+    assertEquals(sce.getData().getTopic(), "topic");
+    assertSame(sce.getData(), s);
+  }
 
-    @Test
-    public void testGetType() {
-        assertNotNull(sce.getType());
-        assertEquals(sce.getType(), SubscriptionChangeEvent.Type.SUBSCRIBE);
-        sce = new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.UNSUBSCRIBE, s);
-        assertEquals(sce.getType(), SubscriptionChangeEvent.Type.UNSUBSCRIBE);
-    }
+  @Test
+  public void testGetType() {
+    assertNotNull(sce.getType());
+    assertEquals(sce.getType(), SubscriptionChangeEvent.Type.SUBSCRIBE);
+    sce = new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.UNSUBSCRIBE, s);
+    assertEquals(sce.getType(), SubscriptionChangeEvent.Type.UNSUBSCRIBE);
+  }
 }

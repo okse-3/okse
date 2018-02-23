@@ -47,1336 +47,1339 @@ import static org.testng.Assert.*;
 public class AMQPServerTest {
 
 
-    AMQProtocolServer ps;
+  AMQProtocolServer ps;
 
-    // port for AMQP server. Incremented every test to prevent tests failing
-    // because the port hasn't been freed in time from an earlier test
-    int port = 5673;
+  // port for AMQP server. Incremented every test to prevent tests failing
+  // because the port hasn't been freed in time from an earlier test
+  int port = 5673;
 
-    @BeforeMethod
-    public void setUp() {
-        ps = new AMQProtocolServer("0.0.0.0", port++, false, true);
-        ps.boot();
-    }
+  @BeforeMethod
+  public void setUp() {
+    ps = new AMQProtocolServer("0.0.0.0", port++, false, true);
+    ps.boot();
+  }
 
-    @AfterMethod
-    public void tearDown() {
-        ps.stopServer();
-        ps = null;
-    }
+  @AfterMethod
+  public void tearDown() {
+    ps.stopServer();
+    ps = null;
+  }
 
-    // TODO: Fix test
-    // @Test(groups = "amqp")
-    private void testSendReceiveAMQPMessagesWhenQueueIsUsed() throws Exception {
-        //AMQProtocolServer psTest = AMQProtocolServer.getInstance("localhost", 63660);
-        AMQProtocolServer psTest = ps;
-        //psTest.boot();
-        psTest.useQueue = true;
+  // TODO: Fix test
+  // @Test(groups = "amqp")
+  private void testSendReceiveAMQPMessagesWhenQueueIsUsed() throws Exception {
+    //AMQProtocolServer psTest = AMQProtocolServer.getInstance("localhost", 63660);
+    AMQProtocolServer psTest = ps;
+    //psTest.boot();
+    psTest.useQueue = true;
 //        if (AMQProtocolServer.getInstance().useQueue) {
-        String message = "Megatest";
-        String topic = "test/test";
-        int numberOfMessages = 5;
+    String message = "Megatest";
+    String topic = "test/test";
+    int numberOfMessages = 5;
 
+    Messenger sendMessenger = Messenger.Factory.create();
+    sendMessenger.start();
+    org.apache.qpid.proton.message.Message msg = org.apache.qpid.proton.message.Message.Factory
+        .create();
 
-        Messenger sendMessenger = Messenger.Factory.create();
-        sendMessenger.start();
-        org.apache.qpid.proton.message.Message msg = org.apache.qpid.proton.message.Message.Factory.create();
+    msg.setAddress(psTest.getHost() + ":" + psTest.getPort() + "/" + topic);
+    msg.setBody(new AmqpValue(message));
 
+    System.out.println("Preparing to send messages...");
+    for (int i = 0; i < numberOfMessages; i++) {
+      sendMessenger.put(msg);
+      System.out.println(String.format("Sending message %d", i));
+      sendMessenger.send();
+    }
+    sendMessenger.stop();
+    ArrayList<org.apache.qpid.proton.message.Message> in = new ArrayList<>();
 
-        msg.setAddress(psTest.getHost() + ":" + psTest.getPort() + "/" + topic);
-        msg.setBody(new AmqpValue(message));
+    Messenger receiveMessenger = Messenger.Factory.create();
+    receiveMessenger.start();
+    System.out.println("Subscribing...");
+    receiveMessenger.subscribe(psTest.getHost() + ":" + psTest.getPort() + "/" + topic);
+    System.out.println("Receiving messages...");
+    receiveMessenger.recv(numberOfMessages);
+    while (receiveMessenger.incoming() > 0) {
+      msg = receiveMessenger.get();
+      in.add(msg);
+    }
 
-
-        System.out.println("Preparing to send messages...");
-        for (int i = 0; i < numberOfMessages; i++) {
-            sendMessenger.put(msg);
-            System.out.println(String.format("Sending message %d", i));
-            sendMessenger.send();
-        }
-        sendMessenger.stop();
-        ArrayList<org.apache.qpid.proton.message.Message> in = new ArrayList<>();
-
-        Messenger receiveMessenger = Messenger.Factory.create();
-        receiveMessenger.start();
-        System.out.println("Subscribing...");
-        receiveMessenger.subscribe(psTest.getHost() + ":" + psTest.getPort() + "/" + topic);
-        System.out.println("Receiving messages...");
-        receiveMessenger.recv(numberOfMessages);
-        while (receiveMessenger.incoming() > 0) {
-            msg = receiveMessenger.get();
-            in.add(msg);
-        }
-
-        assertEquals(numberOfMessages, in.size());
-        System.out.println(String.format("Got %d messages", in.size()));
+    assertEquals(numberOfMessages, in.size());
+    System.out.println(String.format("Got %d messages", in.size()));
 //        }
-    }
+  }
 
 
-    @Test(groups = "amqp")
-    public void testConvertAMQPMessageToMessageBytes() {
-        String message = "Hei på test";
-        String topic = "test/testConvertAMQPMessageToMessageBytes";
+  @Test(groups = "amqp")
+  public void testConvertAMQPMessageToMessageBytes() {
+    String message = "Hei på test";
+    String topic = "test/testConvertAMQPMessageToMessageBytes";
 
-        Section body = new AmqpValue(message);
+    Section body = new AmqpValue(message);
 
-        org.apache.qpid.proton.message.Message AMQPMessage = org.apache.qpid.proton.message.Message.Factory.create();
+    org.apache.qpid.proton.message.Message AMQPMessage = org.apache.qpid.proton.message.Message.Factory
+        .create();
 
-        AMQPMessage.setAddress("127.0.0.1" + "/" + topic);
-        AMQPMessage.setSubject("Supertesty test");
-        AMQPMessage.setBody(body);
+    AMQPMessage.setAddress("127.0.0.1" + "/" + topic);
+    AMQPMessage.setSubject("Supertesty test");
+    AMQPMessage.setBody(body);
 
-        MessageBytes mb = AMQPServer.convertAMQPMessageToMessageBytes(AMQPMessage);
+    MessageBytes mb = AMQPServer.convertAMQPMessageToMessageBytes(AMQPMessage);
 
-        org.apache.qpid.proton.message.Message AMQPMessageReconstruct = org.apache.qpid.proton.message.Message.Factory.create();
+    org.apache.qpid.proton.message.Message AMQPMessageReconstruct = org.apache.qpid.proton.message.Message.Factory
+        .create();
 
-        AMQPMessageReconstruct.decode(mb.getBytes(), 0, mb.getBytes().length);
+    AMQPMessageReconstruct.decode(mb.getBytes(), 0, mb.getBytes().length);
 
-        assertEquals(AMQPMessage.getAddress(), AMQPMessageReconstruct.getAddress());
-        assertEquals(AMQPMessage.getSubject(), AMQPMessageReconstruct.getSubject());
-        //assertEquals(AMQPMessage.getBody(), AMQPMessageReconstruct.getBody());
-        assertEquals((String) ((AmqpValue) AMQPMessage.getBody()).getValue(), (String) ((AmqpValue) AMQPMessageReconstruct.getBody()).getValue());
-    }
+    assertEquals(AMQPMessage.getAddress(), AMQPMessageReconstruct.getAddress());
+    assertEquals(AMQPMessage.getSubject(), AMQPMessageReconstruct.getSubject());
+    //assertEquals(AMQPMessage.getBody(), AMQPMessageReconstruct.getBody());
+    assertEquals((String) ((AmqpValue) AMQPMessage.getBody()).getValue(),
+        (String) ((AmqpValue) AMQPMessageReconstruct.getBody()).getValue());
+  }
 
-    @Test(groups = "amqp")
-    public void testConvertOkseMessageToAMQP() {
-        System.out.println("testConvertOkseMessageToAMQP");
-        String topic = "test";
-        Message okseMessage = new Message("Hei", topic, null, "AMQP");
+  @Test(groups = "amqp")
+  public void testConvertOkseMessageToAMQP() {
+    System.out.println("testConvertOkseMessageToAMQP");
+    String topic = "test";
+    Message okseMessage = new Message("Hei", topic, null, "AMQP");
 
-        org.apache.qpid.proton.message.Message AMQPMessage = AMQPServer.convertOkseMessageToAMQP(okseMessage, "0.0.0.0");
+    org.apache.qpid.proton.message.Message AMQPMessage = AMQPServer
+        .convertOkseMessageToAMQP(okseMessage, "0.0.0.0");
 
-        Address address = new Address(AMQPMessage.getAddress());
+    Address address = new Address(AMQPMessage.getAddress());
 
+    assertEquals(okseMessage.getMessage(), (String) ((AmqpValue) AMQPMessage.getBody()).getValue());
+    assertEquals(okseMessage.getTopic(), address.getName());
+  }
 
-        assertEquals(okseMessage.getMessage(), (String) ((AmqpValue) AMQPMessage.getBody()).getValue());
-        assertEquals(okseMessage.getTopic(), address.getName());
-    }
+  @Test(groups = "amqp")
+  public void testCreateAddress() {
+    String topic = "test";
+    String address1 = "amqp://127.0.0.1/test";
+    String address2 = "127.0.0.1/test";
+    String address3 = "127.0.0.1:61050/test";
+    String address4 = "test";
+    String address5 = "m.fest.no:6666/test";
+    String address6 = "test/test";
 
-    @Test(groups = "amqp")
-    public void testCreateAddress() {
-        String topic = "test";
-        String address1 = "amqp://127.0.0.1/test";
-        String address2 = "127.0.0.1/test";
-        String address3 = "127.0.0.1:61050/test";
-        String address4 = "test";
-        String address5 = "m.fest.no:6666/test";
-        String address6 = "test/test";
+    Delivery dlv = new Delivery() {
+      @Override
+      public Record attachments() {
+        return null;
+      }
 
-        Delivery dlv = new Delivery() {
-            @Override
-            public Record attachments() {
+      @Override
+      public byte[] getTag() {
+        return new byte[0];
+      }
+
+      @Override
+      public Link getLink() {
+        return new Link() {
+          @Override
+          public Record attachments() {
+            return null;
+          }
+
+          @Override
+          public String getName() {
+            return null;
+          }
+
+          @Override
+          public Delivery delivery(byte[] bytes) {
+            return null;
+          }
+
+          @Override
+          public Delivery delivery(byte[] bytes, int i, int i1) {
+            return null;
+          }
+
+          @Override
+          public Delivery head() {
+            return null;
+          }
+
+          @Override
+          public Delivery current() {
+            return null;
+          }
+
+          @Override
+          public boolean advance() {
+            return false;
+          }
+
+          @Override
+          public Source getSource() {
+            return null;
+          }
+
+          @Override
+          public Target getTarget() {
+            return new Target() {
+              @Override
+              public String getAddress() {
+                return topic;
+              }
+
+              @Override
+              public Target copy() {
                 return null;
-            }
-
-            @Override
-            public byte[] getTag() {
-                return new byte[0];
-            }
-
-            @Override
-            public Link getLink() {
-                return new Link() {
-                    @Override
-                    public Record attachments() {
-                        return null;
-                    }
-
-                    @Override
-                    public String getName() {
-                        return null;
-                    }
-
-                    @Override
-                    public Delivery delivery(byte[] bytes) {
-                        return null;
-                    }
-
-                    @Override
-                    public Delivery delivery(byte[] bytes, int i, int i1) {
-                        return null;
-                    }
-
-                    @Override
-                    public Delivery head() {
-                        return null;
-                    }
-
-                    @Override
-                    public Delivery current() {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean advance() {
-                        return false;
-                    }
-
-                    @Override
-                    public Source getSource() {
-                        return null;
-                    }
-
-                    @Override
-                    public Target getTarget() {
-                        return new Target() {
-                            @Override
-                            public String getAddress() {
-                                return topic;
-                            }
-
-                            @Override
-                            public Target copy() {
-                                return null;
-                            }
-                        };
-                    }
-
-                    @Override
-                    public void setSource(Source source) {
-
-                    }
-
-                    @Override
-                    public void setTarget(Target target) {
-
-                    }
-
-                    @Override
-                    public Source getRemoteSource() {
-                        return null;
-                    }
-
-                    @Override
-                    public Target getRemoteTarget() {
-                        return null;
-                    }
-
-                    @Override
-                    public Link next(EnumSet<EndpointState> enumSet, EnumSet<EndpointState> enumSet1) {
-                        return null;
-                    }
-
-                    @Override
-                    public int getCredit() {
-                        return 0;
-                    }
-
-                    @Override
-                    public int getQueued() {
-                        return 0;
-                    }
-
-                    @Override
-                    public int getUnsettled() {
-                        return 0;
-                    }
+              }
+            };
+          }
 
-                    @Override
-                    public Session getSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public SenderSettleMode getSenderSettleMode() {
-                        return null;
-                    }
+          @Override
+          public void setSource(Source source) {
 
-                    @Override
-                    public void setSenderSettleMode(SenderSettleMode senderSettleMode) {
+          }
 
-                    }
+          @Override
+          public void setTarget(Target target) {
 
-                    @Override
-                    public SenderSettleMode getRemoteSenderSettleMode() {
-                        return null;
-                    }
+          }
+
+          @Override
+          public Source getRemoteSource() {
+            return null;
+          }
 
-                    @Override
-                    public ReceiverSettleMode getReceiverSettleMode() {
-                        return null;
-                    }
+          @Override
+          public Target getRemoteTarget() {
+            return null;
+          }
 
-                    @Override
-                    public void setReceiverSettleMode(ReceiverSettleMode receiverSettleMode) {
+          @Override
+          public Link next(EnumSet<EndpointState> enumSet, EnumSet<EndpointState> enumSet1) {
+            return null;
+          }
 
-                    }
+          @Override
+          public int getCredit() {
+            return 0;
+          }
+
+          @Override
+          public int getQueued() {
+            return 0;
+          }
+
+          @Override
+          public int getUnsettled() {
+            return 0;
+          }
 
-                    @Override
-                    public ReceiverSettleMode getRemoteReceiverSettleMode() {
-                        return null;
-                    }
+          @Override
+          public Session getSession() {
+            return null;
+          }
 
-                    @Override
-                    public void setRemoteSenderSettleMode(SenderSettleMode senderSettleMode) {
+          @Override
+          public SenderSettleMode getSenderSettleMode() {
+            return null;
+          }
 
-                    }
+          @Override
+          public void setSenderSettleMode(SenderSettleMode senderSettleMode) {
 
-                    @Override
-                    public Map<Symbol, Object> getProperties() {
-                        return null;
-                    }
+          }
 
-                    @Override
-                    public void setProperties(Map<Symbol, Object> map) {
+          @Override
+          public SenderSettleMode getRemoteSenderSettleMode() {
+            return null;
+          }
 
-                    }
+          @Override
+          public ReceiverSettleMode getReceiverSettleMode() {
+            return null;
+          }
 
-                    @Override
-                    public Map<Symbol, Object> getRemoteProperties() {
-                        return null;
-                    }
+          @Override
+          public void setReceiverSettleMode(ReceiverSettleMode receiverSettleMode) {
 
-                    @Override
-                    public int drained() {
-                        return 0;
-                    }
+          }
 
-                    @Override
-                    public int getRemoteCredit() {
-                        return 0;
-                    }
+          @Override
+          public ReceiverSettleMode getRemoteReceiverSettleMode() {
+            return null;
+          }
 
-                    @Override
-                    public boolean getDrain() {
-                        return false;
-                    }
+          @Override
+          public void setRemoteSenderSettleMode(SenderSettleMode senderSettleMode) {
 
-                    @Override
-                    public void detach() {
+          }
 
-                    }
+          @Override
+          public Map<Symbol, Object> getProperties() {
+            return null;
+          }
 
-                    @Override
-                    public boolean detached() {
-                        return false;
-                    }
+          @Override
+          public void setProperties(Map<Symbol, Object> map) {
 
-                    @Override
-                    public EndpointState getLocalState() {
-                        return null;
-                    }
+          }
 
-                    @Override
-                    public EndpointState getRemoteState() {
-                        return null;
-                    }
+          @Override
+          public Map<Symbol, Object> getRemoteProperties() {
+            return null;
+          }
 
-                    @Override
-                    public ErrorCondition getCondition() {
-                        return null;
-                    }
+          @Override
+          public int drained() {
+            return 0;
+          }
 
-                    @Override
-                    public void setCondition(ErrorCondition errorCondition) {
+          @Override
+          public int getRemoteCredit() {
+            return 0;
+          }
 
-                    }
+          @Override
+          public boolean getDrain() {
+            return false;
+          }
 
-                    @Override
-                    public ErrorCondition getRemoteCondition() {
-                        return null;
-                    }
+          @Override
+          public void detach() {
 
-                    @Override
-                    public void free() {
+          }
 
-                    }
+          @Override
+          public boolean detached() {
+            return false;
+          }
 
-                    @Override
-                    public void open() {
+          @Override
+          public EndpointState getLocalState() {
+            return null;
+          }
 
-                    }
+          @Override
+          public EndpointState getRemoteState() {
+            return null;
+          }
 
-                    @Override
-                    public void close() {
+          @Override
+          public ErrorCondition getCondition() {
+            return null;
+          }
 
-                    }
+          @Override
+          public void setCondition(ErrorCondition errorCondition) {
 
-                    @Override
-                    public void setContext(Object o) {
+          }
 
-                    }
+          @Override
+          public ErrorCondition getRemoteCondition() {
+            return null;
+          }
 
-                    @Override
-                    public Object getContext() {
-                        return null;
-                    }
-                };
-            }
+          @Override
+          public void free() {
 
-            @Override
-            public DeliveryState getLocalState() {
-                return null;
-            }
+          }
 
-            @Override
-            public DeliveryState getRemoteState() {
-                return null;
-            }
+          @Override
+          public void open() {
 
-            @Override
-            public int getMessageFormat() {
-                return 0;
-            }
+          }
 
-            @Override
-            public void disposition(DeliveryState deliveryState) {
+          @Override
+          public void close() {
 
-            }
+          }
 
-            @Override
-            public void settle() {
+          @Override
+          public void setContext(Object o) {
 
-            }
+          }
 
-            @Override
-            public boolean isSettled() {
-                return false;
-            }
-
-            @Override
-            public boolean remotelySettled() {
-                return false;
-            }
-
-            @Override
-            public void free() {
-
-            }
-
-            @Override
-            public Delivery getWorkNext() {
-                return null;
-            }
-
-            @Override
-            public Delivery next() {
-                return null;
-            }
-
-            @Override
-            public boolean isWritable() {
-                return false;
-            }
-
-            @Override
-            public boolean isReadable() {
-                return false;
-            }
-
-            @Override
-            public void setContext(Object o) {
-
-            }
-
-            @Override
-            public Object getContext() {
-                return null;
-            }
-
-            @Override
-            public boolean isUpdated() {
-                return false;
-            }
-
-            @Override
-            public void clear() {
-
-            }
-
-            @Override
-            public boolean isPartial() {
-                return false;
-            }
-
-            @Override
-            public int pending() {
-                return 0;
-            }
-
-            @Override
-            public boolean isBuffered() {
-                return false;
-            }
-
-            @Override
-            public void setDefaultDeliveryState(DeliveryState deliveryState) {
-
-            }
-
-            @Override
-            public DeliveryState getDefaultDeliveryState() {
-                return null;
-            }
-
-            @Override
-            public void setMessageFormat(int i) {
-
-            }
+          @Override
+          public Object getContext() {
+            return null;
+          }
         };
+      }
 
-        assertEquals(AMQPServer.createAddress(address1, dlv).getName(), topic);
-        assertEquals(AMQPServer.createAddress(address2, dlv).getName(), topic);
-        assertEquals(AMQPServer.createAddress(address3, dlv).getName(), topic);
-        assertEquals(AMQPServer.createAddress(address4, dlv).getName(), topic);
-        assertEquals(AMQPServer.createAddress(address5, dlv).getName(), topic);
-        assertEquals(AMQPServer.createAddress(address6, dlv).getName(), topic);
+      @Override
+      public DeliveryState getLocalState() {
+        return null;
+      }
+
+      @Override
+      public DeliveryState getRemoteState() {
+        return null;
+      }
+
+      @Override
+      public int getMessageFormat() {
+        return 0;
+      }
+
+      @Override
+      public void disposition(DeliveryState deliveryState) {
+
+      }
+
+      @Override
+      public void settle() {
+
+      }
+
+      @Override
+      public boolean isSettled() {
+        return false;
+      }
+
+      @Override
+      public boolean remotelySettled() {
+        return false;
+      }
+
+      @Override
+      public void free() {
+
+      }
+
+      @Override
+      public Delivery getWorkNext() {
+        return null;
+      }
+
+      @Override
+      public Delivery next() {
+        return null;
+      }
+
+      @Override
+      public boolean isWritable() {
+        return false;
+      }
+
+      @Override
+      public boolean isReadable() {
+        return false;
+      }
+
+      @Override
+      public void setContext(Object o) {
+
+      }
+
+      @Override
+      public Object getContext() {
+        return null;
+      }
+
+      @Override
+      public boolean isUpdated() {
+        return false;
+      }
+
+      @Override
+      public void clear() {
+
+      }
+
+      @Override
+      public boolean isPartial() {
+        return false;
+      }
+
+      @Override
+      public int pending() {
+        return 0;
+      }
+
+      @Override
+      public boolean isBuffered() {
+        return false;
+      }
+
+      @Override
+      public void setDefaultDeliveryState(DeliveryState deliveryState) {
+
+      }
+
+      @Override
+      public DeliveryState getDefaultDeliveryState() {
+        return null;
+      }
+
+      @Override
+      public void setMessageFormat(int i) {
+
+      }
+    };
+
+    assertEquals(AMQPServer.createAddress(address1, dlv).getName(), topic);
+    assertEquals(AMQPServer.createAddress(address2, dlv).getName(), topic);
+    assertEquals(AMQPServer.createAddress(address3, dlv).getName(), topic);
+    assertEquals(AMQPServer.createAddress(address4, dlv).getName(), topic);
+    assertEquals(AMQPServer.createAddress(address5, dlv).getName(), topic);
+    assertEquals(AMQPServer.createAddress(address6, dlv).getName(), topic);
+  }
+
+  @Test(groups = "amqp")
+  public void testConvertAMQPmessageToOkseMessage() {
+    String message = "Hei på test";
+    String topic = "test/testConvertAMQPMessageToMessageBytes";
+    String address = "127.0.0.1" + "/" + topic;
+
+    Section body = new AmqpValue(message);
+
+    org.apache.qpid.proton.message.Message AMQPMessage = org.apache.qpid.proton.message.Message.Factory
+        .create();
+
+    Address addr = new Address(address);
+
+    AMQPMessage.setAddress(address);
+    AMQPMessage.setBody(body);
+
+    no.ntnu.okse.core.messaging.Message okseMessage = AMQPServer
+        .convertAMQPmessageToOkseMessage(AMQPMessage, addr);
+
+    assertEquals(okseMessage.getMessage(), message);
+    assertEquals(okseMessage.getMessage(), (String) ((AmqpValue) AMQPMessage.getBody()).getValue());
+    assertEquals(okseMessage.getTopic(), topic);
+    assertEquals(okseMessage.getOriginProtocol(), "amqp");
+
+  }
+
+  @Test(groups = "amqp")
+  public void testMessageStore() {
+    AMQPServer.TestMessageStore messageStore = AMQPServer.createMessageStoreFactory();
+
+    String address1 = "test";
+    String address2 = "test/test";
+
+    MessageBytes mb1 = new MessageBytes("test1".getBytes());
+    MessageBytes mb2 = new MessageBytes("test2".getBytes());
+    MessageBytes mb3 = new MessageBytes("test3".getBytes());
+    MessageBytes mb4 = new MessageBytes("test4".getBytes());
+    MessageBytes mb5 = new MessageBytes("test5".getBytes());
+    MessageBytes mb6 = new MessageBytes("test6".getBytes());
+
+    messageStore.put(address1, mb1);
+    messageStore.put(address1, mb2);
+    messageStore.put(address1, mb3);
+
+    messageStore.put(address2, mb4);
+    messageStore.put(address2, mb5);
+    messageStore.put(address2, mb6);
+
+    assertEquals(mb1, messageStore.get(address1));
+    assertFalse(mb3.equals(messageStore.get(address1)));
+    assertEquals(mb3, messageStore.get(address1));
+
+    assertFalse(mb6.equals(messageStore.get(address2)));
+    assertFalse(mb6.equals(messageStore.get(address2)));
+    assertEquals(mb6, messageStore.get(address2));
+
+  }
+
+  @Test(groups = "amqp")
+  public void testRoutes() {
+    SubscriptionHandler.Routes<Sender> routes = new SubscriptionHandler.Routes();
+
+    ArrayList<Sender> senders = new ArrayList<>();
+
+    class TestSender implements Sender {
+
+      @Override
+      public void offer(int i) {
+
+      }
+
+      @Override
+      public int send(byte[] bytes, int i, int i1) {
+        return 0;
+      }
+
+      @Override
+      public void abort() {
+
+      }
+
+      @Override
+      public String getName() {
+        return null;
+      }
+
+      @Override
+      public Delivery delivery(byte[] bytes) {
+        return null;
+      }
+
+      @Override
+      public Delivery delivery(byte[] bytes, int i, int i1) {
+        return null;
+      }
+
+      @Override
+      public Delivery head() {
+        return null;
+      }
+
+      @Override
+      public Delivery current() {
+        return null;
+      }
+
+      @Override
+      public boolean advance() {
+        return false;
+      }
+
+      @Override
+      public Source getSource() {
+        return null;
+      }
+
+      @Override
+      public Target getTarget() {
+        return null;
+      }
+
+      @Override
+      public void setSource(Source source) {
+
+      }
+
+      @Override
+      public void setTarget(Target target) {
+
+      }
+
+      @Override
+      public Source getRemoteSource() {
+        return null;
+      }
+
+      @Override
+      public Target getRemoteTarget() {
+        return null;
+      }
+
+      @Override
+      public Link next(EnumSet<EndpointState> enumSet, EnumSet<EndpointState> enumSet1) {
+        return null;
+      }
+
+      @Override
+      public int getCredit() {
+        return 0;
+      }
+
+      @Override
+      public int getQueued() {
+        return 0;
+      }
+
+      @Override
+      public int getUnsettled() {
+        return 0;
+      }
+
+      @Override
+      public Session getSession() {
+        return null;
+      }
+
+      @Override
+      public SenderSettleMode getSenderSettleMode() {
+        return null;
+      }
+
+      @Override
+      public void setSenderSettleMode(SenderSettleMode senderSettleMode) {
+
+      }
+
+      @Override
+      public SenderSettleMode getRemoteSenderSettleMode() {
+        return null;
+      }
+
+      @Override
+      public ReceiverSettleMode getReceiverSettleMode() {
+        return null;
+      }
+
+      @Override
+      public void setReceiverSettleMode(ReceiverSettleMode receiverSettleMode) {
+
+      }
+
+      @Override
+      public ReceiverSettleMode getRemoteReceiverSettleMode() {
+        return null;
+      }
+
+      @Override
+      public void setRemoteSenderSettleMode(SenderSettleMode senderSettleMode) {
+
+      }
+
+      @Override
+      public Map<Symbol, Object> getProperties() {
+        return null;
+      }
+
+      @Override
+      public void setProperties(Map<Symbol, Object> map) {
+
+      }
+
+      @Override
+      public Map<Symbol, Object> getRemoteProperties() {
+        return null;
+      }
+
+      @Override
+      public int drained() {
+        return 0;
+      }
+
+      @Override
+      public int getRemoteCredit() {
+        return 0;
+      }
+
+      @Override
+      public boolean getDrain() {
+        return false;
+      }
+
+      @Override
+      public void detach() {
+
+      }
+
+      @Override
+      public boolean detached() {
+        return false;
+      }
+
+      @Override
+      public EndpointState getLocalState() {
+        return null;
+      }
+
+      @Override
+      public EndpointState getRemoteState() {
+        return null;
+      }
+
+      @Override
+      public ErrorCondition getCondition() {
+        return null;
+      }
+
+      @Override
+      public void setCondition(ErrorCondition errorCondition) {
+
+      }
+
+      @Override
+      public ErrorCondition getRemoteCondition() {
+        return null;
+      }
+
+      @Override
+      public void free() {
+
+      }
+
+      @Override
+      public void open() {
+
+      }
+
+      @Override
+      public void close() {
+
+      }
+
+      @Override
+      public void setContext(Object o) {
+
+      }
+
+      @Override
+      public Object getContext() {
+        return null;
+      }
+
+      @Override
+      public Record attachments() {
+        return null;
+      }
     }
 
-    @Test(groups = "amqp")
-    public void testConvertAMQPmessageToOkseMessage() {
-        String message = "Hei på test";
-        String topic = "test/testConvertAMQPMessageToMessageBytes";
-        String address = "127.0.0.1" + "/" + topic;
+    Sender snd1 = new TestSender();
+    Sender snd2 = new TestSender();
+    Sender snd3 = new TestSender();
+    Sender snd4 = new TestSender();
+    Sender snd5 = new TestSender();
 
-        Section body = new AmqpValue(message);
+    routes.add(snd1);
+    senders.add(snd1);
+    routes.add(snd2);
+    senders.add(snd2);
+    routes.add(snd3);
+    senders.add(snd3);
+    routes.add(snd4);
+    senders.add(snd4);
+    routes.add(snd5);
+    senders.add(snd5);
 
-        org.apache.qpid.proton.message.Message AMQPMessage = org.apache.qpid.proton.message.Message.Factory.create();
+    assertTrue(senders.contains(routes.choose()));
+    assertEquals(routes.size(), senders.size());
+    assertEquals(routes.getRoutes(), senders);
+    assertFalse(routes.size() == 6);
+    assertFalse(routes.size() == 4);
 
-        Address addr = new Address(address);
+    routes.remove(snd2);
+    assertFalse(routes.size() == 5);
+    assertEquals(routes.size(), 4);
 
-        AMQPMessage.setAddress(address);
-        AMQPMessage.setBody(body);
+  }
 
-        no.ntnu.okse.core.messaging.Message okseMessage = AMQPServer.convertAMQPmessageToOkseMessage(AMQPMessage, addr);
+  @Test(groups = "amqp")
+  public void testGetAddress() {
 
-        assertEquals(okseMessage.getMessage(), message);
-        assertEquals(okseMessage.getMessage(), (String) ((AmqpValue) AMQPMessage.getBody()).getValue());
-        assertEquals(okseMessage.getTopic(), topic);
-        assertEquals(okseMessage.getOriginProtocol(), "amqp");
+    class TestSender implements Sender {
 
+      String address;
+
+      TestSender(String address) {
+        this.address = address;
+      }
+
+      @Override
+      public void offer(int i) {
+
+      }
+
+      @Override
+      public int send(byte[] bytes, int i, int i1) {
+        return 0;
+      }
+
+      @Override
+      public void abort() {
+
+      }
+
+      @Override
+      public String getName() {
+        return null;
+      }
+
+      @Override
+      public Delivery delivery(byte[] bytes) {
+        return null;
+      }
+
+      @Override
+      public Delivery delivery(byte[] bytes, int i, int i1) {
+        return null;
+      }
+
+      @Override
+      public Delivery head() {
+        return null;
+      }
+
+      @Override
+      public Delivery current() {
+        return null;
+      }
+
+      @Override
+      public boolean advance() {
+        return false;
+      }
+
+      @Override
+      public Source getSource() {
+        return new Source() {
+          @Override
+          public String getAddress() {
+            return address;
+          }
+
+          @Override
+          public Source copy() {
+            return null;
+          }
+        };
+      }
+
+      @Override
+      public Target getTarget() {
+        return new Target() {
+          @Override
+          public String getAddress() {
+            return address;
+          }
+
+          @Override
+          public Target copy() {
+            return null;
+          }
+        };
+      }
+
+      @Override
+      public void setSource(Source source) {
+
+      }
+
+      @Override
+      public void setTarget(Target target) {
+
+      }
+
+      @Override
+      public Source getRemoteSource() {
+        return null;
+      }
+
+      @Override
+      public Target getRemoteTarget() {
+        return null;
+      }
+
+      @Override
+      public Link next(EnumSet<EndpointState> enumSet, EnumSet<EndpointState> enumSet1) {
+        return null;
+      }
+
+      @Override
+      public int getCredit() {
+        return 0;
+      }
+
+      @Override
+      public int getQueued() {
+        return 0;
+      }
+
+      @Override
+      public int getUnsettled() {
+        return 0;
+      }
+
+      @Override
+      public Session getSession() {
+        return null;
+      }
+
+      @Override
+      public SenderSettleMode getSenderSettleMode() {
+        return null;
+      }
+
+      @Override
+      public void setSenderSettleMode(SenderSettleMode senderSettleMode) {
+
+      }
+
+      @Override
+      public SenderSettleMode getRemoteSenderSettleMode() {
+        return null;
+      }
+
+      @Override
+      public ReceiverSettleMode getReceiverSettleMode() {
+        return null;
+      }
+
+      @Override
+      public void setReceiverSettleMode(ReceiverSettleMode receiverSettleMode) {
+
+      }
+
+      @Override
+      public ReceiverSettleMode getRemoteReceiverSettleMode() {
+        return null;
+      }
+
+      @Override
+      public void setRemoteSenderSettleMode(SenderSettleMode senderSettleMode) {
+
+      }
+
+      @Override
+      public Map<Symbol, Object> getProperties() {
+        return null;
+      }
+
+      @Override
+      public void setProperties(Map<Symbol, Object> map) {
+
+      }
+
+      @Override
+      public Map<Symbol, Object> getRemoteProperties() {
+        return null;
+      }
+
+      @Override
+      public int drained() {
+        return 0;
+      }
+
+      @Override
+      public int getRemoteCredit() {
+        return 0;
+      }
+
+      @Override
+      public boolean getDrain() {
+        return false;
+      }
+
+      @Override
+      public void detach() {
+
+      }
+
+      @Override
+      public boolean detached() {
+        return false;
+      }
+
+      @Override
+      public EndpointState getLocalState() {
+        return null;
+      }
+
+      @Override
+      public EndpointState getRemoteState() {
+        return null;
+      }
+
+      @Override
+      public ErrorCondition getCondition() {
+        return null;
+      }
+
+      @Override
+      public void setCondition(ErrorCondition errorCondition) {
+
+      }
+
+      @Override
+      public ErrorCondition getRemoteCondition() {
+        return null;
+      }
+
+      @Override
+      public void free() {
+
+      }
+
+      @Override
+      public void open() {
+
+      }
+
+      @Override
+      public void close() {
+
+      }
+
+      @Override
+      public void setContext(Object o) {
+
+      }
+
+      @Override
+      public Object getContext() {
+        return null;
+      }
+
+      @Override
+      public Record attachments() {
+        return null;
+      }
+    }
+    class TestReceiver implements Receiver {
+
+      String address;
+
+      TestReceiver(String address) {
+        this.address = address;
+      }
+
+      @Override
+      public void flow(int i) {
+
+      }
+
+      @Override
+      public int recv(byte[] bytes, int i, int i1) {
+        return 0;
+      }
+
+      @Override
+      public void drain(int i) {
+
+      }
+
+      @Override
+      public String getName() {
+        return null;
+      }
+
+      @Override
+      public Delivery delivery(byte[] bytes) {
+        return null;
+      }
+
+      @Override
+      public Delivery delivery(byte[] bytes, int i, int i1) {
+        return null;
+      }
+
+      @Override
+      public Delivery head() {
+        return null;
+      }
+
+      @Override
+      public Delivery current() {
+        return null;
+      }
+
+      @Override
+      public boolean advance() {
+        return false;
+      }
+
+      @Override
+      public Source getSource() {
+        return null;
+      }
+
+      @Override
+      public Target getTarget() {
+        return new Target() {
+          @Override
+          public String getAddress() {
+            return address;
+          }
+
+          @Override
+          public Target copy() {
+            return null;
+          }
+        };
+      }
+
+      @Override
+      public void setSource(Source source) {
+
+      }
+
+      @Override
+      public void setTarget(Target target) {
+
+      }
+
+      @Override
+      public Source getRemoteSource() {
+        return null;
+      }
+
+      @Override
+      public Target getRemoteTarget() {
+        return null;
+      }
+
+      @Override
+      public Link next(EnumSet<EndpointState> enumSet, EnumSet<EndpointState> enumSet1) {
+        return null;
+      }
+
+      @Override
+      public int getCredit() {
+        return 0;
+      }
+
+      @Override
+      public int getQueued() {
+        return 0;
+      }
+
+      @Override
+      public int getUnsettled() {
+        return 0;
+      }
+
+      @Override
+      public Session getSession() {
+        return null;
+      }
+
+      @Override
+      public SenderSettleMode getSenderSettleMode() {
+        return null;
+      }
+
+      @Override
+      public void setSenderSettleMode(SenderSettleMode senderSettleMode) {
+
+      }
+
+      @Override
+      public SenderSettleMode getRemoteSenderSettleMode() {
+        return null;
+      }
+
+      @Override
+      public ReceiverSettleMode getReceiverSettleMode() {
+        return null;
+      }
+
+      @Override
+      public void setReceiverSettleMode(ReceiverSettleMode receiverSettleMode) {
+
+      }
+
+      @Override
+      public ReceiverSettleMode getRemoteReceiverSettleMode() {
+        return null;
+      }
+
+      @Override
+      public void setRemoteSenderSettleMode(SenderSettleMode senderSettleMode) {
+
+      }
+
+      @Override
+      public Map<Symbol, Object> getProperties() {
+        return null;
+      }
+
+      @Override
+      public void setProperties(Map<Symbol, Object> map) {
+
+      }
+
+      @Override
+      public Map<Symbol, Object> getRemoteProperties() {
+        return null;
+      }
+
+      @Override
+      public int drained() {
+        return 0;
+      }
+
+      @Override
+      public int getRemoteCredit() {
+        return 0;
+      }
+
+      @Override
+      public boolean getDrain() {
+        return false;
+      }
+
+      @Override
+      public void detach() {
+
+      }
+
+      @Override
+      public boolean detached() {
+        return false;
+      }
+
+      @Override
+      public boolean draining() {
+        return false;
+      }
+
+      @Override
+      public void setDrain(boolean b) {
+
+      }
+
+      @Override
+      public EndpointState getLocalState() {
+        return null;
+      }
+
+      @Override
+      public EndpointState getRemoteState() {
+        return null;
+      }
+
+      @Override
+      public ErrorCondition getCondition() {
+        return null;
+      }
+
+      @Override
+      public void setCondition(ErrorCondition errorCondition) {
+
+      }
+
+      @Override
+      public ErrorCondition getRemoteCondition() {
+        return null;
+      }
+
+      @Override
+      public void free() {
+
+      }
+
+      @Override
+      public void open() {
+
+      }
+
+      @Override
+      public void close() {
+
+      }
+
+      @Override
+      public void setContext(Object o) {
+
+      }
+
+      @Override
+      public Object getContext() {
+        return null;
+      }
+
+      @Override
+      public Record attachments() {
+        return null;
+      }
     }
 
-    @Test(groups = "amqp")
-    public void testMessageStore() {
-        AMQPServer.TestMessageStore messageStore = AMQPServer.createMessageStoreFactory();
+    Sender sender = new TestSender("address");
+    Sender sender2 = new TestSender(null);
 
-        String address1 = "test";
-        String address2 = "test/test";
+    Receiver recv = new TestReceiver("address");
+    Receiver recv2 = new TestReceiver(null);
 
-        MessageBytes mb1 = new MessageBytes("test1".getBytes());
-        MessageBytes mb2 = new MessageBytes("test2".getBytes());
-        MessageBytes mb3 = new MessageBytes("test3".getBytes());
-        MessageBytes mb4 = new MessageBytes("test4".getBytes());
-        MessageBytes mb5 = new MessageBytes("test5".getBytes());
-        MessageBytes mb6 = new MessageBytes("test6".getBytes());
+    assertEquals("address", SubscriptionHandler.getAddress(recv));
+    assertEquals(null, SubscriptionHandler.getAddress(recv2));
 
-        messageStore.put(address1, mb1);
-        messageStore.put(address1, mb2);
-        messageStore.put(address1, mb3);
-
-        messageStore.put(address2, mb4);
-        messageStore.put(address2, mb5);
-        messageStore.put(address2, mb6);
-
-        assertEquals(mb1, messageStore.get(address1));
-        assertFalse(mb3.equals(messageStore.get(address1)));
-        assertEquals(mb3, messageStore.get(address1));
-
-        assertFalse(mb6.equals(messageStore.get(address2)));
-        assertFalse(mb6.equals(messageStore.get(address2)));
-        assertEquals(mb6, messageStore.get(address2));
-
-    }
-
-    @Test(groups = "amqp")
-    public void testRoutes() {
-        SubscriptionHandler.Routes<Sender> routes = new SubscriptionHandler.Routes();
-
-        ArrayList<Sender> senders = new ArrayList<>();
-
-        class TestSender implements Sender {
-
-            @Override
-            public void offer(int i) {
-
-            }
-
-            @Override
-            public int send(byte[] bytes, int i, int i1) {
-                return 0;
-            }
-
-            @Override
-            public void abort() {
-
-            }
-
-            @Override
-            public String getName() {
-                return null;
-            }
-
-            @Override
-            public Delivery delivery(byte[] bytes) {
-                return null;
-            }
-
-            @Override
-            public Delivery delivery(byte[] bytes, int i, int i1) {
-                return null;
-            }
-
-            @Override
-            public Delivery head() {
-                return null;
-            }
-
-            @Override
-            public Delivery current() {
-                return null;
-            }
-
-            @Override
-            public boolean advance() {
-                return false;
-            }
-
-            @Override
-            public Source getSource() {
-                return null;
-            }
-
-            @Override
-            public Target getTarget() {
-                return null;
-            }
-
-            @Override
-            public void setSource(Source source) {
-
-            }
-
-            @Override
-            public void setTarget(Target target) {
-
-            }
-
-            @Override
-            public Source getRemoteSource() {
-                return null;
-            }
-
-            @Override
-            public Target getRemoteTarget() {
-                return null;
-            }
-
-            @Override
-            public Link next(EnumSet<EndpointState> enumSet, EnumSet<EndpointState> enumSet1) {
-                return null;
-            }
-
-            @Override
-            public int getCredit() {
-                return 0;
-            }
-
-            @Override
-            public int getQueued() {
-                return 0;
-            }
-
-            @Override
-            public int getUnsettled() {
-                return 0;
-            }
-
-            @Override
-            public Session getSession() {
-                return null;
-            }
-
-            @Override
-            public SenderSettleMode getSenderSettleMode() {
-                return null;
-            }
-
-            @Override
-            public void setSenderSettleMode(SenderSettleMode senderSettleMode) {
-
-            }
-
-            @Override
-            public SenderSettleMode getRemoteSenderSettleMode() {
-                return null;
-            }
-
-            @Override
-            public ReceiverSettleMode getReceiverSettleMode() {
-                return null;
-            }
-
-            @Override
-            public void setReceiverSettleMode(ReceiverSettleMode receiverSettleMode) {
-
-            }
-
-            @Override
-            public ReceiverSettleMode getRemoteReceiverSettleMode() {
-                return null;
-            }
-
-            @Override
-            public void setRemoteSenderSettleMode(SenderSettleMode senderSettleMode) {
-
-            }
-
-            @Override
-            public Map<Symbol, Object> getProperties() {
-                return null;
-            }
-
-            @Override
-            public void setProperties(Map<Symbol, Object> map) {
-
-            }
-
-            @Override
-            public Map<Symbol, Object> getRemoteProperties() {
-                return null;
-            }
-
-            @Override
-            public int drained() {
-                return 0;
-            }
-
-            @Override
-            public int getRemoteCredit() {
-                return 0;
-            }
-
-            @Override
-            public boolean getDrain() {
-                return false;
-            }
-
-            @Override
-            public void detach() {
-
-            }
-
-            @Override
-            public boolean detached() {
-                return false;
-            }
-
-            @Override
-            public EndpointState getLocalState() {
-                return null;
-            }
-
-            @Override
-            public EndpointState getRemoteState() {
-                return null;
-            }
-
-            @Override
-            public ErrorCondition getCondition() {
-                return null;
-            }
-
-            @Override
-            public void setCondition(ErrorCondition errorCondition) {
-
-            }
-
-            @Override
-            public ErrorCondition getRemoteCondition() {
-                return null;
-            }
-
-            @Override
-            public void free() {
-
-            }
-
-            @Override
-            public void open() {
-
-            }
-
-            @Override
-            public void close() {
-
-            }
-
-            @Override
-            public void setContext(Object o) {
-
-            }
-
-            @Override
-            public Object getContext() {
-                return null;
-            }
-
-            @Override
-            public Record attachments() {
-                return null;
-            }
-        }
-
-        Sender snd1 = new TestSender();
-        Sender snd2 = new TestSender();
-        Sender snd3 = new TestSender();
-        Sender snd4 = new TestSender();
-        Sender snd5 = new TestSender();
-
-        routes.add(snd1);
-        senders.add(snd1);
-        routes.add(snd2);
-        senders.add(snd2);
-        routes.add(snd3);
-        senders.add(snd3);
-        routes.add(snd4);
-        senders.add(snd4);
-        routes.add(snd5);
-        senders.add(snd5);
-
-        assertTrue(senders.contains(routes.choose()));
-        assertEquals(routes.size(), senders.size());
-        assertEquals(routes.getRoutes(), senders);
-        assertFalse(routes.size() == 6);
-        assertFalse(routes.size() == 4);
-
-        routes.remove(snd2);
-        assertFalse(routes.size() == 5);
-        assertEquals(routes.size(), 4);
-
-    }
-
-    @Test(groups = "amqp")
-    public void testGetAddress() {
-
-        class TestSender implements Sender {
-
-            String address;
-
-            TestSender(String address) {
-                this.address = address;
-            }
-
-            @Override
-            public void offer(int i) {
-
-            }
-
-            @Override
-            public int send(byte[] bytes, int i, int i1) {
-                return 0;
-            }
-
-            @Override
-            public void abort() {
-
-            }
-
-            @Override
-            public String getName() {
-                return null;
-            }
-
-            @Override
-            public Delivery delivery(byte[] bytes) {
-                return null;
-            }
-
-            @Override
-            public Delivery delivery(byte[] bytes, int i, int i1) {
-                return null;
-            }
-
-            @Override
-            public Delivery head() {
-                return null;
-            }
-
-            @Override
-            public Delivery current() {
-                return null;
-            }
-
-            @Override
-            public boolean advance() {
-                return false;
-            }
-
-            @Override
-            public Source getSource() {
-                return new Source() {
-                    @Override
-                    public String getAddress() {
-                        return address;
-                    }
-
-                    @Override
-                    public Source copy() {
-                        return null;
-                    }
-                };
-            }
-
-            @Override
-            public Target getTarget() {
-                return new Target() {
-                    @Override
-                    public String getAddress() {
-                        return address;
-                    }
-
-                    @Override
-                    public Target copy() {
-                        return null;
-                    }
-                };
-            }
-
-            @Override
-            public void setSource(Source source) {
-
-            }
-
-            @Override
-            public void setTarget(Target target) {
-
-            }
-
-            @Override
-            public Source getRemoteSource() {
-                return null;
-            }
-
-            @Override
-            public Target getRemoteTarget() {
-                return null;
-            }
-
-            @Override
-            public Link next(EnumSet<EndpointState> enumSet, EnumSet<EndpointState> enumSet1) {
-                return null;
-            }
-
-            @Override
-            public int getCredit() {
-                return 0;
-            }
-
-            @Override
-            public int getQueued() {
-                return 0;
-            }
-
-            @Override
-            public int getUnsettled() {
-                return 0;
-            }
-
-            @Override
-            public Session getSession() {
-                return null;
-            }
-
-            @Override
-            public SenderSettleMode getSenderSettleMode() {
-                return null;
-            }
-
-            @Override
-            public void setSenderSettleMode(SenderSettleMode senderSettleMode) {
-
-            }
-
-            @Override
-            public SenderSettleMode getRemoteSenderSettleMode() {
-                return null;
-            }
-
-            @Override
-            public ReceiverSettleMode getReceiverSettleMode() {
-                return null;
-            }
-
-            @Override
-            public void setReceiverSettleMode(ReceiverSettleMode receiverSettleMode) {
-
-            }
-
-            @Override
-            public ReceiverSettleMode getRemoteReceiverSettleMode() {
-                return null;
-            }
-
-            @Override
-            public void setRemoteSenderSettleMode(SenderSettleMode senderSettleMode) {
-
-            }
-
-            @Override
-            public Map<Symbol, Object> getProperties() {
-                return null;
-            }
-
-            @Override
-            public void setProperties(Map<Symbol, Object> map) {
-
-            }
-
-            @Override
-            public Map<Symbol, Object> getRemoteProperties() {
-                return null;
-            }
-
-            @Override
-            public int drained() {
-                return 0;
-            }
-
-            @Override
-            public int getRemoteCredit() {
-                return 0;
-            }
-
-            @Override
-            public boolean getDrain() {
-                return false;
-            }
-
-            @Override
-            public void detach() {
-
-            }
-
-            @Override
-            public boolean detached() {
-                return false;
-            }
-
-            @Override
-            public EndpointState getLocalState() {
-                return null;
-            }
-
-            @Override
-            public EndpointState getRemoteState() {
-                return null;
-            }
-
-            @Override
-            public ErrorCondition getCondition() {
-                return null;
-            }
-
-            @Override
-            public void setCondition(ErrorCondition errorCondition) {
-
-            }
-
-            @Override
-            public ErrorCondition getRemoteCondition() {
-                return null;
-            }
-
-            @Override
-            public void free() {
-
-            }
-
-            @Override
-            public void open() {
-
-            }
-
-            @Override
-            public void close() {
-
-            }
-
-            @Override
-            public void setContext(Object o) {
-
-            }
-
-            @Override
-            public Object getContext() {
-                return null;
-            }
-
-            @Override
-            public Record attachments() {
-                return null;
-            }
-        }
-        class TestReceiver implements Receiver {
-
-            String address;
-
-            TestReceiver(String address) {
-                this.address = address;
-            }
-
-            @Override
-            public void flow(int i) {
-
-            }
-
-            @Override
-            public int recv(byte[] bytes, int i, int i1) {
-                return 0;
-            }
-
-            @Override
-            public void drain(int i) {
-
-            }
-
-            @Override
-            public String getName() {
-                return null;
-            }
-
-            @Override
-            public Delivery delivery(byte[] bytes) {
-                return null;
-            }
-
-            @Override
-            public Delivery delivery(byte[] bytes, int i, int i1) {
-                return null;
-            }
-
-            @Override
-            public Delivery head() {
-                return null;
-            }
-
-            @Override
-            public Delivery current() {
-                return null;
-            }
-
-            @Override
-            public boolean advance() {
-                return false;
-            }
-
-            @Override
-            public Source getSource() {
-                return null;
-            }
-
-            @Override
-            public Target getTarget() {
-                return new Target() {
-                    @Override
-                    public String getAddress() {
-                        return address;
-                    }
-
-                    @Override
-                    public Target copy() {
-                        return null;
-                    }
-                };
-            }
-
-            @Override
-            public void setSource(Source source) {
-
-            }
-
-            @Override
-            public void setTarget(Target target) {
-
-            }
-
-            @Override
-            public Source getRemoteSource() {
-                return null;
-            }
-
-            @Override
-            public Target getRemoteTarget() {
-                return null;
-            }
-
-            @Override
-            public Link next(EnumSet<EndpointState> enumSet, EnumSet<EndpointState> enumSet1) {
-                return null;
-            }
-
-            @Override
-            public int getCredit() {
-                return 0;
-            }
-
-            @Override
-            public int getQueued() {
-                return 0;
-            }
-
-            @Override
-            public int getUnsettled() {
-                return 0;
-            }
-
-            @Override
-            public Session getSession() {
-                return null;
-            }
-
-            @Override
-            public SenderSettleMode getSenderSettleMode() {
-                return null;
-            }
-
-            @Override
-            public void setSenderSettleMode(SenderSettleMode senderSettleMode) {
-
-            }
-
-            @Override
-            public SenderSettleMode getRemoteSenderSettleMode() {
-                return null;
-            }
-
-            @Override
-            public ReceiverSettleMode getReceiverSettleMode() {
-                return null;
-            }
-
-            @Override
-            public void setReceiverSettleMode(ReceiverSettleMode receiverSettleMode) {
-
-            }
-
-            @Override
-            public ReceiverSettleMode getRemoteReceiverSettleMode() {
-                return null;
-            }
-
-            @Override
-            public void setRemoteSenderSettleMode(SenderSettleMode senderSettleMode) {
-
-            }
-
-            @Override
-            public Map<Symbol, Object> getProperties() {
-                return null;
-            }
-
-            @Override
-            public void setProperties(Map<Symbol, Object> map) {
-
-            }
-
-            @Override
-            public Map<Symbol, Object> getRemoteProperties() {
-                return null;
-            }
-
-            @Override
-            public int drained() {
-                return 0;
-            }
-
-            @Override
-            public int getRemoteCredit() {
-                return 0;
-            }
-
-            @Override
-            public boolean getDrain() {
-                return false;
-            }
-
-            @Override
-            public void detach() {
-
-            }
-
-            @Override
-            public boolean detached() {
-                return false;
-            }
-
-            @Override
-            public boolean draining() {
-                return false;
-            }
-
-            @Override
-            public void setDrain(boolean b) {
-
-            }
-
-            @Override
-            public EndpointState getLocalState() {
-                return null;
-            }
-
-            @Override
-            public EndpointState getRemoteState() {
-                return null;
-            }
-
-            @Override
-            public ErrorCondition getCondition() {
-                return null;
-            }
-
-            @Override
-            public void setCondition(ErrorCondition errorCondition) {
-
-            }
-
-            @Override
-            public ErrorCondition getRemoteCondition() {
-                return null;
-            }
-
-            @Override
-            public void free() {
-
-            }
-
-            @Override
-            public void open() {
-
-            }
-
-            @Override
-            public void close() {
-
-            }
-
-            @Override
-            public void setContext(Object o) {
-
-            }
-
-            @Override
-            public Object getContext() {
-                return null;
-            }
-
-            @Override
-            public Record attachments() {
-                return null;
-            }
-        }
-
-        Sender sender = new TestSender("address");
-        Sender sender2 = new TestSender(null);
-
-        Receiver recv = new TestReceiver("address");
-        Receiver recv2 = new TestReceiver(null);
-
-        assertEquals("address", SubscriptionHandler.getAddress(recv));
-        assertEquals(null, SubscriptionHandler.getAddress(recv2));
-
-        assertEquals("address", SubscriptionHandler.getAddress(sender));
-        assertEquals(null, SubscriptionHandler.getAddress(sender2));
-    }
+    assertEquals("address", SubscriptionHandler.getAddress(sender));
+    assertEquals(null, SubscriptionHandler.getAddress(sender2));
+  }
 }

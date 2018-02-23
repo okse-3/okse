@@ -35,115 +35,115 @@ import static org.testng.Assert.*;
 
 public class TopicServiceTest {
 
-    final TopicService ts = TopicService.getInstance();
-    Topic rootOne, rootTwo, one, two, three;
-    HashSet<Topic> roots, leafs, all;
+  final TopicService ts = TopicService.getInstance();
+  Topic rootOne, rootTwo, one, two, three;
+  HashSet<Topic> roots, leafs, all;
 
-    @BeforeMethod
-    public void setUp() {
-        ts.boot();
+  @BeforeMethod
+  public void setUp() {
+    ts.boot();
 
-        roots = new HashSet<>();
-        leafs = new HashSet<>();
-        all = new HashSet<>();
+    roots = new HashSet<>();
+    leafs = new HashSet<>();
+    all = new HashSet<>();
 
-        rootOne = new Topic("RootOne", "Root");
-        rootTwo = new Topic("RootTwo", "Root");
-        one = new Topic("One", "Default");
-        two = new Topic("Two", "Default");
-        three = new Topic("Three", "Default");
+    rootOne = new Topic("RootOne", "Root");
+    rootTwo = new Topic("RootTwo", "Root");
+    one = new Topic("One", "Default");
+    two = new Topic("Two", "Default");
+    three = new Topic("Three", "Default");
 
-        rootOne.addChild(one);
-        one.addChild(two);
-        rootTwo.addChild(three);
+    rootOne.addChild(one);
+    one.addChild(two);
+    rootTwo.addChild(three);
 
-        roots.add(rootOne);
-        roots.add(rootTwo);
+    roots.add(rootOne);
+    roots.add(rootTwo);
 
-        leafs.add(two);
-        leafs.add(three);
+    leafs.add(two);
+    leafs.add(three);
 
-        all.add(rootOne);
-        all.add(rootTwo);
-        all.add(one);
-        all.add(two);
-        all.add(three);
+    all.add(rootOne);
+    all.add(rootTwo);
+    all.add(one);
+    all.add(two);
+    all.add(three);
 
-        ts.addTopicLocal(rootOne);
-        ts.addTopicLocal(rootTwo);
-        ts.addTopicLocal(one);
-        ts.addTopicLocal(two);
-        ts.addTopicLocal(three);
+    ts.addTopicLocal(rootOne);
+    ts.addTopicLocal(rootTwo);
+    ts.addTopicLocal(one);
+    ts.addTopicLocal(two);
+    ts.addTopicLocal(three);
 
-    }
+  }
 
-    @AfterMethod
-    public void tearDown() {
-        ts.stop();
-    }
+  @AfterMethod
+  public void tearDown() {
+    ts.stop();
+  }
 
-    @Test
-    public void testGetInstance() {
-        assertTrue(TopicService.getInstance() instanceof TopicService);
-    }
+  @Test
+  public void testGetInstance() {
+    assertTrue(TopicService.getInstance() instanceof TopicService);
+  }
 
-    @Test
-    public void testAllGetRootTopics() {
-        HashSet<Topic> rootTopics = ts.getAllRootTopics();
-        roots.forEach(t -> assertTrue(rootTopics.contains(t)));
-    }
+  @Test
+  public void testAllGetRootTopics() {
+    HashSet<Topic> rootTopics = ts.getAllRootTopics();
+    roots.forEach(t -> assertTrue(rootTopics.contains(t)));
+  }
 
-    @Test
-    public void testGetAllTopics() {
-        HashSet<Topic> allTopics = ts.getAllTopics();
-        all.forEach(t -> assertTrue(allTopics.contains(t)));
-    }
+  @Test
+  public void testGetAllTopics() {
+    HashSet<Topic> allTopics = ts.getAllTopics();
+    all.forEach(t -> assertTrue(allTopics.contains(t)));
+  }
 
-    @Test
-    public void testGetTopic() {
-        assertEquals(three, ts.getTopic(three.getFullTopicString()));
-    }
+  @Test
+  public void testGetTopic() {
+    assertEquals(three, ts.getTopic(three.getFullTopicString()));
+  }
 
-    @Test
-    public void testGetAllLeafTopics() {
-        HashSet<Topic> leafTopics = ts.getAllLeafTopics();
-        leafs.forEach(t -> assertTrue(leafTopics.contains(t)));
-    }
+  @Test
+  public void testGetAllLeafTopics() {
+    HashSet<Topic> leafTopics = ts.getAllLeafTopics();
+    leafs.forEach(t -> assertTrue(leafTopics.contains(t)));
+  }
 
-    @Test
-    public void testTopicExists() {
-        assertTrue(ts.topicExists(one));
-        assertTrue(ts.topicExists(rootTwo));
-    }
+  @Test
+  public void testTopicExists() {
+    assertTrue(ts.topicExists(one));
+    assertTrue(ts.topicExists(rootTwo));
+  }
 
-    @Test
-    public void testTopicExists1() {
-        assertTrue(ts.topicExists(one.getFullTopicString()));
-        assertTrue(ts.topicExists(two.getFullTopicString()));
-    }
+  @Test
+  public void testTopicExists1() {
+    assertTrue(ts.topicExists(one.getFullTopicString()));
+    assertTrue(ts.topicExists(two.getFullTopicString()));
+  }
 
-    @Test
-    public void testGenerateTopicNodesFromRawTopicString() {
-        HashSet<Topic> collector = ts.generateTopicNodesFromRawTopicString("no/ffi/test");
-        assertEquals(collector.size(), 3);
-        HashMap<String, Topic> partNames = new HashMap<>();
-        partNames.put("no", null);
-        partNames.put("ffi", null);
-        partNames.put("test", null);
-        collector.forEach(t -> assertTrue(partNames.containsKey(t.getName())));
-        collector.forEach(t -> partNames.put(t.getName(), t));
-        assertEquals(partNames.get("test").getParent(), partNames.get("ffi"));
-        assertEquals(partNames.get("ffi").getParent(), partNames.get("no"));
-        collector.forEach(t -> ts.addTopicLocal(t));
-        collector = ts.generateTopicNodesFromRawTopicString("no/ffi/test/sub");
-        partNames.put("sub", null);
-        collector.forEach(t -> {
-            if (t.getName().equals("sub")) {
-                partNames.put("sub", t);
-            }
-        });
-        assertEquals(partNames.get("sub").getParent(), partNames.get("test"));
-        assertEquals(partNames.get("test").getParent(), partNames.get("ffi"));
-        assertEquals(partNames.get("ffi").getParent(), partNames.get("no"));
-    }
+  @Test
+  public void testGenerateTopicNodesFromRawTopicString() {
+    HashSet<Topic> collector = ts.generateTopicNodesFromRawTopicString("no/ffi/test");
+    assertEquals(collector.size(), 3);
+    HashMap<String, Topic> partNames = new HashMap<>();
+    partNames.put("no", null);
+    partNames.put("ffi", null);
+    partNames.put("test", null);
+    collector.forEach(t -> assertTrue(partNames.containsKey(t.getName())));
+    collector.forEach(t -> partNames.put(t.getName(), t));
+    assertEquals(partNames.get("test").getParent(), partNames.get("ffi"));
+    assertEquals(partNames.get("ffi").getParent(), partNames.get("no"));
+    collector.forEach(t -> ts.addTopicLocal(t));
+    collector = ts.generateTopicNodesFromRawTopicString("no/ffi/test/sub");
+    partNames.put("sub", null);
+    collector.forEach(t -> {
+      if (t.getName().equals("sub")) {
+        partNames.put("sub", t);
+      }
+    });
+    assertEquals(partNames.get("sub").getParent(), partNames.get("test"));
+    assertEquals(partNames.get("test").getParent(), partNames.get("ffi"));
+    assertEquals(partNames.get("ffi").getParent(), partNames.get("no"));
+  }
 }
