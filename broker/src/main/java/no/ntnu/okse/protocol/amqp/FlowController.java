@@ -31,47 +31,47 @@ import org.apache.qpid.proton.engine.Receiver;
 
 public class FlowController extends BaseHandler {
 
-    final private int window;
+  final private int window;
 
-    public FlowController(int window) {
-        this.window = window;
-    }
+  public FlowController(int window) {
+    this.window = window;
+  }
 
-    private void topUp(Receiver rcv) {
-        int delta = window - rcv.getCredit();
-        rcv.flow(delta);
-    }
+  private void topUp(Receiver rcv) {
+    int delta = window - rcv.getCredit();
+    rcv.flow(delta);
+  }
 
-    @Override
-    public void onLinkLocalOpen(Event evt) {
-        Link link = evt.getLink();
-        if (link instanceof Receiver) {
-            topUp((Receiver) link);
-        }
+  @Override
+  public void onLinkLocalOpen(Event evt) {
+    Link link = evt.getLink();
+    if (link instanceof Receiver) {
+      topUp((Receiver) link);
     }
+  }
 
-    @Override
-    public void onLinkRemoteOpen(Event evt) {
-        Link link = evt.getLink();
-        if (link instanceof Receiver) {
-            topUp((Receiver) link);
-        }
+  @Override
+  public void onLinkRemoteOpen(Event evt) {
+    Link link = evt.getLink();
+    if (link instanceof Receiver) {
+      topUp((Receiver) link);
     }
+  }
 
-    @Override
-    public void onLinkFlow(Event evt) {
-        Link link = evt.getLink();
-        if (link instanceof Receiver) {
-            topUp((Receiver) link);
-        }
+  @Override
+  public void onLinkFlow(Event evt) {
+    Link link = evt.getLink();
+    if (link instanceof Receiver) {
+      topUp((Receiver) link);
     }
+  }
 
-    @Override
-    public void onDelivery(Event evt) {
-        Link link = evt.getLink();
-        if (link instanceof Receiver) {
-            topUp((Receiver) link);
-        }
+  @Override
+  public void onDelivery(Event evt) {
+    Link link = evt.getLink();
+    if (link instanceof Receiver) {
+      topUp((Receiver) link);
     }
+  }
 
 }

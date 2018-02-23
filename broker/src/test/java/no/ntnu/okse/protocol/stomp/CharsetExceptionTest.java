@@ -6,10 +6,11 @@ import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
 public class CharsetExceptionTest {
-    @Test
-    public void createException(){
-        String message = "message";
-        MIMETypeException exc = new MIMETypeException(message);
-        assertEquals(message, exc.getMessage());
-    }
+
+  @Test
+  public void createException() {
+    String message = "message";
+    MIMETypeException exc = new MIMETypeException(message);
+    assertEquals(message, exc.getMessage());
+  }
 }

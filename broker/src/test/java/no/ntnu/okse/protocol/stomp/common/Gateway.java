@@ -6,17 +6,18 @@ import asia.stampy.server.netty.ServerNettyMessageGateway;
 import no.ntnu.okse.protocol.stomp.listeners.IDontNeedSecurity;
 import org.mockito.Mockito;
 
-public class Gateway extends ServerNettyMessageGateway  {
-    public static ServerNettyMessageGateway initialize(String host, int port) {
-        ServerNettyMessageGateway gateway = Mockito.spy(new Gateway());
-        SystemAcknowledgementHandler sys = new SystemAcknowledgementHandler();
+public class Gateway extends ServerNettyMessageGateway {
 
-        gateway.addMessageListener(new IDontNeedSecurity());
+  public static ServerNettyMessageGateway initialize(String host, int port) {
+    ServerNettyMessageGateway gateway = Mockito.spy(new Gateway());
+    SystemAcknowledgementHandler sys = new SystemAcknowledgementHandler();
 
-        Boilerplate b = new Boilerplate();
-        b.init(gateway, host, port, null, null, sys);
+    gateway.addMessageListener(new IDontNeedSecurity());
 
-        return gateway;
-    }
+    Boilerplate b = new Boilerplate();
+    b.init(gateway, host, port, null, null, sys);
+
+    return gateway;
+  }
 
 }

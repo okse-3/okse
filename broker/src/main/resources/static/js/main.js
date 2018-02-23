@@ -34,14 +34,14 @@ var Main = (function($) {
     };
 
     //  Private variable for holding the interval used to update the panes
-    var clickInterval
+    var clickInterval;
 
 
     // The base url, that appends to all ajax-requests
-    var BASE_URL = "/api/"
+    var BASE_URL = "/api/";
 
     // This variable holds the last known status of the protocol servers
-    var cachedProtocolPowerStatus
+    var cachedProtocolPowerStatus;
 
     /*
         Sets some default settings for every AJAX request, like the request url and data type.
@@ -52,7 +52,7 @@ var Main = (function($) {
             dataType: 'json'
         });
         $.okseDebug.logPrint("[Debug][Main] Successfully set up AJAX")
-    }
+    };
 
     /*
         Global, generic AJAX-function for all AJAX-requests across the complete page.
@@ -68,25 +68,25 @@ var Main = (function($) {
             type: settings.type,
             dataType: settings.dataType,
             beforeSend: function(xhr) {
-                xhr.url = settings.url
+                xhr.url = settings.url;
                 xhr.setRequestHeader(header, token)
             },
             success: settings.success,
             error: settings.error
 
         })
-    }
+    };
 
     /*
         Global function that sets the click interval for a tab after the user wants to activate it again.
      */
     var setIntervalForTab = function(settings) {
-        clearInterval(clickInterval)
-        ajax(settings)
+        clearInterval(clickInterval);
+        ajax(settings);
         clickInterval = setInterval(function () {
             ajax(settings);
         }, $('#settings-update-interval').val() * 1000);
-    }
+    };
 
     var bindButtons = function() {
         $('#protocol-power-button').on('click', function() {
@@ -96,7 +96,7 @@ var Main = (function($) {
                         url: 'main/protocols/power',
                         type: 'POST',
                         error: function(xhr, status, error) {
-                            Main.displayMessage("Unable to stop the protocol servers")
+                            Main.displayMessage("Unable to stop the protocol servers");
                             Main.error(xhr, status, error)
                         }
                     });
@@ -106,21 +106,21 @@ var Main = (function($) {
                     url: 'main/protocols/power',
                     type: 'POST',
                     error: function(xhr, status, error) {
-                        Main.displayMessage("Unable to start the protocol servers")
+                        Main.displayMessage("Unable to start the protocol servers");
                         Main.error(xhr, status, error)
                     }
                 });
             }
 
         });
-    }
+    };
 
     /*
         Global error function that shows the Ajax callback and request url.
      */
     var error = function(xhr, status, error)    {
         if (xhr.status != 200) {
-            var errorMessage = statusErrorMap[xhr.status]
+            var errorMessage = statusErrorMap[xhr.status];
             if (!errorMessage) { errorMessage = "Unknown error" }
             $.okseDebug.errorPrint("[Error][" + xhr.url + "] in Ajax with the following callback {" +
             "status: " + xhr.status +  " " +
@@ -128,14 +128,14 @@ var Main = (function($) {
             "readyState: " + xhr.readyState + " " +
             "responseText: " + xhr.responseText + "}")
         }
-    }
+    };
 
     var refreshRuntimeStatistics = function(statistics) {
-        $('#totalRam').html(statistics.totalRam)
-        $('#freeRam').html(statistics.freeRam)
-        $('#usedRam').html(statistics.usedRam)
+        $('#totalRam').html(statistics.totalRam);
+        $('#freeRam').html(statistics.freeRam);
+        $('#usedRam').html(statistics.usedRam);
         $('#cpuCores').html(statistics.cpuAvailable)
-    }
+    };
 
     var refreshProtocolsTable = function(protocols) {
         var trHTML = '';
@@ -148,31 +148,31 @@ var Main = (function($) {
                 '</tr>';
         });
         return trHTML
-    }
+    };
 
     var updateProtocolPowerButton = function() {
          if (cachedProtocolPowerStatus) {
             if ($('#protocol-power-button').hasClass('btn-success')) {
-                $('#protocol-power-button').removeClass('btn-success')
-                $('#protocol-power-button').addClass('btn-danger')
+                $('#protocol-power-button').removeClass('btn-success');
+                $('#protocol-power-button').addClass('btn-danger');
                 $('#protocol-power-button').text('Stop protocolservers')
             }
          } else {
             if ($('#protocol-power-button').hasClass('btn-danger')) {
-                $('#protocol-power-button').removeClass('btn-danger')
-                $('#protocol-power-button').addClass('btn-success')
+                $('#protocol-power-button').removeClass('btn-danger');
+                $('#protocol-power-button').addClass('btn-success');
                 $('#protocol-power-button').text('Start protocolservers')
              }
          }
-    }
+    };
 
     var refresh = function(response) {
-        refreshElementByClassWithText('.totalSubscribers', response.subscribers)
-        refreshElementByClassWithText('.totalPublishers', response.publishers)
-        refreshElementByClassWithText('.totalTopics', response.topics)
-        refreshElementByClassWithText('.totalMessages', response.totalMessages)
-        $('#uptime').html(response.uptime)
-        refreshRuntimeStatistics(response.runtimeStatistics)
+        refreshElementByClassWithText('.totalSubscribers', response.subscribers);
+        refreshElementByClassWithText('.totalPublishers', response.publishers);
+        refreshElementByClassWithText('.totalTopics', response.topics);
+        refreshElementByClassWithText('.totalMessages', response.totalMessages);
+        $('#uptime').html(response.uptime);
+        refreshRuntimeStatistics(response.runtimeStatistics);
 
         if (response.protocols.length != 0) {
             $('#protocolinfo-table').html(refreshProtocolsTable(response.protocols))
@@ -180,16 +180,16 @@ var Main = (function($) {
             $('#protocolinfo-table').html('<tr class="danger"><td colspan="3"><h4 class="text-center">No protocols returned from CoreService</h4></td></tr>')
         }
 
-        cachedProtocolPowerStatus = response.protocolPower
+        cachedProtocolPowerStatus = response.protocolPower;
         updateProtocolPowerButton()
-    }
+    };
 
     // Updates the given class with a given text
     var refreshElementByClassWithText = function(element, text) {
         $(element).each(function() {
             $(this).text(text)
         });
-    }
+    };
 
 
     return {
@@ -208,14 +208,14 @@ var Main = (function($) {
                 '</div>');
         },
         init: function() {
-            setupAjax()
+            setupAjax();
 
             $(".nav-tabs").on("click", "a", function(e){
-                clearInterval(clickInterval)
-                var clickedElement = $(this).attr("href").substring(1)
-                var updateInterval = $('#settings-update-interval').val() * 1000
-                updateInterval = (updateInterval < 500 ? 500 : updateInterval) // Override if the user enters a number lower than 1
-                $.okseDebug.logPrint("[Debug][Main] The update interval is now: " + updateInterval)
+                clearInterval(clickInterval);
+                var clickedElement = $(this).attr("href").substring(1);
+                var updateInterval = $('#settings-update-interval').val() * 1000;
+                updateInterval = (updateInterval < 500 ? 500 : updateInterval); // Override if the user enters a number lower than 1
+                $.okseDebug.logPrint("[Debug][Main] The update interval is now: " + updateInterval);
 
                 var ajaxSettings = {
                     url: clickedElement,
@@ -224,34 +224,34 @@ var Main = (function($) {
 
                 switch (clickedElement) {
                     case "main":
-                        ajaxSettings.url = 'main/get/all'
-                        ajaxSettings.success = refresh
+                        ajaxSettings.url = 'main/get/all';
+                        ajaxSettings.success = refresh;
                         break;
                     case "topics":
-                        ajaxSettings.url = 'topic/get/all'
-                        ajaxSettings.success = Topics.refresh
+                        ajaxSettings.url = 'topic/get/all';
+                        ajaxSettings.success = Topics.refresh;
                         break;
                     case "statistics":
-                        ajaxSettings.url = clickedElement + '/get/all'
-                        ajaxSettings.success = Stats.refresh
+                        ajaxSettings.url = clickedElement + '/get/all';
+                        ajaxSettings.success = Stats.refresh;
                         break;
                     case "log":
-                        ajaxSettings.url = Logs.url()
-                        ajaxSettings.success = Logs.refresh
+                        ajaxSettings.url = Logs.url();
+                        ajaxSettings.success = Logs.refresh;
                         break;
                     case "config":
-                        ajaxSettings.url = clickedElement + '/get/all'
-                        ajaxSettings.success = Config.refresh
+                        ajaxSettings.url = clickedElement + '/get/all';
+                        ajaxSettings.success = Config.refresh;
                         break;
                     case "subscribers":
-                        ajaxSettings.url = 'subscriber/get/all'
-                        ajaxSettings.success = Subscribers.refresh
+                        ajaxSettings.url = 'subscriber/get/all';
+                        ajaxSettings.success = Subscribers.refresh;
                         break;
                     default:
                         $.okseDebug.errorPrint("[Error][Main] Unknown nav-tab clicked, this should not happen!")
                 }
 
-                ajax(ajaxSettings)
+                ajax(ajaxSettings);
                 clickInterval = setInterval( function() {
                    ajax(ajaxSettings)
                 }, updateInterval);
@@ -265,7 +265,7 @@ var Main = (function($) {
                         type: 'GET',
                         success: refresh
                     })}, 2000);
-                Logs.init()
+                Logs.init();
                 bindButtons()
             }
         }
@@ -279,9 +279,9 @@ $(document).ready(function() {
        debugFlag: true
     });
     // Initiating all JS-modules except Logs, that is initiated only on log in
-    Main.init()
-    Topics.init()
-    Subscribers.init()
+    Main.init();
+    Topics.init();
+    Subscribers.init();
     Config.init()
 
 });

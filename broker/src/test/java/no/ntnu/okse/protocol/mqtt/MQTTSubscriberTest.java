@@ -9,48 +9,48 @@ import static org.testng.AssertJUnit.assertEquals;
 
 public class MQTTSubscriberTest {
 
-    private String host = "127.0.0.1";
-    private int port = 1883;
-    private String topic = "testing";
-    private String clientID = "ogdans3";
-    private Subscriber okseSub;
-    private MQTTSubscriber sub;
+  private final String host = "127.0.0.1";
+  private final int port = 1883;
+  private final String topic = "testing";
+  private final String clientID = "ogdans3";
+  private Subscriber okseSub;
+  private MQTTSubscriber sub;
 
 
-    @BeforeTest
-    public void setUp() {
-        okseSub = new Subscriber(host, port, topic, "mqtt");
-        sub = new MQTTSubscriber(host, port, topic, clientID, okseSub);
-    }
+  @BeforeTest
+  public void setUp() {
+    okseSub = new Subscriber(host, port, topic, "mqtt");
+    sub = new MQTTSubscriber(host, port, topic, clientID, okseSub);
+  }
 
-    @AfterTest
-    public void tearDown() {
-        okseSub = null;
-        sub = null;
-    }
+  @AfterTest
+  public void tearDown() {
+    okseSub = null;
+    sub = null;
+  }
 
-    @Test
-    public void getHost() {
-        assertEquals(host, sub.getHost());
-    }
+  @Test
+  public void getHost() {
+    assertEquals(host, sub.getHost());
+  }
 
-    @Test
-    public void getPort() {
-        assertEquals(port, sub.getPort());
-    }
+  @Test
+  public void getPort() {
+    assertEquals(port, sub.getPort());
+  }
 
-    @Test
-    public void getTopic() {
-        assertEquals(topic, sub.getTopic());
-    }
+  @Test
+  public void getTopic() {
+    assertEquals(topic, sub.getTopic());
+  }
 
-    @Test
-    public void getClientID() {
-        assertEquals(clientID, sub.getClientID());
-    }
+  @Test
+  public void getClientID() {
+    assertEquals(clientID, sub.getClientID());
+  }
 
-    @Test
-    public void getSubscriber() {
-        assertEquals(okseSub, sub.getSubscriber());
-    }
+  @Test
+  public void getSubscriber() {
+    assertEquals(okseSub, sub.getSubscriber());
+  }
 }

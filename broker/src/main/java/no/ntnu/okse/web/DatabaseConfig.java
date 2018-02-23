@@ -33,17 +33,17 @@ import javax.sql.DataSource;
 @Configuration
 public class DatabaseConfig {
 
-    /**
-     * Defines a Bean for Spring. Creates an connection driver to the database
-     *
-     * @return The database driver
-     */
-    @Bean(name = "dataSource")
-    public DataSource dataSource() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.sqlite.JDBC");
-        dataSource.setUrl("jdbc:sqlite:okse.db");
-        return dataSource;
-    }
+  /**
+   * Defines a Bean for Spring. Creates an connection driver to the database
+   *
+   * @return The database driver
+   */
+  @Bean(name = "dataSource")
+  public DataSource dataSource() {
+    DriverManagerDataSource dataSource = new DriverManagerDataSource();
+    dataSource.setDriverClassName("org.sqlite.JDBC");
+    dataSource.setUrl("jdbc:sqlite:okse.db");
+    return dataSource;
+  }
 
 }

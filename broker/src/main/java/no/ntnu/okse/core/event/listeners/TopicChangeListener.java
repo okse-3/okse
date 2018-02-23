@@ -27,5 +27,6 @@ package no.ntnu.okse.core.event.listeners;
 import no.ntnu.okse.core.event.TopicChangeEvent;
 
 public interface TopicChangeListener {
-    public void topicChanged(TopicChangeEvent event);
+
+  void topicChanged(TopicChangeEvent event);
 }

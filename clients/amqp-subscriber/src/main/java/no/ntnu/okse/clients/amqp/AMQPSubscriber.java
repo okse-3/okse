@@ -7,57 +7,59 @@ import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.message.Message;
 
 public class AMQPSubscriber extends SubscribeClient {
-    @Parameter(names = {"--port", "-p"}, description = "Port")
-    public int port = 5672;
 
-    private AMQPClient client;
+  @Parameter(names = {"--port", "-p"}, description = "Port")
+  public int port = 5672;
 
-    public static void main(String[] args) {
-        launch(new AMQPSubscriber(), args);
+  private AMQPClient client;
+
+  public static void main(String[] args) {
+    launch(new AMQPSubscriber(), args);
+  }
+
+  protected void createClient() {
+    client = new AMQPClient();
+    // Prevent subscriber from timing out
+    client.setTimeout(-1L);
+    client.setCallback(new Callback());
+  }
+
+  protected TestClient getClient() {
+    return client;
+  }
+
+  private static class Callback implements AMQPCallback {
+
+    private final boolean verbose = false;
+    private int counter = 0;
+
+    public void onReceive(Message message) {
+      counter++;
+      print(counter, message, verbose);
     }
+  }
 
-    protected void createClient() {
-        client = new AMQPClient();
-        // Prevent subscriber from timing out
-        client.setTimeout(-1L);
-        client.setCallback(new Callback());
+  private static String safe(Object o) {
+    return String.valueOf(o);
+  }
+
+  private static void print(int i, Message msg, boolean verbose) {
+    StringBuilder b = new StringBuilder("message: ");
+    b.append(i).append("\n");
+    b.append("Address: ").append(msg.getAddress()).append("\n");
+    b.append("Subject: ").append(msg.getSubject()).append("\n");
+    if (verbose) {
+      b.append("Props:     ").append(msg.getProperties()).append("\n");
+      b.append("App Props: ").append(msg.getApplicationProperties()).append("\n");
+      b.append("Msg Anno:  ").append(msg.getMessageAnnotations()).append("\n");
+      b.append("Del Anno:  ").append(msg.getDeliveryAnnotations()).append("\n");
+    } else {
+      ApplicationProperties p = msg.getApplicationProperties();
+      String s = (p == null) ? "null" : safe(p.getValue());
+      b.append("Headers: ").append(s).append("\n");
     }
-
-    protected TestClient getClient() {
-        return client;
-    }
-
-    private static class Callback implements AMQPCallback {
-        private boolean verbose = false;
-        private int counter = 0;
-
-        public void onReceive(Message message) {
-            counter++;
-            print(counter, message, verbose);
-        }
-    }
-
-    private static String safe(Object o) {
-        return String.valueOf(o);
-    }
-
-    private static void print(int i, Message msg, boolean verbose) {
-        StringBuilder b = new StringBuilder("message: ");
-        b.append(i).append("\n");
-        b.append("Address: ").append(msg.getAddress()).append("\n");
-        b.append("Subject: ").append(msg.getSubject()).append("\n");
-        if (verbose) {
-            b.append("Props:     ").append(msg.getProperties()).append("\n");
-            b.append("App Props: ").append(msg.getApplicationProperties()).append("\n");
-            b.append("Msg Anno:  ").append(msg.getMessageAnnotations()).append("\n");
-            b.append("Del Anno:  ").append(msg.getDeliveryAnnotations()).append("\n");
-        } else {
-            ApplicationProperties p = msg.getApplicationProperties();
-            String s = (p == null) ? "null" : safe(p.getValue());
-            b.append("Headers: ").append(s).append("\n");
-        }
-        b.append(msg.getBody()).append("\n");
-        b.append("END").append("\n");
-        System.out.println(b.toString());
-    }
+    b.append(msg.getBody()).append("\n");
+    b.append("END").append("\n");
+    System.out.println(b.toString());
+  }
 }

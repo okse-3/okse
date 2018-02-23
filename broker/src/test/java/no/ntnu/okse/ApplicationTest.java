@@ -36,35 +36,35 @@ import static org.testng.Assert.*;
 @Test(singleThreaded = true)
 public class ApplicationTest {
 
-    @BeforeMethod
-    public void setUp() throws Exception {
+  @BeforeMethod
+  public void setUp() {
 
-    }
+  }
 
-    @AfterMethod
-    public void tearDown() throws Exception {
+  @AfterMethod
+  public void tearDown() {
 
-    }
+  }
 
-    @Test
-    public void testGetRunningTime() throws Exception {
-        assertTrue(Application.getRunningTime() instanceof Duration);
-        assertTrue(Application.getRunningTime().compareTo(Duration.ofMillis(0)) >= 0);
-    }
+  @Test
+  public void testGetRunningTime() {
+    assertTrue(Application.getRunningTime() instanceof Duration);
+    assertTrue(Application.getRunningTime().compareTo(Duration.ofMillis(0)) >= 0);
+  }
 
-    @Test
-    public void testResetStartTime() throws Exception {
-        Thread.sleep(10);
-        long d = Application.getRunningTime().toMillis();
-        Application.resetStartTime();
-        long s = Application.getRunningTime().toMillis();
-        assertTrue(s < d);
+  @Test
+  public void testResetStartTime() throws Exception {
+    Thread.sleep(10);
+    long d = Application.getRunningTime().toMillis();
+    Application.resetStartTime();
+    long s = Application.getRunningTime().toMillis();
+    assertTrue(s < d);
 
-    }
+  }
 
-    @Test
-    public void testReadConfigurationFiles() throws Exception {
-        Properties p = Application.readConfigurationFiles();
-        assertNotNull(p);
-    }
+  @Test
+  public void testReadConfigurationFiles() {
+    Properties p = Application.readConfigurationFiles();
+    assertNotNull(p);
+  }
 }
