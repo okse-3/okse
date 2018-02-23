@@ -23,6 +23,9 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
     this.protocolServerType = SERVERTYPE;
   }
 
+  /**
+   * Sets up the {@link XMPPServer}, starts it and sets _running state to true
+   */
   @Override
   public void boot() {
     if (!_running) {
@@ -40,6 +43,9 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
 
   }
 
+  /**
+   * Stops the XMPPProtocolServer and {@link XMPPServer}
+   */
   @Override
   public void stopServer() {
     log.info("Stopping XMPPProtocolServer");
@@ -47,16 +53,26 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
 
   }
 
+  /**
+   * @return the server type as a {@link String}
+   */
   @Override
   public String getProtocolServerType() {
     return SERVERTYPE;
   }
 
+  /**
+   * Forwards the message to the server to handle
+   * @param message An instance of Message containing the required data to distribute a message.
+   */
   @Override
   public void sendMessage(Message message) {
     server.sendMessage(message);
   }
 
+  /**
+   * @return true if ProtocolServer is in a running state, else false
+   */
   public boolean isRunning() {
     return _running;
   }
