@@ -1,35 +1,36 @@
 package no.ntnu.okse.clients;
 
 public interface TestClient {
-    /**
-     * Connect to broker
-     */
-    void connect();
 
-    /**
-     * Disconnect from broker
-     */
-    void disconnect();
+  /**
+   * Connect to broker
+   */
+  void connect();
 
-    /**
-     * Subscribe to topic
-     *
-     * @param topic topic
-     */
-    void subscribe(String topic);
+  /**
+   * Disconnect from broker
+   */
+  void disconnect();
 
-    /**
-     * Unsubscribe from topic
-     *
-     * @param topic topic
-     */
-    void unsubscribe(String topic);
+  /**
+   * Subscribe to topic
+   *
+   * @param topic topic
+   */
+  void subscribe(String topic);
 
-    /**
-     * Publish to topic
-     *
-     * @param topic topic
-     * @param content message content
-     */
-    void publish(String topic, String content);
+  /**
+   * Unsubscribe from topic
+   *
+   * @param topic topic
+   */
+  void unsubscribe(String topic);
+
+  /**
+   * Publish to topic
+   *
+   * @param topic topic
+   * @param content message content
+   */
+  void publish(String topic, String content);
 }

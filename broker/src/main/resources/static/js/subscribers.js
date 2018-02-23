@@ -4,7 +4,7 @@ var Subscribers = (function($) {
     // Private variable holding the subscribers array returned upon the ajax-request.
     var subscribers;
 
-    var _PAGINATOR = 'subscriber-pagination-selector'
+    var _PAGINATOR = 'subscriber-pagination-selector';
     var _CURRENTPAGE = 1; // Variable holding the last page showed in the paginator.
 
     /*
@@ -23,32 +23,32 @@ var Subscribers = (function($) {
             listLength: subscribers.length,
             fillTableCallback: fillTable
         })
-    }
+    };
 
     /*
         This function fills the #subscribers-table with the given input list
      */
     var fillTable = function(from, to) {
-        unBindButtons()
+        unBindButtons();
         if (subscribers.length == 0) {
-            $('#subscribers-table').html('<tr class="danger"><td colspan="6"><h4 class="text-center">No subscribers returned from SubscriptionsService</h4></td></tr>')
+            $('#subscribers-table').html('<tr class="danger"><td colspan="6"><h4 class="text-center">No subscribers returned from SubscriptionsService</h4></td></tr>');
             return;
         }
         if (from === undefined || to === undefined) {
-            $.okseDebug.logPrint("[Debug][Subscriber] Filling table with the complete list")
+            $.okseDebug.logPrint("[Debug][Subscriber] Filling table with the complete list");
             $('#subscribers-table').html(createTableForSubscribers(subscribers))
         } else {
-            $.okseDebug.logPrint("[Debug][Subscriber] Filling table with [" + from + "," + to + "]")
-            var subscribersToPopulate = subscribers.slice(from, to)
+            $.okseDebug.logPrint("[Debug][Subscriber] Filling table with [" + from + "," + to + "]");
+            var subscribersToPopulate = subscribers.slice(from, to);
             $('#subscribers-table').html(createTableForSubscribers(subscribersToPopulate))
         }
         bindButtons()
-    }
+    };
 
     // Create a string of all filters to fill the table cell with
     var createFilterSetString = function(filterSet) {
         if ( ! filterSet.length == 0) {
-            var returnString = ""
+            var returnString = "";
             $.each(filterSet, function(i, filter) {
                returnString += filter + "\n"
             });
@@ -56,7 +56,7 @@ var Subscribers = (function($) {
         } else {
             return "";
         }
-    }
+    };
 
     /*
      Creates, fills and returns a <tr>-element. The <tr>-element is generated based on the subscribers
@@ -77,21 +77,21 @@ var Subscribers = (function($) {
                 '</tr>';
         });
         return trHTML
-    }
+    };
 
     var unBindButtons = function() {
         $('.delete-subscriber').off('click')
-    }
+    };
 
     var bindButtons = function() {
          $('.delete-subscriber').on('click', function(e) {
-            e.preventDefault()
+            e.preventDefault();
 
              if (confirm("Are you sure you want to delete this subscriber?")) {
 
-                 var subscriberID = $(e.target).closest('tr').attr('id')
-                 $(e.target).closest("tr").addClass("deleted")
-                 $(e.target).addClass("disabled")
+                 var subscriberID = $(e.target).closest('tr').attr('id');
+                 $(e.target).closest("tr").addClass("deleted");
+                 $(e.target).addClass("disabled");
 
                  Main.ajax({
                     url: 'subscriber/delete/single?subscriberID=' + encodeURIComponent(subscriberID),
@@ -100,20 +100,20 @@ var Subscribers = (function($) {
                         $.okseDebug.logPrint("[Debug][Subscriber] Callback from server; subscriber deleted")
                     },
                     error: function(xhr, status, error) {
-                        $.okseDebug.logPrint("[Debug][Subscriber] Unable to remove subscriber with id: " + e.target.id)
-                        $(e.target).closest("tr").removeClass("deleted")
-                        $(e.target).removeClass("disabled")
+                        $.okseDebug.logPrint("[Debug][Subscriber] Unable to remove subscriber with id: " + e.target.id);
+                        $(e.target).closest("tr").removeClass("deleted");
+                        $(e.target).removeClass("disabled");
                         Main.error(xhr, status, error)
                     }
                 });
             }
          });
-    }
+    };
 
     return {
         init: function() {
             $('#delete-all-subscribers').on('click', function(e) {
-                e.preventDefault()
+                e.preventDefault();
 
                 if (confirm("Are you sure you want to delete all subscribers?")) {
 
@@ -121,17 +121,17 @@ var Subscribers = (function($) {
                         url: 'subscriber/delete/all',
                         type: 'DELETE',
                         success: function(data) {
-                            $.okseDebug.logPrint("[Debug][Topics] Callback from server; deleted all subscribers")
+                            $.okseDebug.logPrint("[Debug][Topics] Callback from server; deleted all subscribers");
                             // Disable all subscribers and buttons
                             if (data.deleted == true) {
-                                $('#subscribers-table').addClass('deleted')
+                                $('#subscribers-table').addClass('deleted');
                                 $('#subscribers-table').find('a').each(function() {
                                     $(this).addClass('disabled')
                                 });
                             }
                         },
                         error: function(xhr, status, error) {
-                            Main.displayMessage('Unable to remove all subscribers!')
+                            Main.displayMessage('Unable to remove all subscribers!');
                             Main.error(xhr, status, error)
                         }
                     });
@@ -141,27 +141,27 @@ var Subscribers = (function($) {
              * Add a listener to clear interval
              * */
             $("#subscribers-button-refresh").on("click", function(e) {
-                e.preventDefault()
+                e.preventDefault();
                 if (!$(this).hasClass("active")) {
-                    $(this).addClass("active")
-                    $(this).text("Stop refresh")
+                    $(this).addClass("active");
+                    $(this).text("Stop refresh");
                     Main.setIntervalForTab({
                         url: 'subscriber/get/all',
                         type: 'GET',
                         success: Subscribers.refresh
                     })
                 } else {
-                    $(this).removeClass("active")
-                    $(this).text("Start refresh")
+                    $(this).removeClass("active");
+                    $(this).text("Start refresh");
                     Main.clearIntervalForTab()
                 }
             })
         },
         refresh: function(data) {
-            subscribers = data
-            checkIfPaginationIsNeeded()
+            subscribers = data;
+            checkIfPaginationIsNeeded();
             // Remove 'deleted class' if it exists
-            Main.refreshElementByClassWithText('.totalSubscribers', subscribers.length)
+            Main.refreshElementByClassWithText('.totalSubscribers', subscribers.length);
             if ($('#subscribers-table').hasClass('deleted')) { $('#subscribers-table').removeClass('deleted'); }
         }
     }

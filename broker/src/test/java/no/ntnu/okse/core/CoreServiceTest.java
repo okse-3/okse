@@ -27,7 +27,6 @@ package no.ntnu.okse.core;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import no.ntnu.okse.protocol.ProtocolServer;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -44,214 +43,242 @@ import static org.testng.Assert.*;
 @Test(singleThreaded = true)
 public class CoreServiceTest {
 
-    CoreService cs;
-    boolean callback;
-    int counter;
+  CoreService cs;
+  boolean callback;
+  int counter;
 
-    @BeforeClass
-    public void boot() throws Exception {
-        cs = CoreService.getInstance();
-        Field field = CoreService.class.getDeclaredField("protocolServers");
-        field.setAccessible(true);
-        ArrayList<ProtocolServer> ps = (ArrayList<ProtocolServer>)field.get(cs);
-        ps.clear();
-        cs.protocolServersBooted = false;
-        InputStream resourceAsStream = CoreService.class.getResourceAsStream("/config/protocolservers.xml");
-        cs.bootProtocolServers(resourceAsStream);
+  @BeforeClass
+  public void boot() throws Exception {
+    cs = CoreService.getInstance();
+    Field field = CoreService.class.getDeclaredField("protocolServers");
+    field.setAccessible(true);
+    ArrayList<ProtocolServer> ps = (ArrayList<ProtocolServer>) field.get(cs);
+    ps.clear();
+    CoreService.protocolServersBooted = false;
+    InputStream resourceAsStream = CoreService.class
+        .getResourceAsStream("/config/protocolservers.xml");
+    cs.bootProtocolServers(resourceAsStream);
+  }
+
+  @BeforeMethod
+  public void setUp() {
+    callback = false;
+    counter = 0;
+  }
+
+  @AfterMethod
+  public void tearDown() {
+    callback = false;
+    counter = 0;
+  }
+
+  @Test
+  public void testGetInstance() {
+    assertSame(cs, CoreService.getInstance());
+  }
+
+  @Test
+  public void testExecute() {
+    for (int i = 1; i < 11; i++) {
+      if (counter < 10) {
+        cs.execute(() -> counter++);
+      } else {
+        cs.execute(() -> assertEquals(counter, 10));
+      }
+    }
+  }
+
+  @Test
+  public void testGetEventQueue() {
+    assertNotNull(cs.getEventQueue());
+    assertTrue(cs.getEventQueue() instanceof LinkedBlockingQueue);
+  }
+
+  @Test
+  public void testGetExecutor() {
+    assertNotNull(cs.getExecutor());
+    assertTrue(cs.getExecutor() instanceof ExecutorService);
+  }
+
+  @Test
+  public void testRegisterService() {
+    TestService ts = new TestService();
+    cs.registerService(ts);
+    assertNotNull(cs.getService(ts.getClass()));
+    cs.removeService(ts);
+  }
+
+  @Test
+  public void testRemoveService() {
+    TestService ts = new TestService();
+    cs.registerService(ts);
+    assertNotNull(cs.getService(ts.getClass()));
+    cs.removeService(ts);
+    assertNull(cs.getService(ts.getClass()));
+  }
+
+  @Test
+  public void testGetService() {
+    TestService ts = new TestService();
+    cs.registerService(ts);
+    assertNotNull(cs.getService(ts.getClass()));
+    assertSame(cs.getService(ts.getClass()), ts);
+    cs.removeService(ts);
+  }
+
+  @Test
+  public void testAddProtocolServer() {
+    TestProtocol tp = new TestProtocol(1);
+    cs.addProtocolServer(tp);
+    System.out.println(cs.getAllProtocolServers());
+    assertTrue(cs.getAllProtocolServers().contains(tp));
+    cs.removeProtocolServer(tp);
+  }
+
+  @Test
+  public void testRemoveProtocolServer() {
+    TestProtocol tp = new TestProtocol(1);
+    cs.addProtocolServer(tp);
+    assertTrue(cs.getAllProtocolServers().contains(tp));
+    cs.removeProtocolServer(tp);
+    assertFalse(cs.getAllProtocolServers().contains(tp));
+  }
+
+  @Test
+  public void testGetTotalRequestsFromProtocolServers() {
+    TestProtocol tp = new TestProtocol(1);
+    TestProtocol tp2 = new TestProtocol(2);
+    cs.addProtocolServer(tp);
+    cs.addProtocolServer(tp2);
+    assertEquals(cs.getTotalRequestsFromProtocolServers(), 9);
+    cs.removeProtocolServer(tp);
+    cs.removeProtocolServer(tp2);
+  }
+
+  @Test
+  public void testGetTotalMessagesReceivedFromProtocolServers() {
+    TestProtocol tp = new TestProtocol(1);
+    TestProtocol tp2 = new TestProtocol(2);
+    cs.addProtocolServer(tp);
+    cs.addProtocolServer(tp2);
+    assertEquals(cs.getTotalMessagesReceivedFromProtocolServers(), 3);
+    cs.removeProtocolServer(tp);
+    cs.removeProtocolServer(tp2);
+  }
+
+  @Test
+  public void testGetTotalMessagesSentFromProtocolServers() {
+    TestProtocol tp = new TestProtocol(1);
+    TestProtocol tp2 = new TestProtocol(2);
+    cs.addProtocolServer(tp);
+    cs.addProtocolServer(tp2);
+    assertEquals(cs.getTotalMessagesSentFromProtocolServers(), 6);
+    cs.removeProtocolServer(tp);
+    cs.removeProtocolServer(tp2);
+  }
+
+  @Test
+  public void testGetTotalBadRequestsFromProtocolServers() {
+    TestProtocol tp = new TestProtocol(1);
+    TestProtocol tp2 = new TestProtocol(2);
+    cs.addProtocolServer(tp);
+    cs.addProtocolServer(tp2);
+    assertEquals(cs.getTotalBadRequestsFromProtocolServers(), 12);
+    cs.removeProtocolServer(tp);
+    cs.removeProtocolServer(tp2);
+  }
+
+  @Test
+  public void testGetTotalErrorsFromProtocolServers() {
+    TestProtocol tp = new TestProtocol(1);
+    TestProtocol tp2 = new TestProtocol(2);
+    cs.addProtocolServer(tp);
+    cs.addProtocolServer(tp2);
+    assertEquals(cs.getTotalErrorsFromProtocolServers(), 15);
+    cs.removeProtocolServer(tp);
+    cs.removeProtocolServer(tp2);
+  }
+
+  @Test
+  public void testGetAllProtocolServers() {
+    TestProtocol tp = new TestProtocol(1);
+    assertFalse(cs.getAllProtocolServers().contains(tp));
+    cs.addProtocolServer(tp);
+    assertTrue(cs.getAllProtocolServers().contains(tp));
+    cs.removeProtocolServer(tp);
+  }
+
+  @Test
+  public void testGetProtocolServer() {
+    TestProtocol tp = new TestProtocol(1);
+    cs.addProtocolServer(tp);
+    ProtocolServer tp2 = cs.getProtocolServer(tp.getClass());
+    assertSame(tp, tp2);
+    cs.removeProtocolServer(tp);
+  }
+
+  @Test
+  public void testGetProtocolServer1() {
+    TestProtocol tp = new TestProtocol(1);
+    cs.addProtocolServer(tp);
+    ProtocolServer tp2 = cs.getProtocolServer("Test");
+    assertSame(tp, tp2);
+    cs.removeProtocolServer(tp);
+  }
+
+  /* HELPER CLASSES */
+
+  public static class TestService extends AbstractCoreService {
+
+    public TestService() {
+      super(TestService.class.getName());
     }
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        callback = false;
-        counter = 0;
+    protected void init() {
     }
 
-    @AfterMethod
-    public void tearDown() throws Exception {
-        callback = false;
-        counter = 0;
+    public void boot() {
     }
 
-    @Test
-    public void testGetInstance() throws Exception {
-        assertSame(cs, CoreService.getInstance());
+    public void registerListenerSupport() {
     }
 
-    @Test
-    public void testExecute() throws Exception {
-        for (int i = 1; i < 11; i++) {
-            if (counter < 10) cs.execute(() -> counter++);
-            else cs.execute(() -> assertEquals(counter, 10));
-        }
+    public void run() {
     }
 
-    @Test
-    public void testGetEventQueue() throws Exception {
-        assertNotNull(cs.getEventQueue());
-        assertTrue(cs.getEventQueue() instanceof LinkedBlockingQueue);
+    public void stop() {
+    }
+  }
+
+  public static class TestProtocol extends AbstractProtocolServer {
+
+    public TestProtocol(Integer baseCount) {
+      totalMessagesReceived.getAndAdd(baseCount);
+      totalMessagesSent.getAndAdd(2 * baseCount);
+      totalRequests.getAndAdd(3 * baseCount);
+      totalBadRequests.getAndAdd(4 * baseCount);
+      totalErrors.getAndAdd(5 * baseCount);
     }
 
-    @Test
-    public void testGetExecutor() throws Exception {
-        assertNotNull(cs.getExecutor());
-        assertTrue(cs.getExecutor() instanceof ExecutorService);
+    protected void init(String host, Integer port) {
+      this.host = host;
+      this.port = port;
     }
 
-    @Test
-    public void testRegisterService() throws Exception {
-        TestService ts = new TestService();
-        cs.registerService(ts);
-        assertNotNull(cs.getService(ts.getClass()));
-        cs.removeService(ts);
+    public void boot() {
     }
 
-    @Test
-    public void testRemoveService() throws Exception {
-        TestService ts = new TestService();
-        cs.registerService(ts);
-        assertNotNull(cs.getService(ts.getClass()));
-        cs.removeService(ts);
-        assertNull(cs.getService(ts.getClass()));
+    public void run() {
     }
 
-    @Test
-    public void testGetService() throws Exception {
-        TestService ts = new TestService();
-        cs.registerService(ts);
-        assertNotNull(cs.getService(ts.getClass()));
-        assertSame(cs.getService(ts.getClass()), ts);
-        cs.removeService(ts);
+    public void stopServer() {
     }
 
-    @Test
-    public void testAddProtocolServer() throws Exception {
-        TestProtocol tp = new TestProtocol(1);
-        cs.addProtocolServer(tp);
-        System.out.println(cs.getAllProtocolServers());
-        assertTrue(cs.getAllProtocolServers().contains(tp));
-        cs.removeProtocolServer(tp);
+    public String getProtocolServerType() {
+      return "Test";
     }
 
-    @Test
-    public void testRemoveProtocolServer() throws Exception {
-        TestProtocol tp = new TestProtocol(1);
-        cs.addProtocolServer(tp);
-        assertTrue(cs.getAllProtocolServers().contains(tp));
-        cs.removeProtocolServer(tp);
-        assertFalse(cs.getAllProtocolServers().contains(tp));
+    public void sendMessage(Message message) {
     }
-
-    @Test
-    public void testGetTotalRequestsFromProtocolServers() throws Exception {
-        TestProtocol tp = new TestProtocol(1);
-        TestProtocol tp2 = new TestProtocol(2);
-        cs.addProtocolServer(tp);
-        cs.addProtocolServer(tp2);
-        assertEquals(cs.getTotalRequestsFromProtocolServers(), 9);
-        cs.removeProtocolServer(tp);
-        cs.removeProtocolServer(tp2);
-    }
-
-    @Test
-    public void testGetTotalMessagesReceivedFromProtocolServers() throws Exception {
-        TestProtocol tp = new TestProtocol(1);
-        TestProtocol tp2 = new TestProtocol(2);
-        cs.addProtocolServer(tp);
-        cs.addProtocolServer(tp2);
-        assertEquals(cs.getTotalMessagesReceivedFromProtocolServers(), 3);
-        cs.removeProtocolServer(tp);
-        cs.removeProtocolServer(tp2);
-    }
-
-    @Test
-    public void testGetTotalMessagesSentFromProtocolServers() throws Exception {
-        TestProtocol tp = new TestProtocol(1);
-        TestProtocol tp2 = new TestProtocol(2);
-        cs.addProtocolServer(tp);
-        cs.addProtocolServer(tp2);
-        assertEquals(cs.getTotalMessagesSentFromProtocolServers(), 6);
-        cs.removeProtocolServer(tp);
-        cs.removeProtocolServer(tp2);
-    }
-
-    @Test
-    public void testGetTotalBadRequestsFromProtocolServers() throws Exception {
-        TestProtocol tp = new TestProtocol(1);
-        TestProtocol tp2 = new TestProtocol(2);
-        cs.addProtocolServer(tp);
-        cs.addProtocolServer(tp2);
-        assertEquals(cs.getTotalBadRequestsFromProtocolServers(), 12);
-        cs.removeProtocolServer(tp);
-        cs.removeProtocolServer(tp2);
-    }
-
-    @Test
-    public void testGetTotalErrorsFromProtocolServers() throws Exception {
-        TestProtocol tp = new TestProtocol(1);
-        TestProtocol tp2 = new TestProtocol(2);
-        cs.addProtocolServer(tp);
-        cs.addProtocolServer(tp2);
-        assertEquals(cs.getTotalErrorsFromProtocolServers(), 15);
-        cs.removeProtocolServer(tp);
-        cs.removeProtocolServer(tp2);
-    }
-
-    @Test
-    public void testGetAllProtocolServers() throws Exception {
-        TestProtocol tp = new TestProtocol(1);
-        assertFalse(cs.getAllProtocolServers().contains(tp));
-        cs.addProtocolServer(tp);
-        assertTrue(cs.getAllProtocolServers().contains(tp));
-        cs.removeProtocolServer(tp);
-    }
-
-    @Test
-    public void testGetProtocolServer() throws Exception {
-        TestProtocol tp = new TestProtocol(1);
-        cs.addProtocolServer(tp);
-        ProtocolServer tp2 = cs.getProtocolServer(tp.getClass());
-        assertSame(tp, tp2);
-        cs.removeProtocolServer(tp);
-    }
-
-    @Test
-    public void testGetProtocolServer1() throws Exception {
-        TestProtocol tp = new TestProtocol(1);
-        cs.addProtocolServer(tp);
-        ProtocolServer tp2 = cs.getProtocolServer("Test");
-        assertSame(tp, tp2);
-        cs.removeProtocolServer(tp);
-    }
-
-    /* HELPER CLASSES */
-
-    public static class TestService extends AbstractCoreService {
-        public TestService() {
-            super(TestService.class.getName());
-        }
-        protected void init() {}
-        public void boot() {}
-        public void registerListenerSupport() {}
-        public void run() {}
-        public void stop() {}
-    }
-
-    public static class TestProtocol extends AbstractProtocolServer {
-        public TestProtocol(Integer baseCount) {
-            totalMessagesReceived.getAndAdd(1 * baseCount);
-            totalMessagesSent.getAndAdd(2 * baseCount);
-            totalRequests.getAndAdd(3 * baseCount);
-            totalBadRequests.getAndAdd(4 * baseCount);
-            totalErrors.getAndAdd(5 * baseCount);
-        }
-        protected void init(String host, Integer port) {
-            this.host = host;
-            this.port = port;
-        }
-        public void boot() {}
-        public void run() {}
-        public void stopServer() {}
-        public String getProtocolServerType() { return "Test"; }
-        public void sendMessage(Message message) {}
-    }
+  }
 }

@@ -33,34 +33,34 @@ import static org.testng.Assert.*;
 
 public class PublisherChangeEventTest {
 
-    PublisherChangeEvent e;
-    Publisher p;
+  PublisherChangeEvent e;
+  Publisher p;
 
-    @BeforeMethod
-    public void setUp() {
-        p = new Publisher("topic", "0.0.0.0", 8080, "Test");
-        e = new PublisherChangeEvent(PublisherChangeEvent.Type.REGISTER, p);
-    }
+  @BeforeMethod
+  public void setUp() {
+    p = new Publisher("topic", "0.0.0.0", 8080, "Test");
+    e = new PublisherChangeEvent(PublisherChangeEvent.Type.REGISTER, p);
+  }
 
-    @AfterMethod
-    public void tearDown() {
-        p = null;
-        e = null;
-    }
+  @AfterMethod
+  public void tearDown() {
+    p = null;
+    e = null;
+  }
 
-    @Test
-    public void testGetData() throws Exception {
-        assertNotNull(e.getData());
-        assertTrue(e.getData() instanceof Publisher);
-        assertSame(e.getData(), p);
-        assertEquals(e.getData().getTopic(), "topic");
-    }
+  @Test
+  public void testGetData() {
+    assertNotNull(e.getData());
+    assertTrue(e.getData() instanceof Publisher);
+    assertSame(e.getData(), p);
+    assertEquals(e.getData().getTopic(), "topic");
+  }
 
-    @Test
-    public void testGetType() throws Exception {
-        assertNotNull(e.getType());
-        assertEquals(e.getType(), PublisherChangeEvent.Type.REGISTER);
-        e = new PublisherChangeEvent(PublisherChangeEvent.Type.UNREGISTER, p);
-        assertEquals(e.getType(), PublisherChangeEvent.Type.UNREGISTER);
-    }
+  @Test
+  public void testGetType() {
+    assertNotNull(e.getType());
+    assertEquals(e.getType(), PublisherChangeEvent.Type.REGISTER);
+    e = new PublisherChangeEvent(PublisherChangeEvent.Type.UNREGISTER, p);
+    assertEquals(e.getType(), PublisherChangeEvent.Type.UNREGISTER);
+  }
 }

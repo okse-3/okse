@@ -5,21 +5,22 @@ import no.ntnu.okse.clients.SubscribeClient;
 import no.ntnu.okse.clients.TestClient;
 
 public class STOMPSubscriber extends SubscribeClient {
-    @Parameter(names = {"--port", "-p"}, description = "Port")
-    public int port = 61613;
 
-    private StompClient client;
+  @Parameter(names = {"--port", "-p"}, description = "Port")
+  public final int port = 61613;
 
-    public static void main(String[] args) {
-        launch(new STOMPSubscriber(), args);
-    }
+  private StompClient client;
 
-    protected void createClient() {
-        client = new StompClient(host, port);
-        client.setCallback(new StompCallback());
-    }
+  public static void main(String[] args) {
+    launch(new STOMPSubscriber(), args);
+  }
 
-    protected TestClient getClient() {
-        return client;
-    }
+  protected void createClient() {
+    client = new StompClient(host, port);
+    client.setCallback(new StompCallback());
+  }
+
+  protected TestClient getClient() {
+    return client;
+  }
 }

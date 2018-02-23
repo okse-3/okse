@@ -5,20 +5,21 @@ import no.ntnu.okse.clients.PublishClient;
 import no.ntnu.okse.clients.TestClient;
 
 public class AMQPPublisher extends PublishClient {
-    @Parameter(names = {"--port", "-p"}, description = "Port")
-    public int port = 5672;
 
-    private AMQPClient client;
+  @Parameter(names = {"--port", "-p"}, description = "Port")
+  public final int port = 5672;
 
-    public static void main(String[] args) {
-        launch(new AMQPPublisher (), args);
-    }
+  private AMQPClient client;
 
-    protected void createClient() {
-        client = new AMQPClient(host, port);
-    }
+  public static void main(String[] args) {
+    launch(new AMQPPublisher(), args);
+  }
 
-    protected TestClient getClient() {
-        return client;
-    }
+  protected void createClient() {
+    client = new AMQPClient(host, port);
+  }
+
+  protected TestClient getClient() {
+    return client;
+  }
 }

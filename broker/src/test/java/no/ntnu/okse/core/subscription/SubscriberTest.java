@@ -34,143 +34,143 @@ import static org.testng.Assert.*;
 
 public class SubscriberTest {
 
-    Subscriber s;
+  Subscriber s;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        s = new Subscriber("0.0.0.0", 1337, "test/sub", "Test");
+  @BeforeMethod
+  public void setUp() {
+    s = new Subscriber("0.0.0.0", 1337, "test/sub", "Test");
+  }
+
+  @AfterMethod
+  public void tearDown() {
+    s = null;
+  }
+
+  @Test
+  public void testGetHost() {
+    assertEquals(s.getHost(), "0.0.0.0");
+  }
+
+  @Test
+  public void testGetPort() {
+    assertTrue(s.getPort() == 1337);
+    try {
+      s = new Subscriber("0.0.0.0", 0, "test/sub", "Test");
+      fail("Ports outside range should not be allowed");
+    } catch (IllegalArgumentException e) {
+
     }
+    try {
+      s = new Subscriber("0.0.0.0", 65536, "test/sub", "Test");
+      fail("Ports outside range should not be allowed");
+    } catch (IllegalArgumentException e) {
 
-    @AfterMethod
-    public void tearDown() throws Exception {
-        s = null;
     }
+  }
 
-    @Test
-    public void testGetHost() throws Exception {
-        assertEquals(s.getHost(), "0.0.0.0");
+  @Test
+  public void testGetTopic() {
+    assertEquals(s.getTopic(), "test/sub");
+  }
+
+  @Test
+  public void testSetAttribute() {
+    s.setAttribute("flag", "value");
+    assertEquals(s.getAttribute("flag"), "value");
+    assertNull(s.getAttribute("FLAG"));
+  }
+
+  @Test
+  public void testGetAttribute() {
+    assertNull(s.getAttribute("flag"));
+    s.setAttribute("flag", "value");
+    assertEquals(s.getAttribute("flag"), "value");
+    assertNull(s.getAttribute("FLAG"));
+  }
+
+  @Test
+  public void testGetTimeout() {
+    Long timeout = System.currentTimeMillis() + 20000L;
+    assertNull(s.getTimeout());
+    s.setTimeout(timeout);
+    assertTrue(s.getTimeout().equals(timeout));
+  }
+
+  @Test
+  public void testGetSubscriberID() {
+    HashSet<String> ids = new HashSet<>();
+    assertNotNull(s.getSubscriberID());
+    // Hex regex
+    assertTrue(s.getSubscriberID().matches("-?[0-9a-fA-F]+"));
+    // Do a mass test and check for colliding ID's
+    for (int i = 0; i < 1337; i++) {
+      setUp();
+      ids.add(s.getSubscriberID());
+      tearDown();
     }
+    assertEquals(ids.size(), 1337);
+  }
 
-    @Test
-    public void testGetPort() throws Exception {
-        assertTrue(s.getPort() == 1337);
-        try {
-            s = new Subscriber("0.0.0.0", 0, "test/sub", "Test");
-            fail("Ports outside range should not be allowed");
-        } catch (IllegalArgumentException e) {
+  @Test
+  public void testSetTimeout() {
+    Long timeout = System.currentTimeMillis();
+    try {
+      s.setTimeout(timeout - 20000L);
+      fail("Should not be allowed to set timeout in the past");
+    } catch (IllegalArgumentException e) {
 
-        }
-        try {
-            s = new Subscriber("0.0.0.0", 65536, "test/sub", "Test");
-            fail("Ports outside range should not be allowed");
-        } catch (IllegalArgumentException e) {
-
-        }
     }
+    timeout = System.currentTimeMillis();
+    s.setTimeout(timeout + 20000L);
+    assertTrue(s.getTimeout().equals(timeout + 20000L));
+  }
 
-    @Test
-    public void testGetTopic() throws Exception {
-        assertEquals(s.getTopic(), "test/sub");
-    }
+  @Test
+  public void testShouldExpire() {
+    assertFalse(s.shouldExpire());
+    s.setTimeout(System.currentTimeMillis() + 20000L);
+    assertTrue(s.shouldExpire());
+  }
 
-    @Test
-    public void testSetAttribute() throws Exception {
-        s.setAttribute("flag", "value");
-        assertEquals(s.getAttribute("flag"), "value");
-        assertNull(s.getAttribute("FLAG"));
-    }
+  @Test
+  public void testAddFilter() {
+    assertFalse(s.getFilterSet().contains("filterstring"));
+    s.addFilter("filterstring");
+    assertTrue(s.getFilterSet().contains("filterstring"));
+  }
 
-    @Test
-    public void testGetAttribute() throws Exception {
-        assertNull(s.getAttribute("flag"));
-        s.setAttribute("flag", "value");
-        assertEquals(s.getAttribute("flag"), "value");
-        assertNull(s.getAttribute("FLAG"));
-    }
+  @Test
+  public void testRemoveFilter() {
+    s.addFilter("filterstring");
+    assertTrue(s.getFilterSet().contains("filterstring"));
+    s.removeFilter("filterstring");
+    assertFalse(s.getFilterSet().contains("filterstring"));
+  }
 
-    @Test
-    public void testGetTimeout() throws Exception {
-        Long timeout = System.currentTimeMillis() + 20000L;
-        assertNull(s.getTimeout());
-        s.setTimeout(timeout);
-        assertTrue(s.getTimeout().equals(timeout));
-    }
+  @Test
+  public void testGetFilterSet() {
+    assertNotNull(s.getFilterSet());
+    assertTrue(s.getFilterSet() instanceof HashSet);
+    assertTrue(s.getFilterSet().isEmpty());
+  }
 
-    @Test
-    public void testGetSubscriberID() throws Exception {
-        HashSet<String> ids = new HashSet<>();
-        assertNotNull(s.getSubscriberID());
-        // Hex regex
-        assertTrue(s.getSubscriberID().matches("-?[0-9a-fA-F]+"));
-        // Do a mass test and check for colliding ID's
-        for (int i = 0; i < 1337; i++) {
-            setUp();
-            ids.add(s.getSubscriberID());
-            tearDown();
-        }
-        assertEquals(ids.size(), 1337);
-    }
+  @Test
+  public void testHasExpired() throws Exception {
+    assertFalse(s.hasExpired());
+    s.setTimeout(System.currentTimeMillis() + 100L);
+    assertFalse(s.hasExpired());
+    Thread.sleep(150);
+    assertTrue(s.hasExpired());
+  }
 
-    @Test
-    public void testSetTimeout() throws Exception {
-        Long timeout = System.currentTimeMillis();
-        try {
-            s.setTimeout(timeout - 20000L);
-            fail("Should not be allowed to set timeout in the past");
-        } catch (IllegalArgumentException e) {
+  @Test
+  public void testGetOriginProtocol() {
+    assertEquals(s.getOriginProtocol(), "Test");
+  }
 
-        }
-        timeout = System.currentTimeMillis();
-        s.setTimeout(timeout + 20000L);
-        assertTrue(s.getTimeout().equals(timeout + 20000L));
-    }
-
-    @Test
-    public void testShouldExpire() throws Exception {
-        assertFalse(s.shouldExpire());
-        s.setTimeout(System.currentTimeMillis() + 20000L);
-        assertTrue(s.shouldExpire());
-    }
-
-    @Test
-    public void testAddFilter() throws Exception {
-        assertFalse(s.getFilterSet().contains("filterstring"));
-        s.addFilter("filterstring");
-        assertTrue(s.getFilterSet().contains("filterstring"));
-    }
-
-    @Test
-    public void testRemoveFilter() throws Exception {
-        s.addFilter("filterstring");
-        assertTrue(s.getFilterSet().contains("filterstring"));
-        s.removeFilter("filterstring");
-        assertFalse(s.getFilterSet().contains("filterstring"));
-    }
-
-    @Test
-    public void testGetFilterSet() throws Exception {
-        assertNotNull(s.getFilterSet());
-        assertTrue(s.getFilterSet() instanceof HashSet);
-        assertTrue(s.getFilterSet().isEmpty());
-    }
-
-    @Test
-    public void testHasExpired() throws Exception {
-        assertFalse(s.hasExpired());
-        s.setTimeout(System.currentTimeMillis() + 100L);
-        assertFalse(s.hasExpired());
-        Thread.sleep(150);
-        assertTrue(s.hasExpired());
-    }
-
-    @Test
-    public void testGetOriginProtocol() throws Exception {
-        assertEquals(s.getOriginProtocol(), "Test");
-    }
-
-    @Test
-    public void testToString() throws Exception {
-        assertNotNull(s.toString());
-        assertTrue(s.toString() instanceof String);
-    }
+  @Test
+  public void testToString() {
+    assertNotNull(s.toString());
+    assertTrue(s.toString() instanceof String);
+  }
 }

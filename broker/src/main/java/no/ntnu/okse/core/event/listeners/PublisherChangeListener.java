@@ -27,5 +27,6 @@ package no.ntnu.okse.core.event.listeners;
 import no.ntnu.okse.core.event.PublisherChangeEvent;
 
 public interface PublisherChangeListener {
-    public void publisherChanged(PublisherChangeEvent e);
+
+  void publisherChanged(PublisherChangeEvent e);
 }

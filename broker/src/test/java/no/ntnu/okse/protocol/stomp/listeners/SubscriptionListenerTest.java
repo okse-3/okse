@@ -16,61 +16,63 @@ import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
 public class SubscriptionListenerTest {
-    private SubscriptionListener listener;
-    private SubscriptionListener listener_spy;
-    private STOMPSubscriptionManager subscritpionManager_spy;
 
-    @BeforeTest
-    public void setUp() {
-        listener = new SubscriptionListener();
-        STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager();
-        subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
-        subscritpionManager_spy = Mockito.spy(subscriptionManager);
+  private SubscriptionListener listener;
+  private SubscriptionListener listener_spy;
+  private STOMPSubscriptionManager subscritpionManager_spy;
 
-        listener.setSubscriptionManager(subscritpionManager_spy);
+  @BeforeTest
+  public void setUp() {
+    listener = new SubscriptionListener();
+    STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager();
+    subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
+    subscritpionManager_spy = Mockito.spy(subscriptionManager);
 
-        listener_spy = Mockito.spy(listener);
-    }
+    listener.setSubscriptionManager(subscritpionManager_spy);
 
-    @AfterTest
-    public void tearDown() {
-        listener = null;
-        listener_spy = null;
-    }
+    listener_spy = Mockito.spy(listener);
+  }
 
-    @Test
-    public void isForMessage(){
-        assertEquals(true, listener_spy.isForMessage(null));
-    }
+  @AfterTest
+  public void tearDown() {
+    listener = null;
+    listener_spy = null;
+  }
 
-    @Test
-    public void getMessageTypes(){
-        StompMessageType[] types = listener_spy.getMessageTypes();
-        assertEquals(StompMessageType.SUBSCRIBE, types[0]);
-    }
+  @Test
+  public void isForMessage() {
+    assertEquals(true, listener_spy.isForMessage(null));
+  }
 
-    @Test
-    public void messageReceived() throws Exception {
-        StampyMessage msg = createSubMessage();
-        HostPort hostport = createHostPort();
-        listener_spy.messageReceived(msg, hostport);
+  @Test
+  public void getMessageTypes() {
+    StompMessageType[] types = listener_spy.getMessageTypes();
+    assertEquals(StompMessageType.SUBSCRIBE, types[0]);
+  }
 
-        ArgumentCaptor<Subscriber> subscriberArgument = ArgumentCaptor.forClass(Subscriber.class);
-        ArgumentCaptor<String> clientIDArgument = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(subscritpionManager_spy).addSubscriber(subscriberArgument.capture(), clientIDArgument.capture());
-        assertEquals( "ogdans3", clientIDArgument.getValue());
-        assertEquals( "bernt", subscriberArgument.getValue().getTopic());
-    }
+  @Test
+  public void messageReceived() {
+    StampyMessage msg = createSubMessage();
+    HostPort hostport = createHostPort();
+    listener_spy.messageReceived(msg, hostport);
 
-    private HostPort createHostPort(){
-        return new HostPort("localhost", 61613);
-    }
+    ArgumentCaptor<Subscriber> subscriberArgument = ArgumentCaptor.forClass(Subscriber.class);
+    ArgumentCaptor<String> clientIDArgument = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(subscritpionManager_spy)
+        .addSubscriber(subscriberArgument.capture(), clientIDArgument.capture());
+    assertEquals("ogdans3", clientIDArgument.getValue());
+    assertEquals("bernt", subscriberArgument.getValue().getTopic());
+  }
 
-    private StampyMessage createSubMessage(){
-        SubscribeMessage msg = new SubscribeMessage();
-        msg.getHeader().setDestination("bernt");
-        msg.getHeader().setId("ogdans3");
-        return msg;
-    }
+  private HostPort createHostPort() {
+    return new HostPort("localhost", 61613);
+  }
+
+  private StampyMessage createSubMessage() {
+    SubscribeMessage msg = new SubscribeMessage();
+    msg.getHeader().setDestination("bernt");
+    msg.getHeader().setId("ogdans3");
+    return msg;
+  }
 
 }

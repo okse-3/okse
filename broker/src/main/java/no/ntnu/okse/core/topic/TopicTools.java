@@ -28,102 +28,102 @@ import no.ntnu.okse.exceptions.TopicExceptions;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Stack;
 
 public class TopicTools {
 
-    /**
-     * Iterative implementation of Depth-First-Search to discover all Topic nodes from a root node.
-     *
-     * @param root The root node from which the Depth-First-Search is to be performed.
-     * @return A HashSet of all the discovered topic nodes.
-     */
-    private static HashSet<Topic> DFS(Topic root) {
+  /**
+   * Iterative implementation of Depth-First-Search to discover all Topic nodes from a root node.
+   *
+   * @param root The root node from which the Depth-First-Search is to be performed.
+   * @return A HashSet of all the discovered topic nodes.
+   */
+  private static HashSet<Topic> DFS(Topic root) {
 
-        HashSet<Topic> discovered = new HashSet<Topic>();
-        Stack<Topic> queue = new Stack<>();
-        queue.push(root);
+    HashSet<Topic> discovered = new HashSet<>();
+    Stack<Topic> queue = new Stack<>();
+    queue.push(root);
 
-        while (!queue.empty()) {
-            Topic t = queue.pop();
-            if (!discovered.contains(t)) {
-                discovered.add(t);
-                t.getChildren().stream().forEach(c -> queue.push(c));
-            }
-        }
-
-        return discovered;
+    while (!queue.empty()) {
+      Topic t = queue.pop();
+      if (!discovered.contains(t)) {
+        discovered.add(t);
+        t.getChildren().forEach(queue::push);
+      }
     }
 
-    /**
-     * Returns all topic nodes discovered from a collection of root nodes (including the root nodes).
-     *
-     * @param rootNodes A collection of root nodes that are to be explored.
-     * @return A HashSet of the discovered topic nodes from the DFS searches.
-     * @throws TopicExceptions.NonRootNodeException If a node in the collection was in fact not a root node.
-     */
-    public static HashSet<Topic> getAllTopicNodesFromRootNodeSet(Collection<Topic> rootNodes) throws TopicExceptions.NonRootNodeException {
-        HashSet<Topic> returnSet = new HashSet<>();
+    return discovered;
+  }
 
-        // Iterate over all the nodes in the argument collection
-        for (Topic rootNode : rootNodes) {
-            // If we have a non-root node we throw an exception, because this method expects root nodes.
-            if (!rootNode.isRoot())
-                throw new TopicExceptions.NonRootNodeException("Expected rootNode, but was " + rootNode);
+  /**
+   * Returns all topic nodes discovered from a collection of root nodes (including the root nodes).
+   *
+   * @param rootNodes A collection of root nodes that are to be explored.
+   * @return A HashSet of the discovered topic nodes from the DFS searches.
+   * @throws TopicExceptions.NonRootNodeException If a node in the collection was in fact not a root
+   * node.
+   */
+  public static HashSet<Topic> getAllTopicNodesFromRootNodeSet(Collection<Topic> rootNodes)
+      throws TopicExceptions.NonRootNodeException {
+    HashSet<Topic> returnSet = new HashSet<>();
 
-            // Perform a Depth-First-Search from the root node and add the results to the return set.
-            DFS(rootNode).stream().forEach(t -> returnSet.add(t));
-        }
+    // Iterate over all the nodes in the argument collection
+    for (Topic rootNode : rootNodes) {
+      // If we have a non-root node we throw an exception, because this method expects root nodes.
+      if (!rootNode.isRoot()) {
+        throw new TopicExceptions.NonRootNodeException(
+            "Expected rootNode, but was " + rootNode);
+      }
 
-        return returnSet;
+      // Perform a Depth-First-Search from the root node and add the results to the return set.
+      returnSet.addAll(DFS(rootNode));
     }
 
-    /**
-     * Returns a HashSet of all the topics discovered from a collection of topic nodes (including the start nodes).
-     *
-     * @param nodes A collection of topic nodes.
-     * @return A HasSet with the discovered nodes.
-     */
-    public static HashSet<Topic> getAllTopicNodesFromNodeSet(Collection<Topic> nodes) {
-        HashSet<Topic> returnSet = new HashSet<>();
+    return returnSet;
+  }
 
-        // Iterate over all the nodes in the set, and add discovered nodes to the return set.
-        for (Topic node : nodes) {
-            DFS(node).stream().forEach(t -> returnSet.add(t));
-        }
+  /**
+   * Returns a HashSet of all the topics discovered from a collection of topic nodes (including the
+   * start nodes).
+   *
+   * @param nodes A collection of topic nodes.
+   * @return A HasSet with the discovered nodes.
+   */
+  public static HashSet<Topic> getAllTopicNodesFromNodeSet(Collection<Topic> nodes) {
+    HashSet<Topic> returnSet = new HashSet<>();
 
-        return returnSet;
+    // Iterate over all the nodes in the set, and add discovered nodes to the return set.
+    for (Topic node : nodes) {
+      returnSet.addAll(DFS(node));
     }
 
-    /**
-     * Retrieves all children from but (but not including) a Topic
-     *
-     * @param t The Topic node from which to start the child discovery
-     * @return A HashSet of the discovered children.
-     */
-    public static HashSet<Topic> getAllChildrenFromNode(Topic t) {
-        HashSet<Topic> returnSet = DFS(t);
-        returnSet.remove(t);
+    return returnSet;
+  }
 
-        return returnSet;
-    }
+  /**
+   * Retrieves all children from but (but not including) a Topic
+   *
+   * @param t The Topic node from which to start the child discovery
+   * @return A HashSet of the discovered children.
+   */
+  public static HashSet<Topic> getAllChildrenFromNode(Topic t) {
+    HashSet<Topic> returnSet = DFS(t);
+    returnSet.remove(t);
 
-    /**
-     * Retrieves all leaf nodes discovered from (but not including) a Topic
-     *
-     * @param t The Topic node from which to start the leaf node discovery
-     * @return A HashSet of the discovered leaf nodes.
-     */
-    public static HashSet<Topic> getAllLeafNodesFromNode(Topic t) {
-        HashSet<Topic> returnSet = getAllChildrenFromNode(t);
-        Iterator<Topic> iterator = returnSet.iterator();
+    return returnSet;
+  }
 
-        while (iterator.hasNext()) {
-            Topic current = iterator.next();
-            if (!current.isLeaf()) iterator.remove();
-        }
+  /**
+   * Retrieves all leaf nodes discovered from (but not including) a Topic
+   *
+   * @param t The Topic node from which to start the leaf node discovery
+   * @return A HashSet of the discovered leaf nodes.
+   */
+  public static HashSet<Topic> getAllLeafNodesFromNode(Topic t) {
+    HashSet<Topic> returnSet = getAllChildrenFromNode(t);
 
-        return returnSet;
-    }
+    returnSet.removeIf(current -> !current.isLeaf());
+
+    return returnSet;
+  }
 }
