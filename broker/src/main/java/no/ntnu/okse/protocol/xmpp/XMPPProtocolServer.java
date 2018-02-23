@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 
 public class XMPPProtocolServer extends AbstractProtocolServer {
 
-  protected static final String SERVERTYPE = "xmpp";
+  private static final String SERVERTYPE = "xmpp";
 
   private XMPPServer server;
 
