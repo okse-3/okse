@@ -188,11 +188,19 @@
             <artifactId>netty</artifactId>
             <version>3.2.7.Final</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.igniterealtime.smack/smack-core -->
         <dependency>
-            <groupId>com.isode</groupId>
-            <artifactId>stroke</artifactId>
-            <version>1.0-OKSE</version>
+            <groupId>org.igniterealtime.smack</groupId>
+            <artifactId>smack-core</artifactId>
+            <version>4.2.3</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.igniterealtime.smack/smack-extensions -->
+        <dependency>
+            <groupId>org.igniterealtime.smack</groupId>
+            <artifactId>smack-extensions</artifactId>
+            <version>4.2.3</version>
+        </dependency>
+
     </dependencies>
 
     <build>
