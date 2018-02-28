@@ -200,6 +200,13 @@
             <artifactId>smack-extensions</artifactId>
             <version>4.2.3</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.igniterealtime.smack/smack-tcp -->
+        <dependency>
+            <groupId>org.igniterealtime.smack</groupId>
+            <artifactId>smack-tcp</artifactId>
+            <version>4.2.3</version>
+        </dependency>
+
 
     </dependencies>
 
