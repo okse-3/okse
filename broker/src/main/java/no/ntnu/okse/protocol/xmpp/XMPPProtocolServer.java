@@ -3,6 +3,10 @@ package no.ntnu.okse.protocol.xmpp;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
+import org.jivesoftware.smack.SmackException.NoResponseException;
+import org.jivesoftware.smack.SmackException.NotConnectedException;
+import org.jivesoftware.smack.XMPPException.XMPPErrorException;
+import org.jivesoftware.smackx.pubsub.PubSubException.NotAPubSubNodeException;
 
 public class XMPPProtocolServer extends AbstractProtocolServer {
 
@@ -29,7 +33,7 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
   @Override
   public void boot() {
     if (!_running) {
-      server = new XMPPServer(host, port);
+      server = new XMPPServer(this, host, port);
       _serverThread = new Thread(this::run);
       _serverThread.setName("XMPPProtocolServer");
       _serverThread.start();
@@ -67,7 +71,19 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
    */
   @Override
   public void sendMessage(Message message) {
-    server.sendMessage(message);
+    try {
+      server.sendMessage(message);
+    } catch (XMPPErrorException e) {
+      e.printStackTrace();
+    } catch (NotAPubSubNodeException e) {
+      e.printStackTrace();
+    } catch (NotConnectedException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (NoResponseException e) {
+      e.printStackTrace();
+    }
   }
 
   /**
