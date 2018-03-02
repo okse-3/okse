@@ -44,7 +44,7 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
 
   @Override
   public void run() {
-
+    //TODO
   }
 
   /**
@@ -52,8 +52,10 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
    */
   @Override
   public void stopServer() {
-    log.info("Stopping XMPPProtocolServer");
+    log.info("Stopping XMPPServer");
     server.stopServer();
+    log.info("Stopping XMPPProtocolServer");
+    _running = false;
 
   }
 
@@ -66,23 +68,26 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
   }
 
   /**
-   * Forwards the message to the server to handle
+   * Forwards the message to the server to handle, given it does not originate from this protocol
    * @param message An instance of Message containing the required data to distribute a message.
    */
   @Override
   public void sendMessage(Message message) {
-    try {
-      server.sendMessage(message);
-    } catch (XMPPErrorException e) {
-      e.printStackTrace();
-    } catch (NotAPubSubNodeException e) {
-      e.printStackTrace();
-    } catch (NotConnectedException e) {
-      e.printStackTrace();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    } catch (NoResponseException e) {
-      e.printStackTrace();
+    if (!message.getOriginProtocol().equals(protocolServerType)
+        || message.getAttribute("duplicate") != null) {
+      try {
+        server.sendMessage(message);
+      } catch (XMPPErrorException e) {
+        e.printStackTrace();
+      } catch (NotAPubSubNodeException e) {
+        e.printStackTrace();
+      } catch (NotConnectedException e) {
+        e.printStackTrace();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      } catch (NoResponseException e) {
+        e.printStackTrace();
+      }
     }
   }
 

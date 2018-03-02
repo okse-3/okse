@@ -21,18 +21,24 @@ import org.jivesoftware.smackx.pubsub.SimplePayload;
 public class XMPPServer {
 
   private Logger log;
-  private static String protocolServerType;
   private AbstractXMPPConnection connection;
   private PubSubManager pubSubManager;
   private XMPPProtocolServer protocolServer;
+  // linked blocking queue for server concurrency?
 
 
+  /**
+   * Init method for XMPPServers
+   * @param protocolServer, the managing protocol server
+   * @param host, host IP or domain as a {@link String}
+   * @param port, host port number as a {@link Integer}
+   */
   public XMPPServer(XMPPProtocolServer protocolServer, String host, Integer port) {
     try {
       this.protocolServer = protocolServer;
-      protocolServerType = "xmpp";
       log = Logger.getLogger(XMPPServer.class.getName());
 
+      //TODO, move this to configureConnection method
       XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
       configBuilder.setHost(host);
       configBuilder.setPort(port);
@@ -48,11 +54,34 @@ public class XMPPServer {
 
   }
 
+
+  /**
+   *
+   * @return
+   */
+  private XMPPTCPConnection configureConnection() {
+    //TODO read from config and apply to connection
+    return null;
+  }
+
+  /**
+   * Disconnects ongoing connections and shuts down the server
+   */
   public void stopServer() {
     connection.disconnect();
     log.info("XMPPServer closed");
   }
 
+  /**
+   * Sends the Message to a node with the messages topic
+   *
+   * @param message, {@link Message} to be sent
+   * @throws XMPPErrorException
+   * @throws NotAPubSubNodeException
+   * @throws NotConnectedException
+   * @throws InterruptedException
+   * @throws NoResponseException
+   */
   public void sendMessage(Message message)
       throws XMPPErrorException, NotAPubSubNodeException, NotConnectedException, InterruptedException, NoResponseException {
     LeafNode node = pubSubManager.getNode(message.getTopic());
@@ -60,34 +89,67 @@ public class XMPPServer {
     log.debug("Distributed messages with topic: " + message.getTopic());
   }
 
-  public void setUpPubSubListener(Topic topic)
+
+  /**
+   * Sets up a subscription to a node by adding an event listener
+   *
+   * @param topic, the {@link Topic} of the relevant node, will create a {@link org.jivesoftware.smackx.pubsub.Node} if one is not found
+   * @throws XMPPErrorException
+   * @throws NotAPubSubNodeException
+   * @throws NotConnectedException
+   * @throws InterruptedException
+   * @throws NoResponseException
+   */
+  public void subscribeToNode(Topic topic)
       throws XMPPErrorException, NotAPubSubNodeException, NotConnectedException, InterruptedException, NoResponseException {
     LeafNode node = pubSubManager.getNode(topic.getName());
 
+    //TODO, handle synchronization with other protocols
+
     node.addItemEventListener(new PubSubListener<PayloadItem>(this, topic));
-    node.subscribe("okse");
+    node.subscribe("okse"); //TODO, read JID from config
   }
 
+  /**
+   * Translates a {@link PayloadItem} to an OKSE {@link Message} Object
+   *
+   * @param pi, the {@link PayloadItem} to be translated
+   * @param topic, the {@link Topic} of the item
+   * @return a {@link Message} object containing the payload data, topic and protocol origin
+   */
   private Message payloadItemTOMessage(PayloadItem pi, Topic topic) {
     return new Message(pi.getPayload().toString(), topic.toString(), null, protocolServer.getProtocolServerType());
   }
 
+  /**
+   * Translates a {@link Message} object to a {@link SimplePayload} object that can be sent as a {@link PayloadItem}
+   *
+   * @param message, the {@link Message} to be sent
+   * @return a {@link PayloadItem} containing the message
+   */
   private PayloadItem<SimplePayload> messageToPayloadItem(Message message) {
-    SimplePayload payload = new SimplePayload(message.getTopic(), "pubsub:okse", message.getMessage());
+    SimplePayload payload = new SimplePayload(message.getTopic(), "pubsub:okse", message.getMessage()); //TODO read namespace from config
     return new PayloadItem<>(payload);
   }
 
+  /**
+   * Forwards a received message to the OKSE core to be distributed and updates the tracked information
+   *
+   * @param itemList, a list of {@link Item} objects passed on from the event listener
+   * @param topic, the {@link Topic} of the node that sent the payload
+   */
   public void onMessageReceived(List<Item> itemList, Topic topic) {
     log.debug("Received a message with topic: " + topic.getName());
     for (Item item: itemList) {
       if (item instanceof PayloadItem) {
-        log.debug("Redistributed message with topic: " + topic.getName());
         MessageService.getInstance().distributeMessage(payloadItemTOMessage((PayloadItem) item, topic));
+        log.debug("Redistributed message with topic: " + topic.getName());
+        protocolServer.incrementTotalMessagesReceived();
+        protocolServer.incrementTotalRequests();
+
       }
     }
   }
 
-
-  //sub and node configuration are to be implemented here
 
 }
