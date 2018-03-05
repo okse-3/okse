@@ -76,24 +76,11 @@ public class XMPPServer {
     log.info("XMPPServer closed");
   }
 
-  /**
-   * Create a {@link LeafNode} with a NodeID and a predetermined configuration
-   *
-   * @param nodeId the ID of the Node as a {@link String}
-   * @param config the premade {@link ConfigureForm} for the Node
-   * @throws XMPPErrorException
-   * @throws NotConnectedException
-   * @throws InterruptedException
-   * @throws NoResponseException
-   */
-  public LeafNode createLeafNodeWithForm(String nodeId, ConfigureForm config)
-      throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
-    LeafNode leaf = (LeafNode) pubSubManager.createNode(nodeId, config);
-    return leaf;
-  }
 
   /**
-   * Create a {@link LeafNode} with a NodeID, and configuring it in the function.
+   * Create a {@link LeafNode} with a NodeID. The node will be configured with what we set to be
+   * standard: an open PublishModel, so that everyone can subscribe to the node; an open AccessModel,
+   * so that everyone can subscribe to the node; not delivering payloads; and having persistent items.
    *
    * @param nodeId the ID of the created node as a {@link String}
    * @return a configurated {@link LeafNode} with the given NodeID.
@@ -102,41 +89,17 @@ public class XMPPServer {
    * @throws InterruptedException
    * @throws NoResponseException
    */
-  public LeafNode createLeafNodeWithConfig(String nodeId)
+  public LeafNode createLeafNode(String nodeId)
       throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
-    //TODO: This is an example method of how this can be done, figured it would be good to have
     ConfigureForm config = new ConfigureForm(Type.form);
-    config.setAccessModel(AccessModel.open); // can set to open, roster, whitelist, presence and authorize
-    config.setDeliverPayloads(false); // deliver payloads or only send event notifications
-    config.setNotifyRetract(true); // set whether subscribers should be notified when items are deleted from the node
-    config.setPersistentItems(true); // set whether items should be persisted in the node
-    config.setPublishModel(PublishModel.open); // open, publishers or subscribers. Sets who can publish to this node.
-
-    LeafNode leaf = (LeafNode) pubSubManager.createNode(nodeId, config);
-    return leaf;
+    config.setAccessModel(AccessModel.open);
+    config.setDeliverPayloads(false);
+    config.setPersistentItems(true);
+    config.setPublishModel(PublishModel.open);
+    log.debug("Created a new node with id " + nodeId);
+    return (LeafNode) pubSubManager.createNode(nodeId, config);
   }
 
-  /**
-   * Create a {@link ConfigureForm} that contains the necessary configuration options for a node.
-   *
-   * @param accessModel A type of {@link AccessModel} setting the access model of the node.
-   * @param deliverPayloads A boolean determining whether or not the node should deliver payloads.
-   * @param notifyRetract A boolean determining whether or not the node should notify subscribers
-   * of retractions.
-   * @param persistentItems A boolean determining whether or not the node should persist items.
-   * @param publishModel A type of {@link PublishModel} setting the publish model of the node.
-   * @return a filled in {@link ConfigureForm} with node configurations.
-   */
-  public ConfigureForm createNodeConfiguration(AccessModel accessModel, boolean deliverPayloads,
-      boolean notifyRetract, boolean persistentItems, PublishModel publishModel) {
-    ConfigureForm config = new ConfigureForm(Type.form);
-    config.setAccessModel(accessModel);
-    config.setDeliverPayloads(deliverPayloads);
-    config.setNotifyRetract(notifyRetract);
-    config.setPersistentItems(persistentItems);
-    config.setPublishModel(publishModel);
-    return config;
-  }
 
   /**
    * Sends the Message to a node with the messages topic
