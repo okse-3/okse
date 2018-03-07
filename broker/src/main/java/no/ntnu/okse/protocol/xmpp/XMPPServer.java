@@ -1,5 +1,6 @@
 package no.ntnu.okse.protocol.xmpp;
 
+import java.net.InetAddress;
 import java.util.List;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
@@ -28,23 +29,25 @@ public class XMPPServer {
   private AbstractXMPPConnection connection;
   private PubSubManager pubSubManager;
   private XMPPProtocolServer protocolServer;
+  private String partialJID;
+
   // linked blocking queue for server concurrency?
 
 
   /**
    * Init method for XMPPServers
    * @param protocolServer, the managing protocol server
-   * @param host, host IP or domain as a {@link String} //TODO: decide whether to use IP address or DNS. IP requires use of setHostAddress()
+   * @param host, host IP or domain as a {@link String}
    * @param port, host port number as a {@link Integer}
    */
   public XMPPServer(XMPPProtocolServer protocolServer, String host, Integer port) {
     try {
       this.protocolServer = protocolServer;
+      partialJID = host + "/" + port;
       log = Logger.getLogger(XMPPServer.class.getName());
 
-      //TODO, move this to configureConnection method
       XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
-      configBuilder.setHost(host);
+      configBuilder.setHostAddress(InetAddress.getByName(host));
       configBuilder.setPort(port);
       this.connection = new XMPPTCPConnection(configBuilder.build());
       connection.connect();
@@ -58,15 +61,6 @@ public class XMPPServer {
 
   }
 
-
-  /**
-   *
-   * @return
-   */
-  private XMPPTCPConnection configureConnection() {
-    //TODO read from config and apply to connection
-    return null;
-  }
 
   /**
    * Disconnects ongoing connections and shuts down the server
@@ -137,7 +131,7 @@ public class XMPPServer {
     //TODO, handle synchronization with other protocols
 
     node.addItemEventListener(new PubSubListener<PayloadItem>(this, topic));
-    node.subscribe("okse"); //TODO, read JID from config
+    node.subscribe(topic.getName() + "@" + partialJID);
   }
 
   /**
@@ -178,6 +172,9 @@ public class XMPPServer {
         protocolServer.incrementTotalRequests();
 
       }
+      //else if (Item instanceof ItemPublishEvent){
+        //ask for the published message
+      //}
     }
   }
 
