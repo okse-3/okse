@@ -2,6 +2,7 @@ package no.ntnu.okse.protocol.xmpp;
 
 import java.net.InetAddress;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.topic.Topic;
@@ -30,6 +31,7 @@ public class XMPPServer {
   private PubSubManager pubSubManager;
   private XMPPProtocolServer protocolServer;
 
+  private LinkedBlockingQueue<Message> messageQueue;
   // linked blocking queue for server concurrency?
 
 
@@ -140,7 +142,7 @@ public class XMPPServer {
    * @param topic, the {@link Topic} of the item
    * @return a {@link Message} object containing the payload data, topic and protocol origin
    */
-  private Message payloadItemTOMessage(PayloadItem pi, Topic topic) {
+  private Message payloadItemToMessage(PayloadItem pi, Topic topic) {
     return new Message(pi.getPayload().toString(), topic.toString(), null, protocolServer.getProtocolServerType());
   }
 
@@ -166,7 +168,8 @@ public class XMPPServer {
     log.debug("Received a message with topic: " + topic.getName());
     for (Item item: itemList) {
       if (item instanceof PayloadItem) {
-        MessageService.getInstance().distributeMessage(payloadItemTOMessage((PayloadItem) item, topic));
+        MessageService.getInstance().distributeMessage(
+            payloadItemToMessage((PayloadItem) item, topic));
         log.debug("Redistributed message with topic: " + topic.getName());
         protocolServer.incrementTotalMessagesReceived();
         protocolServer.incrementTotalRequests();
@@ -174,9 +177,11 @@ public class XMPPServer {
       }
       //else if (Item instanceof ItemPublishEvent){
         //ask for the published message
-      //}
+      //} else if (Item instance of ConfigPublishEvent)
     }
   }
 
 
+  public void queueMessage(Message message) {
+  }
 }
