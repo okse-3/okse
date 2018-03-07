@@ -10,11 +10,7 @@ import org.jivesoftware.smackx.pubsub.PubSubException.NotAPubSubNodeException;
 
 public class XMPPProtocolServer extends AbstractProtocolServer {
 
-  private static final String SERVERTYPE = "xmpp";
-
   private XMPPServer server;
-
-  private static Logger log = Logger.getLogger(XMPPProtocolServer.class.getName());
 
   /**
    * Constructor for the XMPP protocol server
@@ -24,7 +20,8 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
   public XMPPProtocolServer(String host, Integer port) {
     this.port = port;
     this.host = host;
-    this.protocolServerType = SERVERTYPE;
+    protocolServerType = "xmpp";
+    log = Logger.getLogger(XMPPProtocolServer.class.getName());
   }
 
   /**
@@ -33,11 +30,12 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
   @Override
   public void boot() {
     if (!_running) {
+      _running = true;
+
       server = new XMPPServer(this, host, port);
       _serverThread = new Thread(this::run);
-      _serverThread.setName("XMPPProtocolServer");
+      _serverThread.setName(protocolServerType);
       _serverThread.start();
-      _running = true;
       log.info("XMPPProtocolServer booted successfully");
     }
   }
@@ -64,7 +62,7 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
    */
   @Override
   public String getProtocolServerType() {
-    return SERVERTYPE;
+    return protocolServerType;
   }
 
   /**
@@ -75,17 +73,15 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
   public void sendMessage(Message message) {
     if (!message.getOriginProtocol().equals(protocolServerType)
         || message.getAttribute("duplicate") != null) {
+      incrementTotalRequests();
       try {
         server.sendMessage(message);
-      } catch (XMPPErrorException e) {
+        incrementTotalMessagesSent();
+      } catch (XMPPErrorException | NoResponseException | InterruptedException | NotConnectedException e) {
+        incrementTotalErrors();
         e.printStackTrace();
       } catch (NotAPubSubNodeException e) {
-        e.printStackTrace();
-      } catch (NotConnectedException e) {
-        e.printStackTrace();
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      } catch (NoResponseException e) {
+        incrementTotalBadRequest();
         e.printStackTrace();
       }
     }

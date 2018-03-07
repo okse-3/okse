@@ -29,7 +29,6 @@ public class XMPPServer {
   private AbstractXMPPConnection connection;
   private PubSubManager pubSubManager;
   private XMPPProtocolServer protocolServer;
-  private String partialJID;
 
   // linked blocking queue for server concurrency?
 
@@ -43,12 +42,12 @@ public class XMPPServer {
   public XMPPServer(XMPPProtocolServer protocolServer, String host, Integer port) {
     try {
       this.protocolServer = protocolServer;
-      partialJID = host + "/" + port;
       log = Logger.getLogger(XMPPServer.class.getName());
 
       XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
       configBuilder.setHostAddress(InetAddress.getByName(host));
       configBuilder.setPort(port);
+      configBuilder.setXmppDomain(host + "/" + port);
       this.connection = new XMPPTCPConnection(configBuilder.build());
       connection.connect();
       connection.login();
@@ -131,7 +130,7 @@ public class XMPPServer {
     //TODO, handle synchronization with other protocols
 
     node.addItemEventListener(new PubSubListener<PayloadItem>(this, topic));
-    node.subscribe(topic.getName() + "@" + partialJID);
+    node.subscribe(topic.getName() + "@" + connection.getXMPPServiceDomain());
   }
 
   /**
@@ -152,7 +151,7 @@ public class XMPPServer {
    * @return a {@link PayloadItem} containing the message
    */
   private PayloadItem<SimplePayload> messageToPayloadItem(Message message) {
-    SimplePayload payload = new SimplePayload(message.getTopic(), "pubsub:okse", message.getMessage()); //TODO read namespace from config
+    SimplePayload payload = new SimplePayload(message.getTopic(), "pubsub:okse:" + message.getTopic(), message.getMessage()); //TODO read namespace from config
     return new PayloadItem<>(payload);
   }
 
@@ -163,6 +162,7 @@ public class XMPPServer {
    * @param topic, the {@link Topic} of the node that sent the payload
    */
   public void onMessageReceived(List<Item> itemList, Topic topic) {
+    protocolServer.incrementTotalMessagesReceived();
     log.debug("Received a message with topic: " + topic.getName());
     for (Item item: itemList) {
       if (item instanceof PayloadItem) {
