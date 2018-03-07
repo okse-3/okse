@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.jivesoftware.smack.SmackException.NoResponseException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.jivesoftware.smack.XMPPException.XMPPErrorException;
+import org.jivesoftware.smackx.pubsub.PubSubException.NotALeafNodeException;
 import org.jivesoftware.smackx.pubsub.PubSubException.NotAPubSubNodeException;
 
 public class XMPPProtocolServer extends AbstractProtocolServer {
@@ -77,10 +78,10 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
       try {
         server.sendMessage(message);
         incrementTotalMessagesSent();
-      } catch (XMPPErrorException | NoResponseException | InterruptedException | NotConnectedException e) {
+      } catch (XMPPErrorException | NoResponseException | InterruptedException e) {
         incrementTotalErrors();
         e.printStackTrace();
-      } catch (NotAPubSubNodeException e) {
+      } catch (NotAPubSubNodeException | NotALeafNodeException | NotConnectedException e) {
         incrementTotalBadRequest();
         e.printStackTrace();
       }

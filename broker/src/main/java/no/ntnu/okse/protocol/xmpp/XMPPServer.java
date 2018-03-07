@@ -2,10 +2,8 @@ package no.ntnu.okse.protocol.xmpp;
 
 import java.net.InetAddress;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
-import no.ntnu.okse.core.topic.Topic;
 import org.apache.log4j.Logger;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackException.NoResponseException;
@@ -18,6 +16,7 @@ import org.jivesoftware.smackx.pubsub.ConfigureForm;
 import org.jivesoftware.smackx.pubsub.Item;
 import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.jivesoftware.smackx.pubsub.PayloadItem;
+import org.jivesoftware.smackx.pubsub.PubSubException.NotALeafNodeException;
 import org.jivesoftware.smackx.pubsub.PubSubException.NotAPubSubNodeException;
 import org.jivesoftware.smackx.pubsub.PubSubManager;
 import org.jivesoftware.smackx.pubsub.PublishModel;
@@ -30,9 +29,6 @@ public class XMPPServer {
   private AbstractXMPPConnection connection;
   private PubSubManager pubSubManager;
   private XMPPProtocolServer protocolServer;
-
-  private LinkedBlockingQueue<Message> messageQueue;
-  // linked blocking queue for server concurrency?
 
 
   /**
@@ -73,26 +69,48 @@ public class XMPPServer {
 
 
   /**
-   * Create a {@link LeafNode} with a NodeID. The node will be configured with what we set to be
+   * Create a {@link LeafNode} with a topic/ID. The node will be configured with what we set to be
    * standard: an open PublishModel, so that everyone can subscribe to the node; an open AccessModel,
    * so that everyone can subscribe to the node; not delivering payloads; and having persistent items.
    *
-   * @param nodeId the ID of the created node as a {@link String}
-   * @return a configurated {@link LeafNode} with the given NodeID.
+   * @param topic the ID of the created node as a {@link String}
+   * @return a configured {@link LeafNode} with the given NodeID.
    * @throws XMPPErrorException
    * @throws NotConnectedException
    * @throws InterruptedException
    * @throws NoResponseException
    */
-  public LeafNode createLeafNode(String nodeId)
+  private LeafNode createLeafNode(String topic)
       throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
     ConfigureForm config = new ConfigureForm(Type.form);
     config.setAccessModel(AccessModel.open);
     config.setDeliverPayloads(false);
     config.setPersistentItems(true);
     config.setPublishModel(PublishModel.open);
-    log.debug("Created a new node with id " + nodeId);
-    return (LeafNode) pubSubManager.createNode(nodeId, config);
+    log.debug("Created a new node with id " + topic);
+    return (LeafNode) pubSubManager.createNode(topic, config);
+  }
+
+  /**
+   * Fetches a {@link LeafNode} of the matching topic, will create one if not found
+   *
+   * @param topic, the topic/ID of the node as a {@link String}
+   * @return a {@link LeafNode} of the matching topic
+   * @throws InterruptedException
+   * @throws NotALeafNodeException
+   * @throws NotAPubSubNodeException
+   * @throws NotConnectedException
+   * @throws NoResponseException
+   * @throws XMPPErrorException
+   */
+  public LeafNode getLeafNode(String topic)
+      throws InterruptedException, NotALeafNodeException, NotAPubSubNodeException, NotConnectedException, NoResponseException, XMPPErrorException {
+    try {
+      return pubSubManager.getLeafNode(topic);
+    } catch (XMPPErrorException e) {
+      return createLeafNode(topic);
+    }
+
   }
 
 
@@ -108,8 +126,9 @@ public class XMPPServer {
    */
   public void sendMessage(Message message)
       throws XMPPErrorException, NotAPubSubNodeException, NotConnectedException,
-      InterruptedException, NoResponseException {
-    LeafNode node = pubSubManager.getNode(message.getTopic());
+      InterruptedException, NoResponseException, NotALeafNodeException {
+    LeafNode node = getLeafNode(message.getTopic());
+    subscribeToNode(node);
     node.publish(messageToPayloadItem(message));
     log.debug("Distributed messages with topic: " + message.getTopic());
   }
@@ -118,32 +137,43 @@ public class XMPPServer {
   /**
    * Sets up a subscription to a node by adding an event listener
    *
-   * @param topic, the {@link Topic} of the relevant node, will create a {@link org.jivesoftware.smackx.pubsub.Node} if one is not found
+   * @param node, the {@link LeafNode} to subscribe to
    * @throws XMPPErrorException
    * @throws NotAPubSubNodeException
    * @throws NotConnectedException
    * @throws InterruptedException
    * @throws NoResponseException
    */
-  public void subscribeToNode(Topic topic)
-      throws XMPPErrorException, NotAPubSubNodeException, NotConnectedException, InterruptedException, NoResponseException {
-    LeafNode node = pubSubManager.getNode(topic.getName());
+  public void subscribeToNode(LeafNode node)
+      throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
+    node.addItemEventListener(new PubSubListener<PayloadItem>(this, node.getId()));
+    node.subscribe(node.getId() + "@" + connection.getXMPPServiceDomain());
+  }
 
-    //TODO, handle synchronization with other protocols
-
-    node.addItemEventListener(new PubSubListener<PayloadItem>(this, topic));
-    node.subscribe(topic.getName() + "@" + connection.getXMPPServiceDomain());
+  /**
+   * Fetches and subscribes to a node with the given topic
+   * @param topic, a topic/ID as a {@link String}
+   * @throws NotConnectedException
+   * @throws InterruptedException
+   * @throws NotALeafNodeException
+   * @throws NoResponseException
+   * @throws NotAPubSubNodeException
+   * @throws XMPPErrorException
+   */
+  public void subscribeToTopic(String topic)
+      throws NotConnectedException, InterruptedException, NotALeafNodeException, NoResponseException, NotAPubSubNodeException, XMPPErrorException {
+    subscribeToNode(getLeafNode(topic));
   }
 
   /**
    * Translates a {@link PayloadItem} to an OKSE {@link Message} Object
    *
    * @param pi, the {@link PayloadItem} to be translated
-   * @param topic, the {@link Topic} of the item
+   * @param topic, the topic/ID of the item as a  {@link String}
    * @return a {@link Message} object containing the payload data, topic and protocol origin
    */
-  private Message payloadItemToMessage(PayloadItem pi, Topic topic) {
-    return new Message(pi.getPayload().toString(), topic.toString(), null, protocolServer.getProtocolServerType());
+  private Message payloadItemToMessage(PayloadItem pi, String topic) {
+    return new Message(pi.getPayload().toString(), topic, null, protocolServer.getProtocolServerType());
   }
 
   /**
@@ -153,7 +183,7 @@ public class XMPPServer {
    * @return a {@link PayloadItem} containing the message
    */
   private PayloadItem<SimplePayload> messageToPayloadItem(Message message) {
-    SimplePayload payload = new SimplePayload(message.getTopic(), "pubsub:okse:" + message.getTopic(), message.getMessage()); //TODO read namespace from config
+    SimplePayload payload = new SimplePayload(message.getTopic(), "pubsub:okse:" + message.getTopic(), message.getMessage());
     return new PayloadItem<>(payload);
   }
 
@@ -161,27 +191,20 @@ public class XMPPServer {
    * Forwards a received message to the OKSE core to be distributed and updates the tracked information
    *
    * @param itemList, a list of {@link Item} objects passed on from the event listener
-   * @param topic, the {@link Topic} of the node that sent the payload
+   * @param topic, the {@link String} of the node that sent the payload
    */
-  public void onMessageReceived(List<Item> itemList, Topic topic) {
-    protocolServer.incrementTotalMessagesReceived();
-    log.debug("Received a message with topic: " + topic.getName());
+  public void onMessageReceived(List<Item> itemList, String topic) {
+    log.debug("Received a message with topic: " + topic);
     for (Item item: itemList) {
       if (item instanceof PayloadItem) {
         MessageService.getInstance().distributeMessage(
             payloadItemToMessage((PayloadItem) item, topic));
-        log.debug("Redistributed message with topic: " + topic.getName());
+        log.debug("Redistributed message with topic: " + topic);
         protocolServer.incrementTotalMessagesReceived();
         protocolServer.incrementTotalRequests();
 
       }
-      //else if (Item instanceof ItemPublishEvent){
-        //ask for the published message
-      //} else if (Item instance of ConfigPublishEvent)
     }
   }
 
-
-  public void queueMessage(Message message) {
-  }
 }
