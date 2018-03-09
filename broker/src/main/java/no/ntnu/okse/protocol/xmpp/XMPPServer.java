@@ -2,8 +2,12 @@ package no.ntnu.okse.protocol.xmpp;
 
 import java.net.InetAddress;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import no.ntnu.okse.core.event.SubscriptionChangeEvent;
+import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
+import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackException.NoResponseException;
@@ -23,12 +27,13 @@ import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.xdata.packet.DataForm.Type;
 
-public class XMPPServer {
+public class XMPPServer implements SubscriptionChangeListener{
 
   private Logger log;
   private AbstractXMPPConnection connection;
   private PubSubManager pubSubManager;
   private XMPPProtocolServer protocolServer;
+  private final ConcurrentHashMap<String, PubSubListener<PayloadItem>> listenerMap;
 
 
   /**
@@ -38,10 +43,12 @@ public class XMPPServer {
    * @param port, host port number as a {@link Integer}
    */
   public XMPPServer(XMPPProtocolServer protocolServer, String host, Integer port) {
+    listenerMap = new ConcurrentHashMap<>();
+    log = Logger.getLogger(XMPPServer.class.getName());
+    this.protocolServer = protocolServer;
+    this.pubSubManager = PubSubManager.getInstance(connection);
+    SubscriptionService.getInstance().addSubscriptionChangeListener(this);
     try {
-      this.protocolServer = protocolServer;
-      log = Logger.getLogger(XMPPServer.class.getName());
-
       XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
       configBuilder.setHostAddress(InetAddress.getByName(host));
       configBuilder.setPort(port);
@@ -49,8 +56,6 @@ public class XMPPServer {
       this.connection = new XMPPTCPConnection(configBuilder.build());
       connection.connect();
       connection.login();
-
-      this.pubSubManager = PubSubManager.getInstance(connection);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -146,8 +151,10 @@ public class XMPPServer {
    */
   public void subscribeToNode(LeafNode node)
       throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
-    node.addItemEventListener(new PubSubListener<PayloadItem>(this, node.getId()));
+    PubSubListener listener = new PubSubListener<PayloadItem>(this, node.getId());
+    node.addItemEventListener(listener);
     node.subscribe(node.getId() + "@" + connection.getXMPPServiceDomain());
+    listenerMap.put(node.getId(), listener);
   }
 
   /**
@@ -163,6 +170,17 @@ public class XMPPServer {
   public void subscribeToTopic(String topic)
       throws NotConnectedException, InterruptedException, NotALeafNodeException, NoResponseException, NotAPubSubNodeException, XMPPErrorException {
     subscribeToNode(getLeafNode(topic));
+  }
+
+  public void unsubscribeFromTopic(String topic)
+      throws InterruptedException, NotALeafNodeException, XMPPErrorException, NotConnectedException, NoResponseException {
+    unsubscribeFromNode(pubSubManager.getOrCreateLeafNode(topic));
+  }
+
+  public void unsubscribeFromNode(LeafNode node)
+      throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
+    node.unsubscribe(node.getId() + "@" + connection.getXMPPServiceDomain());
+    node.removeItemEventListener(listenerMap.get(node.getId()));
   }
 
   /**
@@ -207,4 +225,17 @@ public class XMPPServer {
     }
   }
 
+  @Override
+  public void subscriptionChanged(SubscriptionChangeEvent e) {
+    if(e.getData().getOriginProtocol().equals(XMPPProtocolServer.SERVERTYPE)) {
+      if(e.getType() == SubscriptionChangeEvent.Type.UNSUBSCRIBE) {
+        try {
+          unsubscribeFromTopic(e.getData().getTopic());
+        } catch (InterruptedException | NotALeafNodeException | XMPPErrorException | NoResponseException | NotConnectedException e1) {
+          e1.printStackTrace();
+        }
+        //TODO logging and docs
+      }
+    }
+  }
 }

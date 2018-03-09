@@ -12,6 +12,7 @@ import org.jivesoftware.smackx.pubsub.PubSubException.NotAPubSubNodeException;
 public class XMPPProtocolServer extends AbstractProtocolServer {
 
   private XMPPServer server;
+  protected static final String SERVERTYPE = "xmpp";
 
   /**
    * Constructor for the XMPP protocol server
@@ -21,7 +22,7 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
   public XMPPProtocolServer(String host, Integer port) {
     this.port = port;
     this.host = host;
-    protocolServerType = "xmpp";
+    protocolServerType = SERVERTYPE;
     log = Logger.getLogger(XMPPProtocolServer.class.getName());
   }
 

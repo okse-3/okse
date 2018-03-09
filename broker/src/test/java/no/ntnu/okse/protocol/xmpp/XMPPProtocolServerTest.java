@@ -51,7 +51,7 @@ public class XMPPProtocolServerTest {
   public void testSendMessage() throws Exception {
     Message message = new Message("testMessage", "testTopic", null, xmppPS.getProtocolServerType());
     xmppPS.sendMessage(message);
-    Mockito.verify(xmppServerSpy).queueMessage(message);
+    Mockito.verify(xmppServerSpy).onMessageReceived(null, message.getTopic());
   }
 
 }
