@@ -38,13 +38,13 @@ public class Subscriber {
 
   private final String host;
   private final Integer port;
-  private final HashMap<String, String> attributes;
+  private final HashMap<String, String> attributes = new HashMap<>();
   private final String topic;
   private Long timeout;
   private final String originProtocol;
   private final String subscriberID;
-  private static Logger log;
-  private final HashSet<String> filters;
+  private static Logger log = Logger.getLogger(Subscriber.class.getName());;
+  private final HashSet<String> filters = new HashSet<>();
 
   /**
    * Constructs a Subscriber object from the required fields
@@ -55,12 +55,9 @@ public class Subscriber {
    * @param originProtocol Origin protocol of the subscriber
    */
   public Subscriber(String host, Integer port, String topic, String originProtocol) {
-    this.timeout = null;
     this.host = host;
-    this.attributes = new HashMap<>();
     this.topic = topic;
     this.originProtocol = originProtocol;
-    this.filters = new HashSet<>();
     if (checkPort(port)) {
       this.port = port;
     } else {
@@ -68,9 +65,6 @@ public class Subscriber {
     }
 
     this.subscriberID = generateSubscriberID();
-
-    log = Logger.getLogger(Subscriber.class.getName());
-
   }
 
   /**
@@ -95,7 +89,7 @@ public class Subscriber {
    * @return True if it is valid, false otherwise
    */
   private boolean checkPort(Integer port) {
-    return (port > 0 && port < 65536);
+    return port > 0 && port < 65536;
   }
 
   /**

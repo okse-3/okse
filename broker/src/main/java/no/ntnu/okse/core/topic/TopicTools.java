@@ -24,6 +24,7 @@
 
 package no.ntnu.okse.core.topic;
 
+import java.util.stream.Collectors;
 import no.ntnu.okse.exceptions.TopicExceptions;
 
 import java.util.Collection;
@@ -45,10 +46,10 @@ public class TopicTools {
     queue.push(root);
 
     while (!queue.empty()) {
-      Topic t = queue.pop();
-      if (!discovered.contains(t)) {
-        discovered.add(t);
-        t.getChildren().forEach(queue::push);
+      Topic topic = queue.pop();
+      if (!discovered.contains(topic)) {
+        discovered.add(topic);
+        topic.getChildren().forEach(queue::push);
       }
     }
 
@@ -90,14 +91,10 @@ public class TopicTools {
    * @return A HasSet with the discovered nodes.
    */
   public static HashSet<Topic> getAllTopicNodesFromNodeSet(Collection<Topic> nodes) {
-    HashSet<Topic> returnSet = new HashSet<>();
-
-    // Iterate over all the nodes in the set, and add discovered nodes to the return set.
-    for (Topic node : nodes) {
-      returnSet.addAll(DFS(node));
-    }
-
-    return returnSet;
+    return nodes.stream()
+        .map(TopicTools::DFS)
+        .flatMap(HashSet::stream)
+        .collect(Collectors.toCollection(HashSet::new));
   }
 
   /**
@@ -120,10 +117,8 @@ public class TopicTools {
    * @return A HashSet of the discovered leaf nodes.
    */
   public static HashSet<Topic> getAllLeafNodesFromNode(Topic t) {
-    HashSet<Topic> returnSet = getAllChildrenFromNode(t);
-
-    returnSet.removeIf(current -> !current.isLeaf());
-
-    return returnSet;
+    return getAllChildrenFromNode(t).stream()
+        .filter(Topic::isLeaf)
+        .collect(Collectors.toCollection(HashSet::new));
   }
 }

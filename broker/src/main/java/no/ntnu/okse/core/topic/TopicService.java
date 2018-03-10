@@ -24,7 +24,6 @@
 
 package no.ntnu.okse.core.topic;
 
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import no.ntnu.okse.Application;
 import no.ntnu.okse.core.AbstractCoreService;

@@ -28,10 +28,7 @@ public class TopicTask {
 
   // The different Task types
   public enum Type {
-    NEW_TOPIC,
-    UPDATE_TOPIC,
-    DELETE_TOPIC,
-    SHUTDOWN
+    NEW_TOPIC, UPDATE_TOPIC, DELETE_TOPIC, SHUTDOWN
   }
 
   // Needed fields
@@ -46,11 +43,11 @@ public class TopicTask {
 
   // Public getter for Type
   public Type getType() {
-    return this.type;
+    return type;
   }
 
   // Public run-delegation method
   public void run() {
-    this.job.run();
+    job.run();
   }
 }

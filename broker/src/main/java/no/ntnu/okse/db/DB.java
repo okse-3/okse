@@ -209,8 +209,7 @@ public class DB {
     String select = "SELECT * FROM persistence WHERE topic = ?";
     PreparedStatement stmt = con.prepareStatement(select);
     stmt.setString(1, topic);
-    ResultSet rs = stmt.executeQuery();
-    return rs;
+    return stmt.executeQuery();
   }
 
   /**

@@ -40,40 +40,19 @@ public class Topic {
   private final String topicID;
   private String type;
   private Topic parent;
-  private final HashSet<Topic> children;
-  private static Logger log;
+  private final HashSet<Topic> children = new HashSet<>();
+  ;
+  private static Logger log = Logger.getLogger(Topic.class.getName());
+  ;
 
   public Topic() {
-    if (name == null) {
-      this.name = "UNNAMED";
-    }
-    if (type == null) {
-      this.type = "UNKNOWN";
-    }
-
-    topicID = generateTopicID();
-
-    parent = null;
-    children = new HashSet<>();
+    this(null, null);
   }
 
   public Topic(String name, String type) {
-    log = Logger.getLogger(Topic.class.getName());
-    if (name == null) {
-      this.name = "UNNAMED";
-    } else {
-      this.name = name;
-    }
-    if (type == null) {
-      this.type = "UNKNOWN";
-    } else {
-      this.type = type;
-    }
-
+    this.name = name == null ? "UNNAMED" : name;
+    this.type = type == null ? "UNKNOWN" : type;
     topicID = generateTopicID();
-
-    parent = null;
-    children = new HashSet<>();
   }
 
   /**
@@ -207,7 +186,7 @@ public class Topic {
    * itself outside setters.
    */
   public HashSet<Topic> getChildren() {
-    return (HashSet<Topic>) this.children.clone();
+    return (HashSet<Topic>) children.clone();
   }
 
   /**
@@ -215,9 +194,7 @@ public class Topic {
    * node.
    */
   public void clearChildren() {
-    for (Topic t : this.children) {
-      t.setParent(null);
-    }
+    this.children.forEach(child -> child.setParent(null));
   }
 
   /**
@@ -226,7 +203,7 @@ public class Topic {
    * @return true if this is the root node, false otherwise.
    */
   public boolean isRoot() {
-    return this.parent == null;
+    return parent == null;
   }
 
   /**
@@ -235,7 +212,7 @@ public class Topic {
    * @return true if this is a leaf node, false otherwise.
    */
   public boolean isLeaf() {
-    return this.children.isEmpty();
+    return children.isEmpty();
   }
 
   /**
@@ -244,11 +221,10 @@ public class Topic {
    * @return A string containing the full topic path of this node.
    */
   public String getFullTopicString() {
-    String localTopicName = this.getName();
-    if (!this.isRoot()) {
-      return this.parent.getFullTopicString() + "/" + localTopicName;
+    if (!isRoot()) {
+      return parent.getFullTopicString() + "/" + getName();
     } else {
-      return this.name;
+      return getName();
     }
   }
 
@@ -259,9 +235,9 @@ public class Topic {
    */
   public String getFullTopicStringIgnoreCase() {
     if (!this.isRoot()) {
-      return this.parent.getFullTopicStringIgnoreCase() + "/" + this.getNameIgnoreCase();
+      return parent.getFullTopicStringIgnoreCase() + "/" + getNameIgnoreCase();
     } else {
-      return this.getNameIgnoreCase();
+      return getNameIgnoreCase();
     }
   }
 

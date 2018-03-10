@@ -32,7 +32,7 @@ public class Publisher {
   private final String topic;
   private final String host;
   private final Integer port;
-  private final HashMap<String, String> attributes;
+  private final HashMap<String, String> attributes = new HashMap<>();
   private Long timeout;
 
   /**
@@ -48,8 +48,6 @@ public class Publisher {
     this.host = host;
     this.port = port;
     this.originProtocol = originProtocol;
-    this.attributes = new HashMap<>();
-    this.timeout = null;
   }
 
   /**
@@ -117,11 +115,7 @@ public class Publisher {
    * @param value The attribute value
    */
   public void setAttribute(String key, String value) {
-    if (attributes.containsKey(key)) {
-      attributes.replace(key, value);
-    } else {
-      attributes.put(key, value);
-    }
+    attributes.put(key, value);
   }
 
   /**
@@ -131,10 +125,7 @@ public class Publisher {
    * @return The value of the attribute key, <code>null</code> if it does not exist
    */
   public String getAttribute(String key) {
-    if (attributes.containsKey(key)) {
-      return attributes.get(key);
-    }
-    return null;
+    return attributes.getOrDefault(key, null);
   }
 
   /**

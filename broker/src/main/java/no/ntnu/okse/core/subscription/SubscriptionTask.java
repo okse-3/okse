@@ -49,11 +49,11 @@ public class SubscriptionTask {
 
   // Public getter for Type
   public Type getType() {
-    return this.type;
+    return type;
   }
 
   // Public run-delegation method
   public void run() {
-    this.job.run();
+    job.run();
   }
 }
