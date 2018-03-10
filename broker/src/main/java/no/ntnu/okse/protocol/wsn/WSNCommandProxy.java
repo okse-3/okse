@@ -78,26 +78,19 @@ import java.util.*;
 @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
 public class WSNCommandProxy extends AbstractNotificationBroker {
 
-  private final Logger log;
+  private final Logger log = Logger.getLogger(WSNCommandProxy.class.getName());
   private final FilterSupport filterSupport;
   private WSNSubscriptionManager _subscriptionManager;
   private WSNRegistrationManager _registrationManager;
   private final WSNotificationServer _protocolserver;
 
   public WSNCommandProxy(WSNotificationServer protocolserver, Hub hub) {
-    this.log = Logger.getLogger(WSNCommandProxy.class.getName());
-    this.setHub(hub);
-    this.filterSupport = FilterSupport.createDefaultFilterSupport();
-    this._subscriptionManager = null;
-    this._registrationManager = null;
-    _protocolserver = protocolserver;
+    this(protocolserver);
+    setHub(hub);
   }
 
   public WSNCommandProxy(WSNotificationServer protocolserver) {
-    this.log = Logger.getLogger(WSNCommandProxy.class.getName());
-    this.filterSupport = FilterSupport.createDefaultFilterSupport();
-    this._subscriptionManager = null;
-    this._registrationManager = null;
+    filterSupport = FilterSupport.createDefaultFilterSupport();
     _protocolserver = protocolserver;
   }
 

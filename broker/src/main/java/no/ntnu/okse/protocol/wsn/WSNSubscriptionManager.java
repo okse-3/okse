@@ -46,19 +46,16 @@ public class WSNSubscriptionManager extends AbstractSubscriptionManager implemen
   public static final String WSN_ENDPOINT_TOKEN = "wsn-endpoint";
   public static final String WSN_USERAW_TOKEN = "wsn-useraw";
 
-  private static Logger log;
+  private static Logger log = Logger.getLogger(WSNSubscriptionManager.class.getName());;
   private SubscriptionService _subscriptionService = null;
-  private final ConcurrentHashMap<String, Subscriber> localSubscriberMap;
-  private final ConcurrentHashMap<String, AbstractNotificationProducer.SubscriptionHandle> localSubscriberHandle;
+  private final ConcurrentHashMap<String, Subscriber> localSubscriberMap  = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, AbstractNotificationProducer.SubscriptionHandle> localSubscriberHandle = new ConcurrentHashMap<>();
   private final WSNotificationServer _protocolserver;
 
   /**
    * Empty constructor that initializes the log and local maps
    */
   public WSNSubscriptionManager(WSNotificationServer protocolserver) {
-    log = Logger.getLogger(WSNSubscriptionManager.class.getName());
-    localSubscriberMap = new ConcurrentHashMap<>();
-    localSubscriberHandle = new ConcurrentHashMap<>();
     _protocolserver = protocolserver;
   }
 

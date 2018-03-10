@@ -41,11 +41,11 @@ import java.util.Collection;
 
 public class WSNRequestParser implements Hub {
 
-  private final Logger log;
+  private final Logger log = Logger.getLogger(WSNRequestParser.class.getName());
+  ;
   private final WSNotificationServer _protocolServer;
 
   public WSNRequestParser(WSNotificationServer server) {
-    log = Logger.getLogger(WSNRequestParser.class.getName());
     _protocolServer = server;
   }
 

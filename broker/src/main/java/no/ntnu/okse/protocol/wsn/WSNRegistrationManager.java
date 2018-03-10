@@ -60,20 +60,16 @@ public class WSNRegistrationManager extends AbstractPublisherRegistrationManager
 
   public static final String WSN_PUBLISHER_TOKEN = "wsn-publisherkey";
 
-  private static Logger log;
+  private static Logger log = Logger.getLogger(WSNRegistrationManager.class.getName());
   private SubscriptionService _subscriptionService = null;
-  private final HashMap<String, Publisher> localPublisherMap;
-  private final HashMap<String, AbstractNotificationBroker.PublisherHandle> localPublisherHandle;
+  private final HashMap<String, Publisher> localPublisherMap = new HashMap<>();
+  private final HashMap<String, AbstractNotificationBroker.PublisherHandle> localPublisherHandle = new HashMap<>();
   private final WSNotificationServer _protocolserver;
 
   /**
    * Empty constructor that initializes the log and local mappings
    */
   public WSNRegistrationManager(WSNotificationServer protocolserver) {
-    log = Logger.getLogger(WSNRegistrationManager.class.getName());
-    _subscriptionService = null;
-    localPublisherMap = new HashMap<>();
-    localPublisherHandle = new HashMap<>();
     _protocolserver = protocolserver;
   }
 
