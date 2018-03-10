@@ -45,8 +45,8 @@ public class Message {
 
   // Mutable fields
   private String originProtocol;
-  private static Logger log;
-  private HashMap<String, String> attributes;
+  private static Logger log = Logger.getLogger(Message.class.getName());
+  private HashMap<String, String> attributes = new HashMap<>();
   private LocalDateTime processed;
   private boolean systemMessage;
 
@@ -61,15 +61,11 @@ public class Message {
    */
   public Message(@Nonnull String message, String topic, Publisher publisher,
       @Nonnull String originProtocol) {
-    log = Logger.getLogger(Message.class.getName());
     this.publisher = publisher;
     this.topic = topic;
-    this.created = LocalDateTime.now();
-    this.processed = null;
+    created = LocalDateTime.now();
     this.message = message;
-    this.systemMessage = false;
-    this.messageID = generateMessageID();
-    this.attributes = new HashMap<>();
+    messageID = generateMessageID();
     this.originProtocol = originProtocol;
   }
 
@@ -94,7 +90,7 @@ public class Message {
    * @return A string containing the MessageID of this object.
    */
   public String getMessageID() {
-    return this.messageID;
+    return messageID;
   }
 
   /**
@@ -103,7 +99,7 @@ public class Message {
    * @return A string containing the message
    */
   public String getMessage() {
-    return this.message;
+    return message;
   }
 
   /**
@@ -112,7 +108,7 @@ public class Message {
    * @return A topic object this message is to be broadcast to
    */
   public String getTopic() {
-    return this.topic;
+    return topic;
   }
 
   /**
@@ -122,7 +118,7 @@ public class Message {
    * @return The publisher object this message came from, null otherwise.
    */
   public Publisher getPublisher() {
-    return this.publisher;
+    return publisher;
   }
 
   /**
@@ -131,7 +127,7 @@ public class Message {
    * @return true, if publisher is registered
    */
   public boolean messageSentFromRegisteredPublisher() {
-    return this.publisher != null;
+    return publisher != null;
   }
 
   /**
@@ -150,7 +146,7 @@ public class Message {
    * message or other
    */
   public String getOriginProtocol() {
-    return this.originProtocol;
+    return originProtocol;
   }
 
   /**
@@ -159,7 +155,7 @@ public class Message {
    * @return A LocalDateTime object representing the creation time of this object.
    */
   public LocalDateTime getCreationTime() {
-    return this.created;
+    return created;
   }
 
   /**
@@ -168,7 +164,7 @@ public class Message {
    * @return True if the message has been processed, false otherwise.
    */
   public boolean isProcessed() {
-    return this.processed != null;
+    return processed != null;
   }
 
   /**
@@ -178,9 +174,9 @@ public class Message {
    */
   public LocalDateTime setProcessed() {
     if (!isProcessed()) {
-      this.processed = LocalDateTime.now();
+      processed = LocalDateTime.now();
     }
-    return this.processed;
+    return processed;
   }
 
   /**
@@ -190,11 +186,7 @@ public class Message {
    * @param value The value of the attribute
    */
   public void setAttribute(String key, String value) {
-    if (attributes.containsKey(key)) {
-      attributes.replace(key, value);
-    } else {
-      attributes.put(key, value);
-    }
+    attributes.put(key, value);
   }
 
   /**
@@ -204,10 +196,7 @@ public class Message {
    * @return The value if the attribute exists, null otherwise
    */
   public String getAttribute(String key) {
-    if (attributes.containsKey(key)) {
-      return attributes.get(key);
-    }
-    return null;
+    return attributes.getOrDefault(key, null);
   }
 
   /**
@@ -226,7 +215,7 @@ public class Message {
    * Returns null if it has not yet been processed.
    */
   public LocalDateTime getCompletionTime() {
-    return this.processed;
+    return processed;
   }
 
   /**
@@ -236,7 +225,7 @@ public class Message {
    * @param flag True to set this message as a system message, false otherwise.
    */
   public void setSystemMessage(boolean flag) {
-    this.systemMessage = flag;
+    systemMessage = flag;
   }
 
   /**
@@ -246,7 +235,7 @@ public class Message {
    * @return True if it was a system generated message, false otherwise.
    */
   public boolean isSystemMessage() {
-    return this.systemMessage;
+    return systemMessage;
   }
 
   @Override
