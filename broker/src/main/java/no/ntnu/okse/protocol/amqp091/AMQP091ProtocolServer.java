@@ -16,9 +16,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
 
-  private final String SERVERTYPE = "amqp091";
+  private static final String SERVERTYPE = "amqp091";
   private AMQP091Service amqpService;
-  private SubscriptionService subscriptionService;
+  private SubscriptionService subscriptionService = SubscriptionService.getInstance();
   private static AtomicBoolean running = new AtomicBoolean(false);
 
 
@@ -29,11 +29,7 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
    * @param port port
    */
   public AMQP091ProtocolServer(String host, int port) {
-    this.port = port;
-    this.host = host;
-    protocolServerType = SERVERTYPE;
-    log = Logger.getLogger(AMQP091ProtocolServer.class.getName());
-    subscriptionService = SubscriptionService.getInstance();
+    super(host, port, SERVERTYPE);
   }
 
   /**

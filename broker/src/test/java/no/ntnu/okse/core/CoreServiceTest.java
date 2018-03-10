@@ -253,16 +253,12 @@ public class CoreServiceTest {
   public static class TestProtocol extends AbstractProtocolServer {
 
     public TestProtocol(Integer baseCount) {
+      super("0.0.0.0", 0, "");
       totalMessagesReceived.getAndAdd(baseCount);
       totalMessagesSent.getAndAdd(2 * baseCount);
       totalRequests.getAndAdd(3 * baseCount);
       totalBadRequests.getAndAdd(4 * baseCount);
       totalErrors.getAndAdd(5 * baseCount);
-    }
-
-    protected void init(String host, Integer port) {
-      this.host = host;
-      this.port = port;
     }
 
     public void boot() {

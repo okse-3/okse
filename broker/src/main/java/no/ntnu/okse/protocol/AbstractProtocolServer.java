@@ -34,37 +34,30 @@ public abstract class AbstractProtocolServer implements ProtocolServer {
   protected int port;
   protected String host;
 
-  // Run-state variables
-  protected boolean _running;
-
-  // Name and statistics
-  protected String protocolServerType;
-  protected final AtomicInteger totalRequests;
-  protected final AtomicInteger totalBadRequests;
-  protected final AtomicInteger totalErrors;
-  protected final AtomicInteger totalMessagesReceived;
-  protected final AtomicInteger totalMessagesSent;
-
-  /**
-   * Constructor that just initializes the fields to default values
-   */
-  protected AbstractProtocolServer() {
-    port = 0;
-    host = "";
-    _running = false;
-    protocolServerType = "";
-    totalMessagesSent = new AtomicInteger(0);
-    totalMessagesReceived = new AtomicInteger(0);
-    totalRequests = new AtomicInteger(0);
-    totalBadRequests = new AtomicInteger(0);
-    totalErrors = new AtomicInteger(0);
-  }
-
   // Logger singleton
   protected Logger log;
 
   // Server wrapping thread
   protected Thread _serverThread;
+
+  // Run-state variables
+  protected boolean _running = false;
+
+  // Name and statistics
+  protected String protocolServerType;
+  protected final AtomicInteger totalRequests = new AtomicInteger(0);
+  protected final AtomicInteger totalBadRequests = new AtomicInteger(0);
+  protected final AtomicInteger totalErrors = new AtomicInteger(0);
+  protected final AtomicInteger totalMessagesReceived = new AtomicInteger(0);
+  protected final AtomicInteger totalMessagesSent = new AtomicInteger(0);
+
+  protected AbstractProtocolServer(String host, int port, String protocolServerType) {
+    this.host = host;
+    this.port = port;
+    this.protocolServerType = protocolServerType;
+    // this.getClass() returns the Class of the class that is instantiated
+    log = Logger.getLogger(this.getClass().getName());
+  }
 
   /**
    * Total amount of requests from this WSNotificationServer that has passed through this server

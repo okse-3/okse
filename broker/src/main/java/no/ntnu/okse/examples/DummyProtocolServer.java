@@ -54,6 +54,8 @@ public class DummyProtocolServer extends AbstractProtocolServer {
   private static final String DEFAULT_HOST = "0.0.0.0";
   private static final int DEFAULT_PORT = 61001;
 
+  private static final String SERVERTYPE = "DummyProtocol";
+
   // Fields
   private ServerSocketChannel serverChannel;
   private HashSet<SocketChannel> clients;
@@ -67,7 +69,9 @@ public class DummyProtocolServer extends AbstractProtocolServer {
    * @param port The port this server should bind to
    */
   private DummyProtocolServer(String host, Integer port) {
-    init(host, port);
+    // If we have host or port provided, set them, otherwise use internal defaults
+    super(host == null ? DEFAULT_HOST : host, port == null ? DEFAULT_PORT : port, SERVERTYPE);
+    init();
   }
 
   /**
@@ -103,22 +107,12 @@ public class DummyProtocolServer extends AbstractProtocolServer {
 
   /**
    * Initialization method
-   *
-   * @param port The port this server should bind to
    */
-  private void init(String host, Integer port) {
-    // Init logger
-    log = Logger.getLogger(DummyProtocolServer.class.getName());
-    // Set protocol name
-    protocolServerType = "DummyProtocol";
+  private void init() {
     // Update invoked flag
     _invoked = true;
     // Initialize the client set
     clients = new HashSet<>();
-
-    // If we have host or port provided, set them, otherwise use internal defaults
-    this.port = port == null ? DEFAULT_PORT : port;
-    this.host = host == null ? DEFAULT_HOST : host;
 
     try {
 

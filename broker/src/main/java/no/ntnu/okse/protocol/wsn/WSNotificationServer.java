@@ -65,11 +65,10 @@ import java.util.concurrent.TimeUnit;
 
 public class WSNotificationServer extends AbstractProtocolServer {
 
-  // Run-state variables
-  private boolean _running;
-
   // Path to internal configuration file on classpath
   private static final String wsnInternalConfigFile = "/config/wsnserver.xml";
+
+  private static final String SERVERTYPE = "WSNotification";
 
   // Internal Default Values
   private static final String DEFAULT_HOST = "0.0.0.0";
@@ -110,19 +109,15 @@ public class WSNotificationServer extends AbstractProtocolServer {
    * @param wan_host A string
    * @param wan_port An int
    */
-  public WSNotificationServer(
-      String host, int port, Long timeout,
-      int pool_size, String wrapper_name,
-      boolean nat, String wan_host, int wan_port) {
-    this.host = host;
-    this.port = port;
+  public WSNotificationServer(String host, int port, Long timeout, int pool_size,
+      String wrapper_name, boolean nat, String wan_host, int wan_port) {
+    super(host, port, SERVERTYPE);
     connectionTimeout = timeout;
     clientPoolSize = pool_size;
     contentWrapperElementName = wrapper_name;
     behindNAT = nat;
     publicWANHost = wan_host;
     publicWANPort = wan_port;
-    log = Logger.getLogger(WSNotificationServer.class.getName());
     init();
   }
 
@@ -132,12 +127,6 @@ public class WSNotificationServer extends AbstractProtocolServer {
    */
   private void init() {
     log.warn("Logging!");
-
-    // Set the server type
-    protocolServerType = "WSNotification";
-
-    // Declare HttpClient field
-    _client = null;
 
     clientPool = Executors.newFixedThreadPool(clientPoolSize);
 

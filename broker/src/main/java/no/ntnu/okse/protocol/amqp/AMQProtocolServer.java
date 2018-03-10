@@ -37,9 +37,6 @@ public class AMQProtocolServer extends AbstractProtocolServer {
 
   protected static final String SERVERTYPE = "amqp";
 
-  private final Logger log;
-  private Thread _serverThread;
-
   private SubscriptionHandler sh;
   private boolean shuttingdown = false;
 
@@ -57,12 +54,9 @@ public class AMQProtocolServer extends AbstractProtocolServer {
    * @param sasl A boolean specifying whether to use SASL for its connections
    */
   public AMQProtocolServer(String host, int port, boolean queue, boolean sasl) {
-    protocolServerType = SERVERTYPE;
+    super(host, port, SERVERTYPE);
     useQueue = queue;
     useSASL = sasl;
-    this.port = port;
-    this.host = host;
-    log = Logger.getLogger(AMQProtocolServer.class.getName());
   }
 
   @Override

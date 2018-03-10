@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 public class STOMPProtocolServer extends AbstractProtocolServer {
 
   private STOMPServer server;
+  private static final String SERVERTYPE = "stomp";
 
   /**
    * Constructor for the class, sets the host and port for the gateway Also initiates the logger and
@@ -17,11 +18,7 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
    * @param port the port to listen to
    */
   public STOMPProtocolServer(String host, Integer port) {
-    this.host = host;
-    this.port = port;
-
-    protocolServerType = "stomp";
-    log = Logger.getLogger(STOMPProtocolServer.class.getName());
+    super(host, port, SERVERTYPE);
   }
 
 
