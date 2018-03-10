@@ -24,19 +24,10 @@ public class STOMPServer extends Server {
   private static STOMPSubscriptionManager subscriptionManager;
   public ServerNettyMessageGateway gateway;
   private static STOMPProtocolServer ps;
-  private final Logger log;
-  private final LinkedBlockingQueue<Message> messageQueue;
+  private final Logger log = Logger.getLogger(STOMPProtocolServer.class.getName());
+  private final LinkedBlockingQueue<Message> messageQueue = new LinkedBlockingQueue<>();
   private Thread messageSenderThread;
-  private final AtomicBoolean running;
-
-  /**
-   * Sets up the logger when we create a new instance of this class
-   */
-  public STOMPServer() {
-    log = Logger.getLogger(STOMPProtocolServer.class.getName());
-    messageQueue = new LinkedBlockingQueue<>();
-    running = new AtomicBoolean(false);
-  }
+  private final AtomicBoolean running = new AtomicBoolean(false);
 
   /**
    * Sets the subscription manager for the class

@@ -13,17 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class STOMPSubscriptionManager implements SubscriptionChangeListener {
 
-  private static Logger log;
+  private static Logger log = Logger.getLogger(SubscriptionManager.class.getName());
   private SubscriptionService subscriptionService = null;
-  public final ConcurrentHashMap<String, Subscriber> localSubscriberMap;
-
-  /**
-   * Setup of variables
-   */
-  public STOMPSubscriptionManager() {
-    log = Logger.getLogger(SubscriptionManager.class.getName());
-    localSubscriberMap = new ConcurrentHashMap<>();
-  }
+  public final ConcurrentHashMap<String, Subscriber> localSubscriberMap = new ConcurrentHashMap<>();
 
   /**
    * Initialises the core subscription service. Basically a setter

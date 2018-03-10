@@ -2,7 +2,6 @@ package no.ntnu.okse.protocol.stomp.commons;
 
 public class MIMEType {
 
-  private final String contentType;
   private final String charset;
   private final String mediaType;
 
@@ -12,7 +11,6 @@ public class MIMEType {
    * @param contentType, String on the form (text/html;charset=utf-16 )
    */
   public MIMEType(String contentType) {
-    this.contentType = contentType;
     if (contentType == null) {
       this.mediaType = null;
       this.charset = null;

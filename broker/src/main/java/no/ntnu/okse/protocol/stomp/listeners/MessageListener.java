@@ -27,16 +27,9 @@ import java.util.Map;
 public class MessageListener implements StampyMessageListener {
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private final String protocol;
+  private final String protocol = "stomp";
   private STOMPProtocolServer protocolServer;
   private MessageService messageService;
-
-  /**
-   * Constructor for the class, simply sets the protocol type
-   */
-  public MessageListener() {
-    this.protocol = "stomp";
-  }
 
   @Override
   public StompMessageType[] getMessageTypes() {

@@ -16,14 +16,7 @@ import no.ntnu.okse.protocol.stomp.STOMPSubscriptionManager;
 public class SubscriptionListener implements StampyMessageListener {
 
   private STOMPSubscriptionManager subscriptionManager;
-  private final String protocol;
-
-  /**
-   * Constructor for the class Sets the protocol type to stomp
-   */
-  public SubscriptionListener() {
-    this.protocol = "stomp";
-  }
+  private final String protocol = "stomp";
 
   @Override
   public StompMessageType[] getMessageTypes() {
