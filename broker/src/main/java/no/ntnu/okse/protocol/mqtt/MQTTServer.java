@@ -16,6 +16,7 @@ import io.netty.channel.Channel;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.topic.TopicService;
+import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
 
 import javax.validation.constraints.NotNull;
@@ -31,14 +32,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MQTTServer extends Server {
 
   private static final Logger log = Logger.getLogger(Server.class);
-  private static String protocolServerType;
+  private static final String protocolServerType = "mqtt";
   private final MQTTProtocolServer ps;
   private final IConfig config;
-  private final List<InterceptHandler> interceptHandlers;
+  private final List<InterceptHandler> interceptHandlers = new ArrayList<>();
   private MQTTSubscriptionManager subscriptionManager;
-  private final LinkedBlockingQueue<Message> messageQueue;
+  private final LinkedBlockingQueue<Message> messageQueue = new LinkedBlockingQueue<>();
   private Thread messageSenderThread;
-  private final AtomicBoolean running;
+  private final AtomicBoolean running = new AtomicBoolean(false);
 
   /**
    * Class for the interceptors to be used in Moquette
@@ -76,12 +77,8 @@ public class MQTTServer extends Server {
    */
   public MQTTServer(MQTTProtocolServer ps, String host, int port) {
     this.ps = ps;
-    protocolServerType = "mqtt";
-    interceptHandlers = new ArrayList<>();
     interceptHandlers.add(createListeners());
     config = new MemoryConfig(getConfig(host, port));
-    messageQueue = new LinkedBlockingQueue<>();
-    running = new AtomicBoolean(false);
   }
 
   /**

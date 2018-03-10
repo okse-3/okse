@@ -15,17 +15,9 @@ import java.util.ArrayList;
  */
 public class MQTTSubscriptionManager implements SubscriptionChangeListener {
 
-  private static Logger log;
-  private SubscriptionService subscriptionService = null;
-  private final ArrayList<MQTTSubscriber> subscriberList;
-
-  /**
-   * Constructor Instantiates the log Instantiates the local subscriber list
-   */
-  public MQTTSubscriptionManager() {
-    log = Logger.getLogger(MQTTSubscriptionManager.class.getName());
-    subscriberList = new ArrayList<>();
-  }
+  private static Logger log = Logger.getLogger(MQTTSubscriptionManager.class.getName());
+  private SubscriptionService subscriptionService;
+  private final ArrayList<MQTTSubscriber> subscriberList = new ArrayList<>();
 
   /**
    * Sets the subscription service
