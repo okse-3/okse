@@ -22,6 +22,7 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
   public MQTTProtocolServer(String host, Integer port) {
     this.host = host;
     this.port = port;
+    protocolServerType = SERVERTYPE;
   }
 
   @Override

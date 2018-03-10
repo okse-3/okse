@@ -57,7 +57,7 @@ public class AMQProtocolServer extends AbstractProtocolServer {
    * @param sasl A boolean specifying whether to use SASL for its connections
    */
   public AMQProtocolServer(String host, int port, boolean queue, boolean sasl) {
-    protocolServerType = "amqp";
+    protocolServerType = SERVERTYPE;
     useQueue = queue;
     useSASL = sasl;
     this.port = port;

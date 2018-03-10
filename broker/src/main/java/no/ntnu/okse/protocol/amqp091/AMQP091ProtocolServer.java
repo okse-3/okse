@@ -31,6 +31,7 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
   public AMQP091ProtocolServer(String host, int port) {
     this.port = port;
     this.host = host;
+    protocolServerType = SERVERTYPE;
     log = Logger.getLogger(AMQP091ProtocolServer.class.getName());
     subscriptionService = SubscriptionService.getInstance();
   }
