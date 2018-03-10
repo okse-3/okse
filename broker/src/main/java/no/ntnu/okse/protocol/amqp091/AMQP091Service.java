@@ -18,14 +18,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class AMQP091Service {
 
-  private final String host;
-  private final int port;
   private static final Logger log = Logger.getLogger(AMQP091Service.class.getName());
   private final AMQP091MessageListener messageListener;
   private final AMQP091ProtocolServer protocolServer;
-  private final LinkedBlockingQueue<Message> messageQueue;
+  private final LinkedBlockingQueue<Message> messageQueue = new LinkedBlockingQueue<>();;
   private Thread messageSenderThread;
-  private final AtomicBoolean running;
+  private final AtomicBoolean running = new AtomicBoolean(false);
 
   /**
    * Dependency injection constructor for protocol server
@@ -34,11 +32,7 @@ public class AMQP091Service {
    */
   public AMQP091Service(AMQP091ProtocolServer amqp091ProtocolServer) {
     protocolServer = amqp091ProtocolServer;
-    this.host = amqp091ProtocolServer.getHost();
-    this.port = amqp091ProtocolServer.getPort();
     messageListener = new AMQP091MessageListener(amqp091ProtocolServer);
-    messageQueue = new LinkedBlockingQueue<>();
-    running = new AtomicBoolean(false);
   }
 
   /**
@@ -100,7 +94,7 @@ public class AMQP091Service {
    * @return string containing host and port
    */
   private String getHostPort() {
-    return "" + port + " " + host;
+    return "" + protocolServer.getPort() + " " + protocolServer.getHost();
   }
 
   /**

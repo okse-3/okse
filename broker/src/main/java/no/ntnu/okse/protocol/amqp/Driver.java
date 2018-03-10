@@ -43,7 +43,7 @@ public class Driver extends BaseHandler {
   final private Collector collector;
   final private Handler[] handlers;
   final private Selector selector;
-  private static Logger log;
+  private static Logger log = Logger.getLogger(Driver.class.getName());
   private boolean _running;
   private Acceptor acceptor;
   private AMQProtocolServer ps;
@@ -52,7 +52,6 @@ public class Driver extends BaseHandler {
     this.collector = collector;
     this.handlers = handlers;
     this.selector = Selector.open();
-    log = Logger.getLogger(Driver.class.getName());
     this.ps = ps;
   }
 

@@ -21,7 +21,7 @@ public class AMQP091MessageListener implements AMQPMessageListener, Subscription
   private static Logger log = Logger.getLogger(AMQP091MessageListener.class);
 
   private final AMQP091ProtocolServer amqpProtocolServer;
-  private SubscriberMap subscriberMap;
+  private SubscriberMap subscriberMap = new SubscriberMap();;
   private SubscriptionService subscriptionService;
 
   /**
@@ -31,7 +31,6 @@ public class AMQP091MessageListener implements AMQPMessageListener, Subscription
    */
   public AMQP091MessageListener(AMQP091ProtocolServer amqp091ProtocolServer) {
     this.amqpProtocolServer = amqp091ProtocolServer;
-    subscriberMap = new SubscriberMap();
     subscriptionService = SubscriptionService.getInstance();
   }
 

@@ -75,17 +75,15 @@ public class AMQPServer extends BaseHandler {
 
   final private MessageStore messages = new MessageStore();
   final private SubscriptionHandler subscriptionHandler;
-  private static Logger log;
+  private static Logger log = Logger.getLogger(AMQPServer.class.getName());
   private final boolean quiet;
-  private int tag = 0;
-  private final LinkedBlockingQueue<String> queue;
+  private int tag;
+  private final LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>();;
   private final AMQProtocolServer ps;
 
   public AMQPServer(AMQProtocolServer ps, SubscriptionHandler subscriptionHandler, boolean quiet) {
     this.subscriptionHandler = subscriptionHandler;
     this.quiet = quiet;
-    log = Logger.getLogger(AMQPServer.class.getName());
-    queue = new LinkedBlockingQueue<>();
     this.ps = ps;
   }
 
