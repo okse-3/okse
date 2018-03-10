@@ -303,16 +303,6 @@ public class DummyProtocolServer extends AbstractProtocolServer {
   }
 
   /**
-   * Returns the type of this ProtocolServer as a string
-   *
-   * @return A string representing the name of the protocol in question.
-   */
-  @Override
-  public String getProtocolServerType() {
-    return this.protocolServerType;
-  }
-
-  /**
    * Send a message using DummyProtocol
    *
    * @param message An instance of Message containing the required data to distribute a message.

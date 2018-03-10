@@ -77,14 +77,6 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
   }
 
   /**
-   * @return protocol server type as string
-   */
-  @Override
-  public String getProtocolServerType() {
-    return SERVERTYPE;
-  }
-
-  /**
    * @return server running
    */
   public boolean isRunning() {

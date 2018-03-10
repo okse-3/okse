@@ -109,11 +109,6 @@ public class AMQProtocolServer extends AbstractProtocolServer {
   }
 
   @Override
-  public String getProtocolServerType() {
-    return protocolServerType;
-  }
-
-  @Override
   public void sendMessage(Message message) {
     if (!message.getOriginProtocol().equals(protocolServerType)
         || message.getAttribute("duplicate") != null) {

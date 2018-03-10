@@ -289,16 +289,6 @@ public class WSNotificationServer extends AbstractProtocolServer {
   }
 
   /**
-   * Fetches the specified String representation of the Protocol that this ProtocolServer handles.
-   *
-   * @return A string representing the name of the protocol that this ProtocolServer handles.
-   */
-  @Override
-  public String getProtocolServerType() {
-    return protocolServerType;
-  }
-
-  /**
    * Retrieve the default element name for non-XML messages that are to be wrapped in a soap
    * enveloped WSNotification Notify element. This element will be the first and only child of the
    * Message element.

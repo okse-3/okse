@@ -253,7 +253,7 @@ public class CoreServiceTest {
   public static class TestProtocol extends AbstractProtocolServer {
 
     public TestProtocol(Integer baseCount) {
-      super("0.0.0.0", 0, "");
+      super("0.0.0.0", 0, "Test");
       totalMessagesReceived.getAndAdd(baseCount);
       totalMessagesSent.getAndAdd(2 * baseCount);
       totalRequests.getAndAdd(3 * baseCount);
@@ -268,10 +268,6 @@ public class CoreServiceTest {
     }
 
     public void stopServer() {
-    }
-
-    public String getProtocolServerType() {
-      return "Test";
     }
 
     public void sendMessage(Message message) {

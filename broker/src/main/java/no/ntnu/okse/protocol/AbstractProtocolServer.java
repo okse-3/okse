@@ -55,7 +55,7 @@ public abstract class AbstractProtocolServer implements ProtocolServer {
     this.host = host;
     this.port = port;
     this.protocolServerType = protocolServerType;
-    // this.getClass() returns the Class of the class that is instantiated
+    // this.getClass() returns the Class of the class that is instantiated, creating a distinct logger for each different subclass
     log = Logger.getLogger(this.getClass().getName());
   }
 
@@ -113,6 +113,16 @@ public abstract class AbstractProtocolServer implements ProtocolServer {
    */
   public int getPort() {
     return this.port;
+  }
+
+  /**
+   * Returns a string representing the protocol server type
+   *
+   * @return The protocol server type
+   */
+  @Override
+  public String getProtocolServerType() {
+    return protocolServerType;
   }
 
   /**

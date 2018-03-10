@@ -53,11 +53,6 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
   }
 
   @Override
-  public String getProtocolServerType() {
-    return SERVERTYPE;
-  }
-
-  @Override
   public void sendMessage(Message message) {
     log.info("Received message on topic " + message.getMessage());
     server.queueMessage(message);

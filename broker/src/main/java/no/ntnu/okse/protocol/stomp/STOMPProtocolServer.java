@@ -58,11 +58,6 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
   }
 
   @Override
-  public String getProtocolServerType() {
-    return protocolServerType;
-  }
-
-  @Override
   public void sendMessage(Message message) {
     log.info("Received message on topic " + message.getTopic());
     server.queueMessage(message);
