@@ -230,10 +230,6 @@ public class CoreServiceTest {
 
   public static class TestService extends AbstractCoreService {
 
-    public TestService() {
-      super(TestService.class.getName());
-    }
-
     protected void init() {
     }
 

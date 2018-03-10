@@ -57,23 +57,21 @@ public class CoreService extends AbstractCoreService {
   // Common service fields
   private static CoreService _singleton;
   private static Thread _serviceThread;
-  private static boolean _invoked = false;
+  private static boolean _invoked;
 
   // Service specific fields
-  private LinkedBlockingQueue<Event> eventQueue;
+  private LinkedBlockingQueue<Event> eventQueue = new LinkedBlockingQueue<>();
   private ExecutorService executor;
-  private HashSet<AbstractCoreService> services;
-  private ArrayList<ProtocolServer> protocolServers;
+  private HashSet<AbstractCoreService> services = new HashSet<>();
+  private ArrayList<ProtocolServer> protocolServers = new ArrayList<>();
   private Properties config;
-  public static boolean protocolServersBooted = false;
+  public static boolean protocolServersBooted;
 
   /**
    * Constructs the CoreService instance. Constructor is private due to the singleton pattern used
    * for core services.
    */
   protected CoreService() {
-    // Pass the className to superclass for logger initialization
-    super(CoreService.class.getName());
     if (_invoked) {
       throw new IllegalStateException("Already invoked");
     }
@@ -99,9 +97,6 @@ public class CoreService extends AbstractCoreService {
   protected void init() {
     config = Application.readConfigurationFiles();
     log.debug("Initializing CoreService");
-    eventQueue = new LinkedBlockingQueue();
-    services = new HashSet<>();
-    protocolServers = new ArrayList<>();
     // Initialize the ExecutorService (Dynamic threadpool that increases and decreases on demand in runtime)
     executor = Executors.newCachedThreadPool();
     // Set the invoked flag
@@ -173,7 +168,7 @@ public class CoreService extends AbstractCoreService {
         if (e.getEventType().equals(SystemEventType.SHUTDOWN_PROTOCOL_SERVERS)) {
           stopAllProtocolServers();
         }
-          // Are we booting protocol servers?
+        // Are we booting protocol servers?
         else if (e.getEventType().equals(SystemEventType.BOOT_PROTOCOL_SERVERS)) {
           bootProtocolServers();
         }
@@ -200,7 +195,7 @@ public class CoreService extends AbstractCoreService {
       log.warn("Interrupted during shutdown sleep");
     }
     // Shut down all the Core Services
-    this.services.forEach(AbstractCoreService::stop);
+    services.forEach(AbstractCoreService::stop);
 
     // Turn of run flag
     _running = false;
@@ -221,7 +216,7 @@ public class CoreService extends AbstractCoreService {
    * @param r The Runnable job to be executed
    */
   public void execute(Runnable r) {
-    this.executor.execute(r);
+    executor.execute(r);
   }
 
   /**
@@ -281,12 +276,10 @@ public class CoreService extends AbstractCoreService {
    * @return A core service extending AbstractCoreService
    */
   public AbstractCoreService getService(Class serviceClass) {
-    for (AbstractCoreService service : services) {
-      if (service.getClass().equals(serviceClass)) {
-        return service;
-      }
-    }
-    return null;
+    return services.stream()
+        .filter(service -> service.getClass().equals(serviceClass))
+        .findFirst()
+        .orElse(null);
   }
 
   /**
@@ -306,9 +299,7 @@ public class CoreService extends AbstractCoreService {
    * @param ps: An instance of a subclass of AbstractProtocolServer that implements ProtocolServer
    */
   public void removeProtocolServer(ProtocolServer ps) {
-    if (protocolServers.contains(ps)) {
-      protocolServers.remove(ps);
-    }
+    protocolServers.remove(ps);
   }
 
   /**
@@ -317,8 +308,9 @@ public class CoreService extends AbstractCoreService {
    * @return An integer representing the total amount of requests.
    */
   public int getTotalRequestsFromProtocolServers() {
-    return getAllProtocolServers().stream().map(ProtocolServer::getTotalRequests)
-        .reduce(0, (a, b) -> a + b);
+    return getAllProtocolServers().stream()
+        .mapToInt(ProtocolServer::getTotalRequests)
+        .sum();
   }
 
   /**
@@ -327,8 +319,9 @@ public class CoreService extends AbstractCoreService {
    * @return An integer representing the total amount of messages received.
    */
   public int getTotalMessagesReceivedFromProtocolServers() {
-    return getAllProtocolServers().stream().map(ProtocolServer::getTotalMessagesReceived)
-        .reduce(0, (a, b) -> a + b);
+    return getAllProtocolServers().stream()
+        .mapToInt(ProtocolServer::getTotalMessagesReceived)
+        .sum();
   }
 
   /**
@@ -337,8 +330,9 @@ public class CoreService extends AbstractCoreService {
    * @return An integer representing the total number of messages sent
    */
   public int getTotalMessagesSentFromProtocolServers() {
-    return getAllProtocolServers().stream().map(ProtocolServer::getTotalMessagesSent)
-        .reduce(0, (a, b) -> a + b);
+    return getAllProtocolServers().stream()
+        .mapToInt(ProtocolServer::getTotalMessagesSent)
+        .sum();
   }
 
   /**
@@ -348,8 +342,9 @@ public class CoreService extends AbstractCoreService {
    * @return An integer representing the total amount of bad or malformed requests
    */
   public int getTotalBadRequestsFromProtocolServers() {
-    return getAllProtocolServers().stream().map(ProtocolServer::getTotalBadRequests)
-        .reduce(0, (a, b) -> a + b);
+    return getAllProtocolServers().stream()
+        .mapToInt(ProtocolServer::getTotalBadRequests)
+        .sum();
   }
 
   /**
@@ -358,8 +353,9 @@ public class CoreService extends AbstractCoreService {
    * @return An integer representing the total amount of errors from protocol servers.
    */
   public int getTotalErrorsFromProtocolServers() {
-    return getAllProtocolServers().stream().map(ProtocolServer::getTotalErrors)
-        .reduce(0, (a, b) -> a + b);
+    return getAllProtocolServers().stream()
+        .mapToInt(ProtocolServer::getTotalErrors)
+        .sum();
   }
 
   /**
@@ -370,7 +366,7 @@ public class CoreService extends AbstractCoreService {
    */
   public ArrayList<ProtocolServer> getAllProtocolServers() {
     if (protocolServersBooted) {
-      return this.protocolServers;
+      return protocolServers;
     } else {
       return new ArrayList<>();
     }
@@ -385,12 +381,10 @@ public class CoreService extends AbstractCoreService {
    * returned object can be safely cast to the specified Class.
    */
   public ProtocolServer getProtocolServer(Class className) {
-    for (ProtocolServer ps : protocolServers) {
-      if (className.equals(ps.getClass())) {
-        return ps;
-      }
-    }
-    return null;
+    return protocolServers.stream()
+        .filter(ps -> className.equals(ps.getClass()))
+        .findFirst()
+        .orElse(null);
   }
 
   /**
@@ -452,12 +446,10 @@ public class CoreService extends AbstractCoreService {
    * equal to the specified argument.
    */
   public ProtocolServer getProtocolServer(String protocolServerType) {
-    for (ProtocolServer ps : protocolServers) {
-      if (ps.getProtocolServerType().equalsIgnoreCase(protocolServerType)) {
-        return ps;
-      }
-    }
-    return null;
+    return protocolServers.stream()
+        .filter(ps -> ps.getProtocolServerType().equalsIgnoreCase(protocolServerType))
+        .findFirst()
+        .orElse(null);
   }
 
   /* Begin private helper methods */
@@ -544,6 +536,5 @@ public class CoreService extends AbstractCoreService {
     this.registerListenerSupport();
     // Register listener support on other registered core services
     services.forEach(AbstractCoreService::registerListenerSupport);
-
   }
 }

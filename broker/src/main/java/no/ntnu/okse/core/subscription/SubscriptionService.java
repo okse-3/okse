@@ -51,25 +51,24 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
 
   private static SubscriptionService _singleton;
   private static Thread _serviceThread;
-  private static boolean _invoked = false;
+  private static boolean _invoked;
 
   // Is the scheduled auto removal of expired subs and pubs active?
   private final boolean autoPurgeRunning = false;
 
-  private LinkedBlockingQueue<SubscriptionTask> queue;
+  private LinkedBlockingQueue<SubscriptionTask> queue = new LinkedBlockingQueue<>();
   private ScheduledExecutorService scheduler;
   private Properties config;
-  private ConcurrentHashSet<SubscriptionChangeListener> _subscriptionListeners;
-  private ConcurrentHashSet<PublisherChangeListener> _registrationListeners;
-  private ConcurrentHashSet<Subscriber> _subscribers;
-  private ConcurrentHashSet<Publisher> _publishers;
+  private ConcurrentHashSet<SubscriptionChangeListener> _subscriptionListeners = new ConcurrentHashSet<>();
+  private ConcurrentHashSet<PublisherChangeListener> _registrationListeners = new ConcurrentHashSet<>();
+  private ConcurrentHashSet<Subscriber> _subscribers = new ConcurrentHashSet<>();
+  private ConcurrentHashSet<Publisher> _publishers = new ConcurrentHashSet<>();
 
   /**
    * Private constructor that passes classname to superclass log field and calls initialization
    * method
    */
   protected SubscriptionService() {
-    super(SubscriptionService.class.getName());
     init();
   }
 
@@ -93,12 +92,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
     _invoked = true;
     config = Application.readConfigurationFiles();
     log.info("Initializing SubscriptionService...");
-    queue = new LinkedBlockingQueue<>();
     scheduler = Executors.newScheduledThreadPool(1);
-    _subscribers = new ConcurrentHashSet<>();
-    _publishers = new ConcurrentHashSet<>();
-    _registrationListeners = new ConcurrentHashSet<>();
-    _subscriptionListeners = new ConcurrentHashSet<>();
   }
 
   /**
@@ -522,17 +516,12 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
    * @return A HashSet of Subscriber objects that have subscribed to the specified topic
    */
   public HashSet<Subscriber> getAllSubscribersForTopic(String topic) {
-    // Initialize a collector
-    HashSet<Subscriber> results = new HashSet<>();
-
     // Iterate over all subscribers
-    getAllSubscribers().stream()
+    return getAllSubscribers().stream()
         // Only pass on those who match topic argument
         .filter(s -> s.getTopic() == null || s.getTopic().equals(topic))
         // Collect in the results set
-        .forEach(results::add);
-
-    return results;
+        .collect(Collectors.toCollection(HashSet::new));
   }
 
   /**
@@ -542,17 +531,11 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
    * @return A HashSet of Subscriber objects that have subscribed to the specified topic
    */
   public HashSet<Publisher> getAllPublishersForTopic(String topic) {
-    // Initialize a collector
-    HashSet<Publisher> results = new HashSet<>();
-
-    // Iterate over all subscribers
-    getAllPublishers().stream()
+    return getAllPublishers().stream()
         // Only pass on those who match topic argument
         .filter(p -> p.getTopic().equals(topic))
         // Collect in the results set
-        .forEach(results::add);
-
-    return results;
+        .collect(Collectors.toCollection(HashSet::new));
   }
 
   /**

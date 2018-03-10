@@ -24,6 +24,7 @@
 
 package no.ntnu.okse.core.messaging;
 
+import java.util.stream.Collectors;
 import no.ntnu.okse.Application;
 import no.ntnu.okse.core.AbstractCoreService;
 import no.ntnu.okse.core.CoreService;
@@ -46,8 +47,8 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
   private static boolean _invoked = false;
   private static MessageService _singleton;
   private static Thread _serviceThread;
-  private LinkedBlockingQueue<Message> queue;
-  private ConcurrentHashMap<String, Message> latestMessages;
+  private LinkedBlockingQueue<Message> queue = new LinkedBlockingQueue<>();
+  private ConcurrentHashMap<String, Message> latestMessages = new ConcurrentHashMap<>();
   private Properties config;
 
   /**
@@ -55,7 +56,6 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
    * for this class
    */
   protected MessageService() {
-    super(MessageService.class.getName());
     if (_invoked) {
       throw new IllegalStateException("Already invoked");
     }
@@ -68,8 +68,6 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
   protected void init() {
     config = Application.readConfigurationFiles();
     log.info("Initializing MessageService...");
-    queue = new LinkedBlockingQueue<>();
-    latestMessages = new ConcurrentHashMap<>();
     _invoked = true;
   }
 
@@ -126,28 +124,7 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
 
           // Do we have a system message?
           if (m.isSystemMessage() && m.getTopic() == null) {
-
-            log.debug("Received message was a SystemMessage: " + m.getMessage());
-
-            // Check if we are to broadcast this system message
-            if (Application.BROADCAST_SYSTEM_MESSAGES_TO_SUBSCRIBERS) {
-
-              log.debug("System Message Broadcast set to TRUE, distributing system message...");
-
-              // Generate duplicate messages to all topics and iterate over them
-              generateMessageToAllTopics(m).forEach(message -> {
-                // Fetch all protocol servers, and call sendMessage on each
-                CoreService.getInstance().getAllProtocolServers()
-                    .forEach(s -> s.sendMessage(message));
-                // Flag the message as processed
-                message.setProcessed();
-              });
-
-              log.info("System message distribution completed");
-            }
-
-            // Set original message as processed.
-            m.setProcessed();
+            handleSystemMessage(m);
 
             // Continue the run loop
             continue;
@@ -254,11 +231,7 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
    * @return The message object for the specified topic, null if there has not been any messages yet
    */
   public Message getLatestMessage(String topic) {
-    if (latestMessages.containsKey(topic)) {
-      return latestMessages.get(topic);
-    }
-
-    return null;
+    return latestMessages.getOrDefault(topic, null);
   }
 
   /**
@@ -280,16 +253,10 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
    * @return A containing the new message objects, to dispatch into the queue.
    */
   public List<Message> generateMessageForAGivenTopicSet(Message m, HashSet<Topic> topics) {
-    ArrayList<Message> collector = new ArrayList<>();
-
-    topics
-        .forEach(t -> {
-          Message msg = new Message(m.getMessage(), t.getFullTopicString(), m.getPublisher(),
-              m.getOriginProtocol());
-          collector.add(msg);
-        });
-
-    return collector;
+    return topics.stream()
+        .map(topic -> new Message(m.getMessage(), topic.getFullTopicString(), m.getPublisher(),
+            m.getOriginProtocol()))
+        .collect(Collectors.toList());
   }
 
 
@@ -304,20 +271,38 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
    * @return A HashSet of the generated messages
    */
   private HashSet<Message> generateMessageToAllTopics(Message m) {
-    // Initialize the collector
-    HashSet<Message> generated = new HashSet<>();
-    // Iterate over all topics and generate individual messages per topic
-    TopicService.getInstance().getAllTopics().forEach(t -> {
-      // Create the message wrapper
-      Message msg = new Message(m.getMessage(), t.getFullTopicString(), m.getPublisher(),
-          m.getOriginProtocol());
-      // Flag the generated message the same as the originating message
-      msg.setSystemMessage(m.isSystemMessage());
-      // Add the message to the collector
-      generated.add(msg);
-    });
+    // Create message wrapper for each topic
+    HashSet<Message> generated = TopicService.getInstance().getAllTopics().stream()
+        .map(topic -> new Message(m.getMessage(), topic.getFullTopicString(), m.getPublisher(),
+            m.getOriginProtocol()))
+        .collect(Collectors.toCollection(HashSet::new));
 
+    // Flag each message wrapper the same as the original
+    generated.forEach(message -> message.setSystemMessage(m.isSystemMessage()));
     return generated;
+  }
+
+  private void handleSystemMessage(Message m) {
+    log.debug("Received message was a SystemMessage: " + m.getMessage());
+
+    // Check if we are to broadcast this system message
+    if (Application.BROADCAST_SYSTEM_MESSAGES_TO_SUBSCRIBERS) {
+
+      log.debug("System Message Broadcast set to TRUE, distributing system message...");
+
+      // Generate duplicate messages to all topics and iterate over them
+      generateMessageToAllTopics(m).forEach(message -> {
+        // Fetch all protocol servers, and call sendMessage on each
+        CoreService.getInstance().getAllProtocolServers().forEach(s -> s.sendMessage(message));
+        // Flag the message as processed
+        message.setProcessed();
+      });
+
+      log.info("System message distribution completed");
+    }
+
+    // Set original message as processed.
+    m.setProcessed();
   }
 
   /* Begin observation methods */

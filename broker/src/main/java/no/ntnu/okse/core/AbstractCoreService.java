@@ -30,18 +30,9 @@ public abstract class AbstractCoreService {
 
   // Instance-specific fields
   protected boolean _running;
-  protected final Logger log;
 
-  /**
-   * Protected constructor that takes in the className string from the subclass (for logger
-   * initializing)
-   *
-   * @param className className as string
-   */
-  protected AbstractCoreService(String className) {
-    _running = false;
-    log = Logger.getLogger(className);
-  }
+  // Logger connected to the class name of the subclass
+  protected final Logger log = Logger.getLogger(this.getClass().getName());
 
   /**
    * Initializing method

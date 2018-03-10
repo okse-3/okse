@@ -24,6 +24,8 @@
 
 package no.ntnu.okse.core.topic;
 
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import no.ntnu.okse.Application;
 import no.ntnu.okse.core.AbstractCoreService;
 import no.ntnu.okse.core.Utilities;
@@ -38,21 +40,20 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class TopicService extends AbstractCoreService {
 
-  private static boolean _invoked = false;
+  private static boolean _invoked;
   private static TopicService _singleton = null;
   private static Thread _serviceThread;
-  private LinkedBlockingQueue<TopicTask> queue;
+  private LinkedBlockingQueue<TopicTask> queue = new LinkedBlockingQueue<>();
   private Properties config;
-  private ConcurrentHashMap<String, Topic> allTopics;
-  private ConcurrentHashSet<TopicChangeListener> _listeners;
-  private ConcurrentHashMap<String, HashSet<String>> mappings;
+  private ConcurrentHashMap<String, Topic> allTopics = new ConcurrentHashMap<>();
+  private ConcurrentHashSet<TopicChangeListener> _listeners = new ConcurrentHashSet<>();
+  private ConcurrentHashMap<String, HashSet<String>> mappings = new ConcurrentHashMap<>();
 
   /**
    * Private constructor that passes this classname to superclass log instance. Uses getInstance to
    * instantiate.
    */
   protected TopicService() {
-    super(TopicService.class.getName());
     if (_invoked) {
       throw new IllegalStateException("Already invoked");
     }
@@ -78,10 +79,6 @@ public class TopicService extends AbstractCoreService {
   protected void init() {
     config = Application.readConfigurationFiles();
     log.info("Initializing TopicService...");
-    queue = new LinkedBlockingQueue<>();
-    allTopics = new ConcurrentHashMap<>();
-    _listeners = new ConcurrentHashSet<>();
-    mappings = new ConcurrentHashMap<>();
     _invoked = true;
 
     log.info("Initializing topic mapping from configuration file");
@@ -192,15 +189,10 @@ public class TopicService extends AbstractCoreService {
    * @return A HashSet of all the root topic nodes.
    */
   public HashSet<Topic> getAllRootTopics() {
-    HashSet<Topic> collector = new HashSet<>();
     // Iterate over the key value pairs and add topic to roots if it is indeed a root topic node
-    allTopics.forEach((k, t) -> {
-      if (t.isRoot()) {
-        collector.add(t);
-      }
-    });
-
-    return collector;
+    return allTopics.values().stream()
+        .filter(Topic::isRoot)
+        .collect(Collectors.toCollection(HashSet::new));
   }
 
   /**
@@ -209,10 +201,7 @@ public class TopicService extends AbstractCoreService {
    * @return A HashSet of all topic nodes.
    */
   public HashSet<Topic> getAllTopics() {
-    HashSet<Topic> collector = new HashSet<>();
-    allTopics.forEach((s, t) -> collector.add(t));
-
-    return collector;
+    return new HashSet<>(allTopics.values());
   }
 
   /**
@@ -221,15 +210,9 @@ public class TopicService extends AbstractCoreService {
    * @return A HashSet of all leaf topic nodes.
    */
   public HashSet<Topic> getAllLeafTopics() {
-    HashSet<Topic> collector = new HashSet<>();
-    // Iterate over the key value pairs and add the topic if it is indeed a leaf topic node.
-    allTopics.forEach((k, t) -> {
-      if (t.isLeaf()) {
-        collector.add(t);
-      }
-    });
-
-    return collector;
+    return allTopics.values().stream()
+        .filter(Topic::isLeaf)
+        .collect(Collectors.toCollection(HashSet::new));
   }
 
   /**
@@ -239,10 +222,7 @@ public class TopicService extends AbstractCoreService {
    * @return A Topic if we found one, null otherwise.
    */
   public Topic getTopic(String rawTopicString) {
-    if (allTopics.containsKey(rawTopicString)) {
-      return allTopics.get(rawTopicString);
-    }
-    return null;
+    return allTopics.getOrDefault(rawTopicString, null);
   }
 
   /**
@@ -252,13 +232,9 @@ public class TopicService extends AbstractCoreService {
    * @return A topic if found, null otherwise.
    */
   public Topic getTopicByID(String id) {
-    List<Topic> result = new ArrayList<>();
-
-    allTopics.forEach((k, t) -> {
-      if (t.getTopicID().equals(id)) {
-        result.add(t);
-      }
-    });
+    List<Topic> result = allTopics.values().stream()
+        .filter(topic -> topic.getTopicID().equals(id))
+        .collect(Collectors.toList());
 
     if (result.size() > 1) {
       log.warn("Found multiple topics with the same hash/ID.");
@@ -275,11 +251,7 @@ public class TopicService extends AbstractCoreService {
    * @return A HashMap of all the registered mappings
    */
   public HashMap<String, HashSet<String>> getAllMappings() {
-    HashMap<String, HashSet<String>> collector = new HashMap<>();
-
-    mappings.forEach(collector::put);
-
-    return collector;
+    return new HashMap<>(mappings);
   }
 
   /**
@@ -347,7 +319,7 @@ public class TopicService extends AbstractCoreService {
    * @return true if it exists, false otherwise.
    */
   public boolean topicExists(String topic) {
-    return this.allTopics.containsKey(topic);
+    return allTopics.containsKey(topic);
   }
 
   /**
@@ -372,7 +344,7 @@ public class TopicService extends AbstractCoreService {
     }
 
     // Split our topic string into parts
-    ArrayList<String> topicParts = new ArrayList(Arrays.asList(topic.split("/")));
+    ArrayList<String> topicParts = new ArrayList<>(Arrays.asList(topic.split("/")));
 
     // Generate the leaf node, set name and type and add to collector
     Topic currentTopic = new Topic();
@@ -420,7 +392,7 @@ public class TopicService extends AbstractCoreService {
    */
   public void deleteMapping(String mapping) {
     if (mappings.containsKey(mapping)) {
-      HashSet<String> mappedAgainst = mappings.remove(mapping);
+      mappings.remove(mapping);
       log.info("Removed the mappings for Topic{" + mapping + "}");
     } else {
       log.warn("Attempt to remove a mapping that did in fact not exist ");
@@ -524,7 +496,7 @@ public class TopicService extends AbstractCoreService {
    * @param listener An object implementing the TopicChangeListener interface
    */
   public synchronized void addTopicChangeListener(TopicChangeListener listener) {
-    this._listeners.add(listener);
+    _listeners.add(listener);
   }
 
   /**
@@ -533,9 +505,7 @@ public class TopicService extends AbstractCoreService {
    * @param listener The object implementing TopicChangeListener interface that is to be removed.
    */
   public synchronized void removeTopicChangeListener(TopicChangeListener listener) {
-    if (this._listeners.contains(listener)) {
-      this._listeners.remove(listener);
-    }
+    _listeners.remove(listener);
   }
 
   /**
@@ -546,7 +516,9 @@ public class TopicService extends AbstractCoreService {
    */
   public void fireTopicChangeEvent(Topic topic, TopicChangeEventType topicChangeEventType) {
     TopicChangeEvent topicEvent = new TopicChangeEvent(topicChangeEventType, topic);
-    log.debug("Firing topicchange event of topicChangeEventType " + topicChangeEventType + " on topic " + topic);
+    log.debug(
+        "Firing topicchange event of topicChangeEventType " + topicChangeEventType + " on topic "
+            + topic);
     this._listeners.forEach(t -> t.topicChanged(topicEvent));
   }
 
