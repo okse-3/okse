@@ -27,8 +27,11 @@ package no.ntnu.okse.core.subscription;
 import no.ntnu.okse.Application;
 import no.ntnu.okse.core.AbstractCoreService;
 import no.ntnu.okse.core.event.PublisherChangeEvent;
+import no.ntnu.okse.core.event.PublisherChangeEvent.PublishEventType;
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
+import no.ntnu.okse.core.event.SubscriptionChangeEvent.SubscribeEventType;
 import no.ntnu.okse.core.event.TopicChangeEvent;
+import no.ntnu.okse.core.event.TopicChangeEvent.TopicChangeEventType;
 import no.ntnu.okse.core.event.listeners.PublisherChangeListener;
 import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.event.listeners.TopicChangeListener;
@@ -219,7 +222,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
       _subscribers.add(s);
       log.info("Added new subscriber: " + s);
       // Fire the subscribe event
-      fireSubscriptionChangeEvent(s, SubscriptionChangeEvent.Type.SUBSCRIBE);
+      fireSubscriptionChangeEvent(s, SubscribeEventType.SUBSCRIBE);
     } else {
       log.warn("Attempt to add a subscriber that already exists!");
     }
@@ -236,7 +239,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
       _subscribers.remove(s);
       log.info("Removed subscriber: " + s);
       // Fire the unsubscribe event
-      fireSubscriptionChangeEvent(s, SubscriptionChangeEvent.Type.UNSUBSCRIBE);
+      fireSubscriptionChangeEvent(s, SubscribeEventType.UNSUBSCRIBE);
     } else {
       log.warn("Attempt to remove a subscriber that did not exist!");
     }
@@ -254,7 +257,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
       s.setTimeout(timeout);
       log.info("Renewed subscriber: " + s);
       // Fire the renew event
-      fireSubscriptionChangeEvent(s, SubscriptionChangeEvent.Type.RENEW);
+      fireSubscriptionChangeEvent(s, SubscribeEventType.RENEW);
     } else {
       log.warn("Attempt to modify a subscriber that does not exist in the service!");
     }
@@ -271,7 +274,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
       s.setAttribute("paused", "true");
       log.info("Paused subscriber: " + s);
       // Fire the pause event
-      fireSubscriptionChangeEvent(s, SubscriptionChangeEvent.Type.PAUSE);
+      fireSubscriptionChangeEvent(s, SubscribeEventType.PAUSE);
     } else {
       log.warn("Attempt to modify a subscriber that does not exist in the service!");
     }
@@ -288,7 +291,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
       s.setAttribute("paused", "false");
       log.info("Resumed subscriber: " + s);
       // FIre the resume event
-      fireSubscriptionChangeEvent(s, SubscriptionChangeEvent.Type.RESUME);
+      fireSubscriptionChangeEvent(s, SubscribeEventType.RESUME);
     } else {
       log.warn("Attempt to modify a subscriber that does not exist in the service!");
     }
@@ -305,7 +308,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
       _publishers.add(p);
       log.info("Added publisher: " + p);
       // Fire the register event
-      firePublisherChangeEvent(p, PublisherChangeEvent.Type.REGISTER);
+      firePublisherChangeEvent(p, PublishEventType.REGISTER);
     } else {
       log.warn("Attempt to add a publisher that already exists!");
     }
@@ -322,7 +325,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
       _publishers.remove(p);
       log.info("Removed publisher: " + p);
       // Fire the remove event
-      firePublisherChangeEvent(p, PublisherChangeEvent.Type.UNREGISTER);
+      firePublisherChangeEvent(p, PublishEventType.UNREGISTER);
     }
   }
   /* End Service-Local methods */
@@ -630,10 +633,10 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
    * Private helper method fo fire the subscriptionChange method on all listeners.
    *
    * @param sub : The particular subscriber object that has changed.
-   * @param type : What type of action is associated with the subscriber object.
+   * @param subscribeEventType : What type of action is associated with the subscriber object.
    */
-  private void fireSubscriptionChangeEvent(Subscriber sub, SubscriptionChangeEvent.Type type) {
-    SubscriptionChangeEvent sce = new SubscriptionChangeEvent(type, sub);
+  private void fireSubscriptionChangeEvent(Subscriber sub, SubscribeEventType subscribeEventType) {
+    SubscriptionChangeEvent sce = new SubscriptionChangeEvent(subscribeEventType, sub);
     _subscriptionListeners.forEach(l -> l.subscriptionChanged(sce));
   }
 
@@ -663,7 +666,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
    * @param reg : The particular publisher object that has changed.
    * @param type : What type of action is associated with the publisher object.
    */
-  private void firePublisherChangeEvent(Publisher reg, PublisherChangeEvent.Type type) {
+  private void firePublisherChangeEvent(Publisher reg, PublishEventType type) {
     PublisherChangeEvent pce = new PublisherChangeEvent(type, reg);
     _registrationListeners.forEach(l -> l.publisherChanged(pce));
   }
@@ -674,7 +677,7 @@ public class SubscriptionService extends AbstractCoreService implements TopicCha
 
   @Override
   public void topicChanged(TopicChangeEvent event) {
-    if (event.getType().equals(TopicChangeEvent.Type.DELETE)) {
+    if (event.getEventType().equals(TopicChangeEventType.DELETE)) {
 
       // Fetch the raw topic string from the event Topic object
       String fullRawTopicString = event.getData().getFullTopicString();

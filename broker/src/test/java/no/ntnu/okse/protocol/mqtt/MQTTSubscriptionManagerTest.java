@@ -1,6 +1,7 @@
 package no.ntnu.okse.protocol.mqtt;
 
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
+import no.ntnu.okse.core.event.SubscriptionChangeEvent.SubscribeEventType;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.mockito.Mockito;
@@ -178,7 +179,7 @@ public class MQTTSubscriptionManagerTest {
         .getSubscriber();
 
     subscriptionHandler_spy.subscriptionChanged(
-        new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.UNSUBSCRIBE, sub));
+        new SubscriptionChangeEvent(SubscribeEventType.UNSUBSCRIBE, sub));
     Mockito.verify(subscriptionHandler_spy).removeSubscriber(sub);
   }
 }

@@ -28,6 +28,7 @@ import no.ntnu.okse.Application;
 import no.ntnu.okse.core.CoreService;
 import no.ntnu.okse.core.Utilities;
 import no.ntnu.okse.core.event.SystemEvent;
+import no.ntnu.okse.core.event.SystemEvent.SystemEventType;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.core.topic.TopicService;
 import org.apache.log4j.Logger;
@@ -110,13 +111,13 @@ public class MainController {
 
     if (CoreService.protocolServersBooted) {
       try {
-        cs.getEventQueue().put(new SystemEvent(SystemEvent.Type.SHUTDOWN_PROTOCOL_SERVERS, null));
+        cs.getEventQueue().put(new SystemEvent(SystemEventType.SHUTDOWN_PROTOCOL_SERVERS, null));
       } catch (InterruptedException e) {
         log.warn("WARNING: Please don't interrupt the thread");
       }
     } else {
       try {
-        cs.getEventQueue().put(new SystemEvent(SystemEvent.Type.BOOT_PROTOCOL_SERVERS, null));
+        cs.getEventQueue().put(new SystemEvent(SystemEventType.BOOT_PROTOCOL_SERVERS, null));
       } catch (InterruptedException e) {
         log.warn("WARNING: Please don't interrupt the thread");
       }

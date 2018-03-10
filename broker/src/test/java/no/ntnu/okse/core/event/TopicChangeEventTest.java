@@ -24,6 +24,7 @@
 
 package no.ntnu.okse.core.event;
 
+import no.ntnu.okse.core.event.TopicChangeEvent.TopicChangeEventType;
 import no.ntnu.okse.core.topic.Topic;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -42,7 +43,7 @@ public class TopicChangeEventTest {
     one = new Topic("root", "DEFAULT");
     two = new Topic("sub", "DEFAULT");
     two.setParent(one);
-    tce = new TopicChangeEvent(TopicChangeEvent.Type.NEW, two);
+    tce = new TopicChangeEvent(TopicChangeEventType.NEW, two);
   }
 
   @AfterMethod
@@ -61,9 +62,9 @@ public class TopicChangeEventTest {
 
   @Test
   public void testGetType() {
-    assertNotNull(tce.getType());
-    assertEquals(tce.getType(), TopicChangeEvent.Type.NEW);
-    tce = new TopicChangeEvent(TopicChangeEvent.Type.DELETE, one);
-    assertEquals(tce.getType(), TopicChangeEvent.Type.DELETE);
+    assertNotNull(tce.getEventType());
+    assertEquals(tce.getEventType(), TopicChangeEventType.NEW);
+    tce = new TopicChangeEvent(TopicChangeEventType.DELETE, one);
+    assertEquals(tce.getEventType(), TopicChangeEventType.DELETE);
   }
 }

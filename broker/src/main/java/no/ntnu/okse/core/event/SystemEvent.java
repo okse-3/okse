@@ -24,44 +24,19 @@
 
 package no.ntnu.okse.core.event;
 
-public class SystemEvent extends Event {
+import no.ntnu.okse.core.event.SystemEvent.SystemEventType;
 
-  public enum Type {
-    SHUTDOWN,
-    SHUTDOWN_PROTOCOL_SERVERS,
-    BOOT_PROTOCOL_SERVERS
-  }
+public class SystemEvent extends Event<Object, SystemEventType> {
 
-  final Type type;
+  public enum SystemEventType {SHUTDOWN, SHUTDOWN_PROTOCOL_SERVERS, BOOT_PROTOCOL_SERVERS}
 
   /**
    * Constructs an Event containing an operation, some data and a dataType. <p>
    *
-   * @param type : Type of SystemEvent
+   * @param systemEventType : PublishEventType of SystemEvent
    * @param data : An object containing the data payload.
    */
-  public SystemEvent(Type type, Object data) {
-    super(data);
-    this.type = type;
-  }
-
-  /**
-   * An abstract method to retrieve the data payload. <p>
-   *
-   * @return An object containing the data payload casted to proper type in subclass.
-   */
-  @Override
-  public Object getData() {
-    return data;
-  }
-
-  /**
-   * An abstract method that should return a subclass enum type
-   *
-   * @return Type enum implemented in subclass
-   */
-  @Override
-  public Object getType() {
-    return type;
+  public SystemEvent(SystemEventType systemEventType, Object data) {
+    super(data, systemEventType);
   }
 }

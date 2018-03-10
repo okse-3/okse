@@ -27,6 +27,7 @@ package no.ntnu.okse.examples;
 import no.ntnu.okse.Application;
 import no.ntnu.okse.core.CoreService;
 import no.ntnu.okse.core.event.SystemEvent;
+import no.ntnu.okse.core.event.SystemEvent.SystemEventType;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
@@ -360,10 +361,8 @@ public class DummyProtocolServer extends AbstractProtocolServer {
       } else if (args[0].equalsIgnoreCase("shutdownprotocolservers")) {
         log.debug("SHUTDOWN PROTOCOL SERVERS RECEIVED");
         try {
-          CoreService.getInstance().getEventQueue().put(new SystemEvent(
-              SystemEvent.Type.SHUTDOWN_PROTOCOL_SERVERS,
-              null
-          ));
+          CoreService.getInstance().getEventQueue()
+              .put(new SystemEvent(SystemEventType.SHUTDOWN_PROTOCOL_SERVERS, null));
         } catch (InterruptedException e) {
           log.error("Interrupted while attempting to insert an event into CoreService");
         }

@@ -28,6 +28,7 @@ import no.ntnu.okse.Application;
 import no.ntnu.okse.core.AbstractCoreService;
 import no.ntnu.okse.core.CoreService;
 import no.ntnu.okse.core.event.TopicChangeEvent;
+import no.ntnu.okse.core.event.TopicChangeEvent.TopicChangeEventType;
 import no.ntnu.okse.core.event.listeners.TopicChangeListener;
 import no.ntnu.okse.core.topic.Topic;
 import no.ntnu.okse.core.topic.TopicService;
@@ -323,7 +324,7 @@ public class MessageService extends AbstractCoreService implements TopicChangeLi
 
   @Override
   public void topicChanged(TopicChangeEvent event) {
-    if (event.getType().equals(TopicChangeEvent.Type.DELETE)) {
+    if (event.getEventType().equals(TopicChangeEventType.DELETE)) {
       // Fetch the raw topic string from the deleted topic
       String rawTopicString = event.getData().getFullTopicString();
 

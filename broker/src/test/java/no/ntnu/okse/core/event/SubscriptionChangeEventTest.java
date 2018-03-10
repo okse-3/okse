@@ -24,6 +24,7 @@
 
 package no.ntnu.okse.core.event;
 
+import no.ntnu.okse.core.event.SubscriptionChangeEvent.SubscribeEventType;
 import no.ntnu.okse.core.subscription.Subscriber;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -39,7 +40,7 @@ public class SubscriptionChangeEventTest {
   @BeforeMethod
   public void setUp() {
     s = new Subscriber("0.0.0.0", 8080, "topic", "Test");
-    sce = new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.SUBSCRIBE, s);
+    sce = new SubscriptionChangeEvent(SubscribeEventType.SUBSCRIBE, s);
   }
 
   @AfterMethod
@@ -57,9 +58,9 @@ public class SubscriptionChangeEventTest {
 
   @Test
   public void testGetType() {
-    assertNotNull(sce.getType());
-    assertEquals(sce.getType(), SubscriptionChangeEvent.Type.SUBSCRIBE);
-    sce = new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.UNSUBSCRIBE, s);
-    assertEquals(sce.getType(), SubscriptionChangeEvent.Type.UNSUBSCRIBE);
+    assertNotNull(sce.getEventType());
+    assertEquals(sce.getEventType(), SubscribeEventType.SUBSCRIBE);
+    sce = new SubscriptionChangeEvent(SubscribeEventType.UNSUBSCRIBE, s);
+    assertEquals(sce.getEventType(), SubscribeEventType.UNSUBSCRIBE);
   }
 }

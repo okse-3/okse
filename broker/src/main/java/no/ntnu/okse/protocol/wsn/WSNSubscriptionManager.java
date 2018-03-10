@@ -1,6 +1,7 @@
 package no.ntnu.okse.protocol.wsn;
 
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
+import no.ntnu.okse.core.event.SubscriptionChangeEvent.SubscribeEventType;
 import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
@@ -537,14 +538,14 @@ public class WSNSubscriptionManager extends AbstractSubscriptionManager implemen
     // If it is WSNotification subscriber
     if (e.getData().getOriginProtocol().equals(_protocolserver.getProtocolServerType())) {
       // If we are dealing with an Unsubscribe
-      if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
+      if (e.getEventType().equals(SubscribeEventType.UNSUBSCRIBE)) {
         log.debug("Unsubscribing " + localSubscriberHandle
             .get(e.getData().getAttribute(WSN_SUBSCRIBER_TOKEN)));
         // Remove the local mappings from WS-Nu subscriptionKey to OKSE Subscriber object and WS-Nu subscriptionHandle
         localSubscriberMap.remove(e.getData().getAttribute(WSN_SUBSCRIBER_TOKEN));
         localSubscriberHandle.remove(e.getData().getAttribute(WSN_SUBSCRIBER_TOKEN));
 
-      } else if (e.getType().equals(SubscriptionChangeEvent.Type.SUBSCRIBE)) {
+      } else if (e.getEventType().equals(SubscribeEventType.SUBSCRIBE)) {
         log.debug("Received a SUBSCRIBE event");
       }
     }

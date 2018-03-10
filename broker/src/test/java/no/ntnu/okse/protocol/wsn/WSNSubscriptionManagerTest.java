@@ -25,6 +25,7 @@
 package no.ntnu.okse.protocol.wsn;
 
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
+import no.ntnu.okse.core.event.SubscriptionChangeEvent.SubscribeEventType;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.ntnunotif.wsnu.base.internal.ServiceConnection;
@@ -236,7 +237,7 @@ public class WSNSubscriptionManagerTest {
     public void removeSubscriber(Subscriber s) {
       subscribers.remove(s);
       sm.subscriptionChanged(
-          new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.UNSUBSCRIBE, s));
+          new SubscriptionChangeEvent(SubscribeEventType.UNSUBSCRIBE, s));
     }
 
     @Override

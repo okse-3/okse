@@ -25,6 +25,7 @@
 package no.ntnu.okse.protocol.wsn;
 
 import no.ntnu.okse.core.event.PublisherChangeEvent;
+import no.ntnu.okse.core.event.PublisherChangeEvent.PublishEventType;
 import no.ntnu.okse.core.event.listeners.PublisherChangeListener;
 import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.SubscriptionService;
@@ -281,7 +282,7 @@ public class WSNRegistrationManager extends AbstractPublisherRegistrationManager
     // Is this event on WSN publisher?
     if (e.getData().getOriginProtocol().equals(_protocolserver.getProtocolServerType())) {
       // Do we have an unregister?
-      if (e.getType().equals(PublisherChangeEvent.Type.UNREGISTER)) {
+      if (e.getEventType().equals(PublishEventType.UNREGISTER)) {
         // Remove the publisher from maps using its WSN_PUBLISHER_TOKEN hash
         localPublisherMap.remove(e.getData().getAttribute(WSN_PUBLISHER_TOKEN));
         localPublisherHandle.remove(e.getData().getAttribute(WSN_PUBLISHER_TOKEN));

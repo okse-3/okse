@@ -24,6 +24,7 @@
 
 package no.ntnu.okse.core.event;
 
+import no.ntnu.okse.core.event.SystemEvent.SystemEventType;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -38,7 +39,7 @@ public class SystemEventTest {
   @BeforeMethod
   public void setUp() {
     o = new Object();
-    e = new SystemEvent(SystemEvent.Type.SHUTDOWN, o);
+    e = new SystemEvent(SystemEventType.SHUTDOWN, o);
   }
 
   @AfterMethod
@@ -55,10 +56,10 @@ public class SystemEventTest {
 
   @Test
   public void testGetType() {
-    assertNotNull(e.getType());
-    assertEquals(e.getType(), SystemEvent.Type.SHUTDOWN);
-    e = new SystemEvent(SystemEvent.Type.BOOT_PROTOCOL_SERVERS, o);
-    assertEquals(e.getType(), SystemEvent.Type.BOOT_PROTOCOL_SERVERS);
+    assertNotNull(e.getEventType());
+    assertEquals(e.getEventType(), SystemEventType.SHUTDOWN);
+    e = new SystemEvent(SystemEventType.BOOT_PROTOCOL_SERVERS, o);
+    assertEquals(e.getEventType(), SystemEventType.BOOT_PROTOCOL_SERVERS);
 
   }
 }

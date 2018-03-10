@@ -1,6 +1,7 @@
 package no.ntnu.okse.protocol.stomp;
 
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
+import no.ntnu.okse.core.event.SubscriptionChangeEvent.SubscribeEventType;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.mockito.Mockito;
@@ -54,7 +55,7 @@ public class STOMPSubscriptionManagerTest {
   public void subscriptionChanged() {
     Subscriber sub = new Subscriber("127.0.0.1", 1883, "testing", "stomp");
     SubscriptionChangeEvent e = new SubscriptionChangeEvent(
-        SubscriptionChangeEvent.Type.UNSUBSCRIBE, sub);
+        SubscribeEventType.UNSUBSCRIBE, sub);
 
     subscriptionHandler_spy.subscriptionChanged(e);
     Mockito.verify(subscriptionHandler_spy).removeSubscriber(sub);

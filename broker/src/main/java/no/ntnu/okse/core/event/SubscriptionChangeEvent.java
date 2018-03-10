@@ -24,49 +24,21 @@
 
 package no.ntnu.okse.core.event;
 
+import no.ntnu.okse.core.event.SubscriptionChangeEvent.SubscribeEventType;
 import no.ntnu.okse.core.subscription.Subscriber;
 
-public class SubscriptionChangeEvent extends Event {
+public class SubscriptionChangeEvent extends Event<Subscriber, SubscribeEventType> {
 
-  // The different types of subscription changes that might occur
-  public enum Type {
-    SUBSCRIBE,
-    UNSUBSCRIBE,
-    RENEW,
-    PAUSE,
-    RESUME
-  }
-
-  private final Type eventType;
+  public enum SubscribeEventType {SUBSCRIBE, UNSUBSCRIBE, RENEW, PAUSE, RESUME}
 
   /**
-   * Constructs a SubscriptionChangeEvent of a certain Type, with associated Subscriber object. <p>
+   * Constructs a SubscriptionChangeEvent of a certain PublishEventType, with associated Subscriber
+   * object. <p>
    *
-   * @param eventType : The type of subscription event this is
+   * @param subscribeEventType : The topicChangeEventType of subscription event this is
    * @param data : The subscriber object in question.
    */
-  public SubscriptionChangeEvent(Type eventType, Subscriber data) {
-    super(data);
-    this.eventType = eventType;
-  }
-
-  /**
-   * Fetch the related Subscriber object.
-   *
-   * @return The Subscriber object associated with this event.
-   */
-  @Override
-  public Subscriber getData() {
-    return (Subscriber) data;
-  }
-
-  /**
-   * Fetch the event type of this event.
-   *
-   * @return A SubscriptionChangeEvent
-   */
-  @Override
-  public Type getType() {
-    return this.eventType;
+  public SubscriptionChangeEvent(SubscribeEventType subscribeEventType, Subscriber data) {
+    super(data, subscribeEventType);
   }
 }

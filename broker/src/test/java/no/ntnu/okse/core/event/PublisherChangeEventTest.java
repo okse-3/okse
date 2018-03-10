@@ -24,6 +24,7 @@
 
 package no.ntnu.okse.core.event;
 
+import no.ntnu.okse.core.event.PublisherChangeEvent.PublishEventType;
 import no.ntnu.okse.core.subscription.Publisher;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -39,7 +40,7 @@ public class PublisherChangeEventTest {
   @BeforeMethod
   public void setUp() {
     p = new Publisher("topic", "0.0.0.0", 8080, "Test");
-    e = new PublisherChangeEvent(PublisherChangeEvent.Type.REGISTER, p);
+    e = new PublisherChangeEvent(PublishEventType.REGISTER, p);
   }
 
   @AfterMethod
@@ -58,9 +59,9 @@ public class PublisherChangeEventTest {
 
   @Test
   public void testGetType() {
-    assertNotNull(e.getType());
-    assertEquals(e.getType(), PublisherChangeEvent.Type.REGISTER);
-    e = new PublisherChangeEvent(PublisherChangeEvent.Type.UNREGISTER, p);
-    assertEquals(e.getType(), PublisherChangeEvent.Type.UNREGISTER);
+    assertNotNull(e.getEventType());
+    assertEquals(e.getEventType(), PublishEventType.REGISTER);
+    e = new PublisherChangeEvent(PublishEventType.UNREGISTER, p);
+    assertEquals(e.getEventType(), PublishEventType.UNREGISTER);
   }
 }

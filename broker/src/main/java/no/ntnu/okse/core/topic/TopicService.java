@@ -28,6 +28,7 @@ import no.ntnu.okse.Application;
 import no.ntnu.okse.core.AbstractCoreService;
 import no.ntnu.okse.core.Utilities;
 import no.ntnu.okse.core.event.TopicChangeEvent;
+import no.ntnu.okse.core.event.TopicChangeEvent.TopicChangeEventType;
 import no.ntnu.okse.core.event.listeners.TopicChangeListener;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 
@@ -309,7 +310,7 @@ public class TopicService extends AbstractCoreService {
   public void addTopicLocal(Topic t) {
     this.allTopics.put(t.getFullTopicString(), t);
     log.info("Added new topic: " + t);
-    fireTopicChangeEvent(t, TopicChangeEvent.Type.NEW);
+    fireTopicChangeEvent(t, TopicChangeEventType.NEW);
   }
 
   /**
@@ -323,7 +324,7 @@ public class TopicService extends AbstractCoreService {
     if (allTopics.containsValue(t)) {
       allTopics.remove(t.getFullTopicString());
       log.info("Deleted Topic: " + t);
-      fireTopicChangeEvent(t, TopicChangeEvent.Type.DELETE);
+      fireTopicChangeEvent(t, TopicChangeEventType.DELETE);
     }
   }
 
@@ -541,11 +542,11 @@ public class TopicService extends AbstractCoreService {
    * Public helper method to fire a topic change event on all listeners
    *
    * @param topic The topic that has had an event
-   * @param type The type of topic event that occurred
+   * @param topicChangeEventType The type of topic event that occurred
    */
-  public void fireTopicChangeEvent(Topic topic, TopicChangeEvent.Type type) {
-    TopicChangeEvent topicEvent = new TopicChangeEvent(type, topic);
-    log.debug("Firing topicchange event of type " + type + " on topic " + topic);
+  public void fireTopicChangeEvent(Topic topic, TopicChangeEventType topicChangeEventType) {
+    TopicChangeEvent topicEvent = new TopicChangeEvent(topicChangeEventType, topic);
+    log.debug("Firing topicchange event of topicChangeEventType " + topicChangeEventType + " on topic " + topic);
     this._listeners.forEach(t -> t.topicChanged(topicEvent));
   }
 

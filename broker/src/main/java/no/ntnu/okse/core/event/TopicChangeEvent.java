@@ -24,46 +24,20 @@
 
 package no.ntnu.okse.core.event;
 
+import no.ntnu.okse.core.event.TopicChangeEvent.TopicChangeEventType;
 import no.ntnu.okse.core.topic.Topic;
 
-public class TopicChangeEvent extends Event {
+public class TopicChangeEvent extends Event<Topic, TopicChangeEventType> {
 
-  public enum Type {
-    NEW,
-    UPDATE,
-    DELETE
-  }
-
-  final Type type;
+  public enum TopicChangeEventType {NEW, UPDATE, DELETE}
 
   /**
    * Constructs an Event containing an operation, some data and a dataType. <p>
    *
-   * @param eventType : Type of TopicChangeEvent
+   * @param topicChangeEventType : PublishEventType of TopicChangeEvent
    * @param data : An object containing the data payload.
    */
-  public TopicChangeEvent(Type eventType, Object data) {
-    super(data);
-    this.type = eventType;
-  }
-
-  /**
-   * A method to retrieve the data payload. <p>
-   *
-   * @return An object containing the data payload casted to proper type.
-   */
-  @Override
-  public Topic getData() {
-    return (Topic) this.data;
-  }
-
-  /**
-   * A method that returns the type of topic change event that occurred.
-   *
-   * @return Type enum implemented in subclass
-   */
-  @Override
-  public Type getType() {
-    return this.type;
+  public TopicChangeEvent(TopicChangeEventType topicChangeEventType, Topic data) {
+    super(data, topicChangeEventType);
   }
 }

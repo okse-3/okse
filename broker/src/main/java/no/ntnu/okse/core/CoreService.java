@@ -27,6 +27,7 @@ package no.ntnu.okse.core;
 import no.ntnu.okse.Application;
 import no.ntnu.okse.core.event.Event;
 import no.ntnu.okse.core.event.SystemEvent;
+import no.ntnu.okse.core.event.SystemEvent.SystemEventType;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.SubscriptionService;
@@ -169,11 +170,11 @@ public class CoreService extends AbstractCoreService {
         Event e = eventQueue.take();
         log.debug("Consumed an event: " + e);
         // Are we shutting down protocol servers?
-        if (e.getType().equals(SystemEvent.Type.SHUTDOWN_PROTOCOL_SERVERS)) {
+        if (e.getEventType().equals(SystemEventType.SHUTDOWN_PROTOCOL_SERVERS)) {
           stopAllProtocolServers();
         }
           // Are we booting protocol servers?
-        else if (e.getType().equals(SystemEvent.Type.BOOT_PROTOCOL_SERVERS)) {
+        else if (e.getEventType().equals(SystemEventType.BOOT_PROTOCOL_SERVERS)) {
           bootProtocolServers();
         }
       } catch (InterruptedException e) {
@@ -206,7 +207,7 @@ public class CoreService extends AbstractCoreService {
 
     try {
       // Inject a SHUTDOWN event into eventQueue
-      eventQueue.put(new SystemEvent(SystemEvent.Type.SHUTDOWN, null));
+      eventQueue.put(new SystemEvent(SystemEventType.SHUTDOWN, null));
     } catch (InterruptedException e) {
       log.error("Interrupted while trying to inject the SHUTDOWN event to eventQueue");
     }

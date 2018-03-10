@@ -1,6 +1,7 @@
 package no.ntnu.okse.protocol.mqtt;
 
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
+import no.ntnu.okse.core.event.SubscriptionChangeEvent.SubscribeEventType;
 import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
@@ -184,7 +185,7 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
   @Override
   public void subscriptionChanged(SubscriptionChangeEvent e) {
     if (e.getData().getOriginProtocol().equals("mqtt")) {
-      if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
+      if (e.getEventType().equals(SubscribeEventType.UNSUBSCRIBE)) {
         log.debug("Received a UNSUBSCRIBE event");
         removeSubscriber(e.getData());
       }

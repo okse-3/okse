@@ -25,6 +25,7 @@
 package no.ntnu.okse.protocol.amqp;
 
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
+import no.ntnu.okse.core.event.SubscriptionChangeEvent.SubscribeEventType;
 import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
@@ -394,11 +395,11 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
     // If it is AMQP subscriber
     if (e.getData().getOriginProtocol().equals(ps.getProtocolServerType())) {
       // If we are dealing with an Unsubscribe
-      if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
+      if (e.getEventType().equals(SubscribeEventType.UNSUBSCRIBE)) {
         log.debug("Unsubscribing " + localSubscriberSenderMap.get(e.getData()));
         // Remove the local mappings from AMQP subscriptionKey to OKSE Subscriber object and AMQP subscriptionHandle
         remove(localSubscriberSenderMap.get(e.getData()));
-      } else if (e.getType().equals(SubscriptionChangeEvent.Type.SUBSCRIBE)) {
+      } else if (e.getEventType().equals(SubscribeEventType.SUBSCRIBE)) {
         log.debug("Received a SUBSCRIBE event");
         // TODO: Investigate if we really need to do anything here since it will function as a callback
         // TODO: after addSubscriber

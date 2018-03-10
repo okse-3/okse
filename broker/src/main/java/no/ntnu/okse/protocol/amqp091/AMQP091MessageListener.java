@@ -1,6 +1,7 @@
 package no.ntnu.okse.protocol.amqp091;
 
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
+import no.ntnu.okse.core.event.SubscriptionChangeEvent.SubscribeEventType;
 import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
@@ -152,7 +153,7 @@ public class AMQP091MessageListener implements AMQPMessageListener, Subscription
   @Override
   public void subscriptionChanged(SubscriptionChangeEvent e) {
     if (e.getData().getOriginProtocol().equals(amqpProtocolServer.getProtocolServerType())) {
-      if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
+      if (e.getEventType().equals(SubscribeEventType.UNSUBSCRIBE)) {
         subscriberMap.removeSubscriber(e.getData());
       }
     }
