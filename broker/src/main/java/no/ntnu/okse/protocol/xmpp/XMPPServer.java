@@ -1,6 +1,8 @@
 package no.ntnu.okse.protocol.xmpp;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
@@ -10,8 +12,10 @@ import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
 import org.jivesoftware.smack.AbstractXMPPConnection;
+import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.SmackException.NoResponseException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.XMPPException.XMPPErrorException;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
@@ -26,14 +30,19 @@ import org.jivesoftware.smackx.pubsub.PubSubManager;
 import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.xdata.packet.DataForm.Type;
+import org.jxmpp.jid.Jid;
+import org.jxmpp.jid.impl.JidCreate;
+import org.jxmpp.stringprep.XmppStringprepException;
 
 public class XMPPServer implements SubscriptionChangeListener{
 
-  private Logger log;
+  private final Jid JID;
+  private Logger log = Logger.getLogger(XMPPServer.class.getName());
+  private final ConcurrentHashMap<String, PubSubListener<PayloadItem>> listenerMap = new ConcurrentHashMap<>();
   private AbstractXMPPConnection connection;
   private PubSubManager pubSubManager;
+  private ConfigureForm form;
   private XMPPProtocolServer protocolServer;
-  private final ConcurrentHashMap<String, PubSubListener<PayloadItem>> listenerMap;
 
 
   /**
@@ -43,23 +52,57 @@ public class XMPPServer implements SubscriptionChangeListener{
    * @param port, host port number as a {@link Integer}
    */
   public XMPPServer(XMPPProtocolServer protocolServer, String host, Integer port) {
-    listenerMap = new ConcurrentHashMap<>();
-    log = Logger.getLogger(XMPPServer.class.getName());
-    this.protocolServer = protocolServer;
-    this.pubSubManager = PubSubManager.getInstance(connection);
-    SubscriptionService.getInstance().addSubscriptionChangeListener(this);
-    try {
-      XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
-      configBuilder.setHostAddress(InetAddress.getByName(host));
-      configBuilder.setPort(port);
-      configBuilder.setXmppDomain(host + "/" + port);
-      this.connection = new XMPPTCPConnection(configBuilder.build());
-      connection.connect();
-      connection.login();
 
-    } catch (Exception e) {
+    try {
+      JID = JidCreate.bareFrom("pubsub.okse.no"); // needs clarification with customer
+    } catch (XmppStringprepException e) {
+      e.printStackTrace();
+      System.out.println("Error in JID string");
+    }
+    XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
+    try {
+      configBuilder.setHostAddress(InetAddress.getByName(host));
+    } catch (UnknownHostException e) {
+      e.printStackTrace();
+      System.out.println("Error in host string");
+    }
+    configBuilder.setPort(port);
+    try {
+      configBuilder.setXmppDomain(JID); // needs clarification with customer
+    } catch (XmppStringprepException e) {
       e.printStackTrace();
     }
+    this.connection = new XMPPTCPConnection(configBuilder.build());
+    try {
+      connection.connect();
+    } catch (SmackException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    } catch (XMPPException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    try {
+      connection.login(user, pass); // needs clarification with customer
+    } catch (XMPPException e) {
+      e.printStackTrace();
+    } catch (SmackException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    this.protocolServer = protocolServer;
+    this.pubSubManager = PubSubManager.getInstance(connection); //add JID?
+    form = new ConfigureForm(Type.submit);
+    form.setAccessModel(AccessModel.open);
+    form.setDeliverPayloads(true);
+    form.setPersistentItems(true);
+    form.setPublishModel(PublishModel.open);
+    SubscriptionService.getInstance().addSubscriptionChangeListener(this);
 
   }
 
@@ -87,13 +130,8 @@ public class XMPPServer implements SubscriptionChangeListener{
    */
   private LeafNode createLeafNode(String topic)
       throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
-    ConfigureForm config = new ConfigureForm(Type.form);
-    config.setAccessModel(AccessModel.open);
-    config.setDeliverPayloads(false);
-    config.setPersistentItems(true);
-    config.setPublishModel(PublishModel.open);
     log.debug("Created a new node with id " + topic);
-    return (LeafNode) pubSubManager.createNode(topic, config);
+    return (LeafNode) pubSubManager.createNode(topic, form);
   }
 
   /**
@@ -153,7 +191,7 @@ public class XMPPServer implements SubscriptionChangeListener{
       throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
     PubSubListener listener = new PubSubListener<PayloadItem>(this, node.getId());
     node.addItemEventListener(listener);
-    node.subscribe(node.getId() + "@" + connection.getXMPPServiceDomain());
+    node.subscribe(JID + "/" + node.getId()); // needs clarification with customer
     listenerMap.put(node.getId(), listener);
   }
 
@@ -179,7 +217,7 @@ public class XMPPServer implements SubscriptionChangeListener{
 
   public void unsubscribeFromNode(LeafNode node)
       throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
-    node.unsubscribe(node.getId() + "@" + connection.getXMPPServiceDomain());
+    node.unsubscribe(JID + "/" + node.getId()); // needs clarification with customer
     node.removeItemEventListener(listenerMap.get(node.getId()));
   }
 
@@ -201,7 +239,7 @@ public class XMPPServer implements SubscriptionChangeListener{
    * @return a {@link PayloadItem} containing the message
    */
   private PayloadItem<SimplePayload> messageToPayloadItem(Message message) {
-    SimplePayload payload = new SimplePayload(message.getTopic(), "pubsub:okse:" + message.getTopic(), message.getMessage());
+    SimplePayload payload = new SimplePayload(message.getTopic(), JID + "/" + message.getTopic(), message.getMessage());
     return new PayloadItem<>(payload);
   }
 

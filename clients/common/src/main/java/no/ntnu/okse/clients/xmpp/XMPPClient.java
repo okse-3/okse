@@ -25,7 +25,7 @@ public class XMPPClient implements TestClient{
   private String JID;
   private String serverHost;
   private Integer serverPort;
-  private int messageCounter;
+  public int messageCounter;
   private AbstractXMPPConnection connection;
   private PubSubManager pubSubManager;
   private ConcurrentHashMap<String, ItemEventListener<PayloadItem>> listenerMap;
