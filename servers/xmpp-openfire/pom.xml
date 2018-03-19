@@ -15,7 +15,11 @@
   <description>Openfire XMPP server for the OKSE project</description>
 
   <dependencies>
-
+    <dependency>
+      <groupId>org.igniterealtime.openfire</groupId>
+      <artifactId>xmppserver</artifactId>
+      <version>4.2.0</version>
+    </dependency>
   </dependencies>
 
   <build>
