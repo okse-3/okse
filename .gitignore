@@ -79,3 +79,6 @@ broker/config/
 
 #Moquette
 moquette_store.*
+
+# Openfire
+**/embedded-db/
