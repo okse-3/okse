@@ -7,7 +7,7 @@ public class OpenfireXMPPServerFactory {
   private static XMPPServer xmppServer;
 
   public static void startXMPPServer() {
-    if (xmppServer != null && xmppServer.isStarted() && !xmppServer.isShuttingDown()) {
+    if (serverRunning()) {
       throw new IllegalStateException("XMPP server already running");
     }
     xmppServer = new XMPPServer();
@@ -15,10 +15,14 @@ public class OpenfireXMPPServerFactory {
   }
 
   public static void stopXMPPServer() {
-    if (xmppServer == null || xmppServer.isShuttingDown()) {
+    if (!serverRunning()) {
       throw new IllegalStateException("XMPP server is already stopped");
     }
     xmppServer.stop();
+  }
+
+  public static boolean serverRunning() {
+    return xmppServer != null && xmppServer.isStarted() && !xmppServer.isShuttingDown();
   }
 
 }
