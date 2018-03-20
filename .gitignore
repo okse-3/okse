@@ -82,3 +82,5 @@ moquette_store.*
 
 # Openfire
 **/embedded-db/
+server-update.xml
+available-plugins.xml
