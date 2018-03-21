@@ -12,7 +12,7 @@
   </adminConsole>
   <locale>en</locale>
   <network>
-    <interface></interface>
+    <interface/>
   </network>
   <connectionProvider>
     <className>org.jivesoftware.database.EmbeddedConnectionProvider</className>
