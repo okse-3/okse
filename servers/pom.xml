@@ -9,7 +9,7 @@
   <modules>
     <module>xmpp-openfire</module>
   </modules>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
   <name>OKSE Servers</name>
   <description>External protocol servers for the OKSE project</description>
