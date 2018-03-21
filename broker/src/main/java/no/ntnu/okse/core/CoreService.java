@@ -33,6 +33,7 @@ import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.core.topic.TopicService;
 import no.ntnu.okse.protocol.ProtocolServer;
 import no.ntnu.okse.protocol.ProtocolServerFactory;
+import org.jxmpp.stringprep.XmppStringprepException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -479,13 +480,15 @@ public class CoreService extends AbstractCoreService {
     } catch (FileNotFoundException e) {
       log.error("config/protocolservers.xml not found");
       e.printStackTrace();
+    } catch (XmppStringprepException e) {
+      e.printStackTrace();
     }
   }
 
   /**
    * Helper method that boots all added protocolservers
    */
-  public void bootProtocolServers(InputStream configStream) {
+  public void bootProtocolServers(InputStream configStream) throws XmppStringprepException {
     // If they are already booted, return.
     if (protocolServersBooted) {
       return;
