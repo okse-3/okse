@@ -22,6 +22,7 @@ import org.jivesoftware.smackx.pubsub.PubSubManager;
 import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.xdata.packet.DataForm.Type;
+import org.jxmpp.jid.EntityBareJid;
 
 public class XMPPServer {
 
@@ -36,8 +37,12 @@ public class XMPPServer {
    * @param protocolServer, the managing protocol server
    * @param host, host IP or domain as a {@link String}
    * @param port, host port number as a {@link Integer}
+   * @param username, client username, as a {@link String}
+   * @param password, client password, as a {@link String}
+   * @param jid, client JID, as a {@link EntityBareJid}
    */
-  public XMPPServer(XMPPProtocolServer protocolServer, String host, Integer port) {
+  public XMPPServer(XMPPProtocolServer protocolServer, String host, Integer port, String username,
+      String password, EntityBareJid jid) {
     try {
       this.protocolServer = protocolServer;
       log = Logger.getLogger(XMPPServer.class.getName());
@@ -45,7 +50,8 @@ public class XMPPServer {
       XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
       configBuilder.setHostAddress(InetAddress.getByName(host));
       configBuilder.setPort(port);
-      configBuilder.setXmppDomain(host + "/" + port);
+      configBuilder.setXmppDomain(jid.asDomainBareJid());
+      configBuilder.setUsernameAndPassword(username, password);
       this.connection = new XMPPTCPConnection(configBuilder.build());
       connection.connect();
       connection.login();

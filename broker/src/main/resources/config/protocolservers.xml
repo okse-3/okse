@@ -5,5 +5,9 @@
     <server type="mqtt" />
     <server type="wsn" />
     <server type="stomp" />
-    <server type="xmpp" />
+    <server
+      type="xmpp"
+      jid="okse@xmpp-protocol"
+      password="password"
+    />
 </servers>
