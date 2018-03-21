@@ -1,5 +1,6 @@
 package no.ntnu.okse;
 
+import java.io.IOException;
 import org.jivesoftware.openfire.XMPPServer;
 
 public class OpenfireXMPPServerFactory {
@@ -10,12 +11,19 @@ public class OpenfireXMPPServerFactory {
     if (serverRunning()) {
       throw new IllegalStateException("XMPP server already running");
     }
+
+    try {
+      OpenfireXMPPServerDBManager.setupConfigFile();
+    } catch (IOException e) {
+      throw new IllegalStateException("Config file is not correct");
+    }
+
     xmppServer = new XMPPServer();
     xmppServer.finishSetup();
-    // Everyone should be able to create nodes
-    xmppServer.getPubSubModule().setNodeCreationRestricted(false);
     // Listen for clients on
     xmppServer.getConnectionManager().enableClientListener(true);
+    // Everyone should be able to create nodes
+    xmppServer.getPubSubModule().setNodeCreationRestricted(true);
   }
 
   public static void stopXMPPServer() {

@@ -3,8 +3,11 @@ package no.ntnu.okse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import org.apache.tools.ant.types.Path;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
@@ -50,6 +53,21 @@ public class OpenfireXMPPServerDBManager {
   }
 
   /**
+   * Copies a copy of the config file to a file with the name required by Openfire. Although ugly it
+   * is required due to Openfire changing the config file after creating the database. Not allowing
+   * easy creation and deletion of databases
+   *
+   * @throws IOException If the config file cannot be moved
+   */
+  public static void setupConfigFile() throws IOException {
+    Files.copy(
+        new File(getConfigHomePath() + File.separator + "conf" + File.separator + "config.xml")
+            .toPath(),
+        new File(getConfigHomePath() + File.separator + "conf" + File.separator + "openfire.xml")
+            .toPath(), StandardCopyOption.REPLACE_EXISTING);
+  }
+
+  /**
    * Finds the location of the database copy for when running in test mode
    *
    * @return The path to the database copy
@@ -64,16 +82,23 @@ public class OpenfireXMPPServerDBManager {
    * @return The home path for the Openfire server
    */
   private static String getConfigHomePath() {
-    String homePath = JiveGlobals.getHomeDirectory();
-    if (homePath == null) {
-      try {
-        InputStream settingsXML = OpenfireXMPPServerDBManager.class
-            .getResourceAsStream("/openfire_init.xml");
-        SAXReader reader = new SAXReader();
-        Document doc = reader.read(settingsXML);
-        homePath = doc.getRootElement().getText();
-      } catch (DocumentException de) {
-        de.printStackTrace();
+    InputStream settingsXML = null;
+    String homePath = null;
+    try {
+      settingsXML = OpenfireXMPPServerDBManager.class
+          .getResourceAsStream("/openfire_init.xml");
+      SAXReader reader = new SAXReader();
+      Document doc = reader.read(settingsXML);
+      homePath = doc.getRootElement().getText();
+    } catch (DocumentException de) {
+      de.printStackTrace();
+    } finally {
+      if (settingsXML != null) {
+        try {
+          settingsXML.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
       }
     }
     if (homePath == null) {
