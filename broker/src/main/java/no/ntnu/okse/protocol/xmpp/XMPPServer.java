@@ -36,7 +36,6 @@ import org.jxmpp.jid.EntityBareJid;
 
 public class XMPPServer implements SubscriptionChangeListener {
 
-  private String username, password;
   private EntityBareJid jid;
   private ConfigureForm form;
   private XMPPProtocolServer protocolServer;
@@ -59,7 +58,6 @@ public class XMPPServer implements SubscriptionChangeListener {
       String password) {
 
     this.jid = jid;
-    this.password = password;
 
     XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
     try {
@@ -103,7 +101,7 @@ public class XMPPServer implements SubscriptionChangeListener {
     }
 
     this.protocolServer = protocolServer;
-    this.pubSubManager = PubSubManager.getInstance(connection, jid.asDomainBareJid());
+    this.pubSubManager = PubSubManager.getInstance(connection, jid.asDomainBareJid()); //TODO this?
 
     form = new ConfigureForm(Type.submit);
     form.setAccessModel(AccessModel.open);
@@ -181,7 +179,7 @@ public class XMPPServer implements SubscriptionChangeListener {
       throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
     PubSubListener listener = new PubSubListener<PayloadItem>(this, node.getId());
     node.addItemEventListener(listener);
-    node.subscribe(jid.asDomainBareJid() + "/" + node.getId());
+    //node.subscribe(jid.asDomainBareJid() + "/" + node.getId()); //TODO this?
   }
 
   /**
