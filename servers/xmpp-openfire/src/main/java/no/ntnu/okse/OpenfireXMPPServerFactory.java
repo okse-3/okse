@@ -12,6 +12,10 @@ public class OpenfireXMPPServerFactory {
     }
     xmppServer = new XMPPServer();
     xmppServer.finishSetup();
+    // Everyone should be able to create nodes
+    xmppServer.getPubSubModule().setNodeCreationRestricted(false);
+    // Listen for clients on
+    xmppServer.getConnectionManager().enableClientListener(true);
   }
 
   public static void stopXMPPServer() {
