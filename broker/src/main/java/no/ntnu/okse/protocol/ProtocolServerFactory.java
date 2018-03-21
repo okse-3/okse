@@ -118,6 +118,8 @@ public class ProtocolServerFactory {
   private static XMPPProtocolServer createXMPP(NamedNodeMap attr) {
     final String DEFAULT_HOST = "0.0.0.0";
     final int DEFAULT_PORT = 5222;
+    final String DEFAULT_JID = "okse@okse";
+    final String DEFAULT_PASSWORD = "password";
 
     String host = attr.getNamedItem("host") != null ?
         attr.getNamedItem("host").getNodeValue() :
@@ -127,7 +129,16 @@ public class ProtocolServerFactory {
         stringToPort(attr.getNamedItem("port").getNodeValue(), DEFAULT_PORT) :
         DEFAULT_PORT;
 
-    return new XMPPProtocolServer(host, port);
+    String jid = attr.getNamedItem("jid") != null ?
+        attr.getNamedItem("jid").getNodeValue() :
+        DEFAULT_JID;
+
+    String password = attr.getNamedItem("password") != null ?
+        attr.getNamedItem("password").getNodeValue() :
+        DEFAULT_PASSWORD;
+
+
+    return new XMPPProtocolServer(host, port, jid, password);
   }
 
   private static WSNotificationServer createWSN(NamedNodeMap attr) {

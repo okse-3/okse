@@ -33,6 +33,7 @@ import org.jivesoftware.smackx.xdata.packet.DataForm.Type;
 import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
+import org.jxmpp.jid.EntityBareJid;
 
 public class XMPPServer implements SubscriptionChangeListener{
 
@@ -50,9 +51,12 @@ public class XMPPServer implements SubscriptionChangeListener{
    * @param protocolServer, the managing protocol server
    * @param host, host IP or domain as a {@link String}
    * @param port, host port number as a {@link Integer}
+   * @param username, client username, as a {@link String}
+   * @param password, client password, as a {@link String}
+   * @param jid, client JID, as a {@link EntityBareJid}
    */
-  public XMPPServer(XMPPProtocolServer protocolServer, String host, Integer port) {
-
+  public XMPPServer(XMPPProtocolServer protocolServer, String host, Integer port, String username,
+      String password, EntityBareJid jid) {
     try {
       JID = JidCreate.bareFrom("pubsub.okse.no"); // needs clarification with customer
     } catch (XmppStringprepException e) {
