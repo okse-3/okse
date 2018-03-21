@@ -6,13 +6,12 @@ import no.ntnu.okse.protocol.mqtt.MQTTProtocolServer;
 import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
 import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import no.ntnu.okse.protocol.xmpp.XMPPProtocolServer;
-import org.jxmpp.stringprep.XmppStringprepException;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 public class ProtocolServerFactory {
 
-  public static ProtocolServer create(Node node) throws XmppStringprepException {
+  public static ProtocolServer create(Node node) {
     NamedNodeMap attr = node.getAttributes();
     if (attr.getNamedItem("type") == null) {
       return null;
@@ -116,10 +115,10 @@ public class ProtocolServerFactory {
     return new MQTTProtocolServer(host, port);
   }
 
-  private static XMPPProtocolServer createXMPP(NamedNodeMap attr) throws XmppStringprepException {
+  private static XMPPProtocolServer createXMPP(NamedNodeMap attr) {
     final String DEFAULT_HOST = "0.0.0.0";
     final int DEFAULT_PORT = 5222;
-    final String DEFAULT_JID = "okse@okse.org";
+    final String DEFAULT_JID = "okse@okse";
     final String DEFAULT_PASSWORD = "password";
 
     String host = attr.getNamedItem("host") != null ?

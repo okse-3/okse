@@ -27,13 +27,16 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
    * @param jid the client JID, as a {@link String}
    * @param password the client password, as a {@link String}
    */
-  public XMPPProtocolServer(String host, Integer port, String jid, String password)
-      throws XmppStringprepException {
-    this.port = port;
-    this.host = host;
-    this.jid = JidCreate.entityBareFrom(jid);
-    this.username = this.jid.getLocalpart().toString();
-    this.password = password;
+  public XMPPProtocolServer(String host, Integer port, String jid, String password) {
+    try {
+      this.port = port;
+      this.host = host;
+      this.jid = JidCreate.entityBareFrom(jid);
+      this.username = this.jid.getLocalpart().toString();
+      this.password = password;
+    } catch (XmppStringprepException xse){
+      xse.printStackTrace();
+    }
     protocolServerType = "xmpp";
     log = Logger.getLogger(XMPPProtocolServer.class.getName());
   }

@@ -7,7 +7,7 @@
     <server type="stomp" />
     <server
       type="xmpp"
-      jid="okse@xmpp-protocol"
+      jid="okse@okse"
       password="password"
     />
 </servers>
