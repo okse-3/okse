@@ -24,6 +24,17 @@
 
 package no.ntnu.okse.core;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import no.ntnu.okse.Application;
 import no.ntnu.okse.core.event.Event;
 import no.ntnu.okse.core.event.SystemEvent;
@@ -36,20 +47,6 @@ import no.ntnu.okse.protocol.ProtocolServerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class CoreService extends AbstractCoreService {
 
@@ -473,13 +470,9 @@ public class CoreService extends AbstractCoreService {
    */
 
   public void bootProtocolServers() {
-    try {
-      FileInputStream is = new FileInputStream("config/protocolservers.xml");
-      bootProtocolServers(is);
-    } catch (FileNotFoundException e) {
-      log.error("config/protocolservers.xml not found");
-      e.printStackTrace();
-    }
+    InputStream is = this.getClass().getResourceAsStream("/config/protocolservers.xml");
+    if (is == null) throw new IllegalStateException("Could not load protocolservers.xml");
+    bootProtocolServers(is);
   }
 
   /**

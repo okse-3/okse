@@ -6,7 +6,6 @@ import org.apache.log4j.Logger;
 import org.jivesoftware.smack.SmackException.NoResponseException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.jivesoftware.smack.XMPPException.XMPPErrorException;
-import org.jivesoftware.smackx.pubsub.PubSubException.NotALeafNodeException;
 import org.jivesoftware.smackx.pubsub.PubSubException.NotAPubSubNodeException;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.impl.JidCreate;
@@ -14,8 +13,8 @@ import org.jxmpp.stringprep.XmppStringprepException;
 
 public class XMPPProtocolServer extends AbstractProtocolServer {
 
-  private String username, password;
   private EntityBareJid jid;
+  private String password;
   private XMPPServer server;
   protected static final String SERVERTYPE = "xmpp";
 
@@ -29,17 +28,17 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
    * @param password the client password, as a {@link String}
    */
   public XMPPProtocolServer(String host, Integer port, String jid, String password) {
-    try {
-      this.port = port;
-      this.host = host;
-      this.jid = JidCreate.entityBareFrom(jid);
-      this.username = this.jid.getLocalpart().toString();
-      this.password = password;
-    } catch (XmppStringprepException xse){
-      xse.printStackTrace();
-    }
-    protocolServerType = SERVERTYPE;
     log = Logger.getLogger(XMPPProtocolServer.class.getName());
+    this.port = port;
+    this.host = host;
+    try {
+      this.jid = JidCreate.entityBareFrom(jid);
+    } catch (XmppStringprepException e){
+      log.error("EntityBareJid was malformed");
+      e.printStackTrace();
+    }
+    this.password = password;
+    protocolServerType = SERVERTYPE;
   }
 
   /**
@@ -50,9 +49,9 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
     if (!_running) {
       _running = true;
 
-      server = new XMPPServer(this, host, port, username, password, jid);
+      server = new XMPPServer(this, host, port, jid, password);
       _serverThread = new Thread(this::run);
-      _serverThread.setName(protocolServerType);
+      _serverThread.setName("XMPPProtocolServer");
       _serverThread.start();
       log.info("XMPPProtocolServer booted successfully");
     }
@@ -60,7 +59,6 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
 
   @Override
   public void run() {
-    //TODO
   }
 
   /**
@@ -95,10 +93,10 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
       try {
         server.sendMessage(message);
         incrementTotalMessagesSent();
-      } catch (XMPPErrorException | NoResponseException | InterruptedException e) {
+      } catch (NotAPubSubNodeException | XMPPErrorException | NoResponseException | InterruptedException e) {
         incrementTotalErrors();
         e.printStackTrace();
-      } catch (NotAPubSubNodeException | NotALeafNodeException | NotConnectedException e) {
+      } catch (NotConnectedException e) {
         incrementTotalBadRequest();
         e.printStackTrace();
       }
