@@ -37,12 +37,13 @@ import org.jxmpp.jid.EntityBareJid;
 public class XMPPServer implements SubscriptionChangeListener {
 
   private EntityBareJid jid;
-  private ConfigureForm form;
+  private String password;
+  private static ConfigureForm form = createNodeForm();
   private XMPPProtocolServer protocolServer;
   private PubSubManager pubSubManager;
   private AbstractXMPPConnection connection;
 
-  private Logger log = Logger.getLogger(XMPPProtocolServer.class.getName());
+  private Logger log = Logger.getLogger(XMPPServer.class);
 
 
   /**
@@ -58,24 +59,10 @@ public class XMPPServer implements SubscriptionChangeListener {
       String password) {
 
     this.jid = jid;
+    this.password = password;
+    this.protocolServer = protocolServer;
+    this.connection = setUpConnection(host, port);
 
-    XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
-    try {
-      configBuilder.setHostAddress(InetAddress.getByName(host));
-      configBuilder.setHost(host);
-    } catch (UnknownHostException e) {
-      log.error("Host string is not valid.");
-      e.printStackTrace();
-    }
-
-    configBuilder.setPort(port);
-    configBuilder.setConnectTimeout(30000);
-    configBuilder.setSecurityMode(SecurityMode.disabled);
-    configBuilder.setUsernameAndPassword(jid.getLocalpart(), password);
-    configBuilder.setXmppDomain(jid.asDomainBareJid());
-    XMPPTCPConnectionConfiguration config = configBuilder.build();
-
-    this.connection = new XMPPTCPConnection(config);
     try {
       connection.connect();
       log.info("XMPP TCP connection established.");
@@ -86,6 +73,7 @@ public class XMPPServer implements SubscriptionChangeListener {
 
     AccountManager accountManager = AccountManager.getInstance(connection);
     accountManager.sensitiveOperationOverInsecureConnection(true);
+
     try {
       accountManager.createAccount(jid.getLocalpart(), password);
     } catch (NoResponseException | XMPPErrorException | InterruptedException | NotConnectedException e) {
@@ -93,24 +81,58 @@ public class XMPPServer implements SubscriptionChangeListener {
       //e.printStackTrace();
     }
     try {
-      connection.login(jid.getLocalpart(), password); // needs clarification with customer
+      connection.login(jid.getLocalpart(), password);
       log.info("Logged in successfully.");
-    } catch (XMPPException | SmackException | IOException | InterruptedException e) {
-      log.error("Could not log in.");
+    } catch (XMPPException e) {
+      log.error("Could not log in."); //FIXME this is not only when user already exists, try other way?
+      e.printStackTrace();
+    } catch (InterruptedException | IOException | SmackException e) {
+      log.error("Could not connect.");
       e.printStackTrace();
     }
 
-    this.protocolServer = protocolServer;
-    this.pubSubManager = PubSubManager.getInstance(connection, jid.asDomainBareJid()); //TODO this?
+    this.pubSubManager = PubSubManager.getInstance(connection, jid.asDomainBareJid()); //FIXME this might be causing the error?
 
-    form = new ConfigureForm(Type.submit);
+    SubscriptionService.getInstance().addSubscriptionChangeListener(this);
+  }
+
+  /**
+   * Sets up the {@link ConfigureForm} used when creating a new {@link LeafNode}
+   * @return the configure form
+   */
+  private static ConfigureForm createNodeForm() {
+    ConfigureForm form = new ConfigureForm(Type.submit);
     form.setAccessModel(AccessModel.open);
     form.setDeliverPayloads(true);
     form.setPersistentItems(true);
     form.setPublishModel(PublishModel.open);
     form.setNodeType(NodeType.leaf);
-    SubscriptionService.getInstance().addSubscriptionChangeListener(this);
+    return form;
+  }
 
+  /**
+   * Sets up the XMPP connection over TCP.
+   * @param host, the host address to connect to as a {@link String} (needs to be parsable by {@link InetAddress#getByName})
+   * @param port, the port number the service is running on as a {@link Integer}
+   * @return A {@link XMPPTCPConnection}
+   */
+  private XMPPTCPConnection setUpConnection(String host, Integer port) {
+    XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
+    try {
+      configBuilder.setHostAddress(InetAddress.getByName(host));
+      configBuilder.setHost(host);
+    } catch (UnknownHostException e) {
+      log.error("Host string is not valid.");
+      e.printStackTrace();
+    }
+    configBuilder.setPort(port);
+    configBuilder.setConnectTimeout(30000);
+    configBuilder.setSecurityMode(SecurityMode.disabled);
+    configBuilder.setUsernameAndPassword(jid.getLocalpart(), password);
+    configBuilder.setXmppDomain(jid.asDomainBareJid());
+    XMPPTCPConnectionConfiguration config = configBuilder.build();
+
+    return new XMPPTCPConnection(config);
   }
 
 
@@ -177,9 +199,12 @@ public class XMPPServer implements SubscriptionChangeListener {
    */
   public void subscribeToNode(LeafNode node)
       throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
+    log.debug(String.format("Subscribing to %s ", node.getId()));
     PubSubListener listener = new PubSubListener<PayloadItem>(this, node.getId());
     node.addItemEventListener(listener);
-    //node.subscribe(jid.asDomainBareJid() + "/" + node.getId()); //TODO this?
+    node.subscribe(jid.asDomainBareJid() + "/" + node.getId()); //FIXME this is not working properly
+    node.unsubscribe(jid.toString());
+    log.debug(String.format("Successfully subscribed to %s ", node.getId()));
   }
 
   /**
@@ -192,14 +217,24 @@ public class XMPPServer implements SubscriptionChangeListener {
     subscribeToNode(pubSubManager.getOrCreateLeafNode(topic));
   }
 
+  /**
+   * Removes a subscription on the given topic
+   * @param topic, the topic id as a {@link String}
+   */
   public void unsubscribeFromTopic(String topic)
       throws InterruptedException, NotALeafNodeException, XMPPErrorException, NotConnectedException, NoResponseException, NotAPubSubNodeException {
     unsubscribeFromNode(pubSubManager.getLeafNode(topic));
   }
 
+  /**
+   * Removes a subscription on the given topic node
+   * @param node, the topic node as a {@link LeafNode}
+   */
   public void unsubscribeFromNode(LeafNode node)
       throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
+    log.debug(String.format("Unsubscribing from %s ", node.getId()));
     node.unsubscribe(jid.toString());
+    log.debug(String.format("Successfully unsubscribed from %s ", node.getId()));
   }
 
   /**
@@ -248,11 +283,16 @@ public class XMPPServer implements SubscriptionChangeListener {
     }
   }
 
+  /**
+   * Delegates subscription events received from other protocols to the corresponding methods
+   * @param e, the {@link SubscriptionChangeEvent} to handle
+   */
   @Override
   public void subscriptionChanged(SubscriptionChangeEvent e) {
     if (e.getData().getOriginProtocol().equals(XMPPProtocolServer.SERVERTYPE)) {
       if (e.getType() == SubscriptionChangeEvent.Type.UNSUBSCRIBE) {
         try {
+          log.debug("Unsubscribe event received");
           unsubscribeFromTopic(e.getData().getTopic());
         } catch (InterruptedException | NotALeafNodeException | XMPPErrorException | NoResponseException | NotConnectedException | NotAPubSubNodeException e1) {
           e1.printStackTrace();

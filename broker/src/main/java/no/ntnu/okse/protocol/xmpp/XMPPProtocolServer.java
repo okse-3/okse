@@ -28,7 +28,7 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
    * @param password the client password, as a {@link String}
    */
   public XMPPProtocolServer(String host, Integer port, String jid, String password) {
-    log = Logger.getLogger(XMPPProtocolServer.class.getName());
+    log = Logger.getLogger(XMPPProtocolServer.class);
     this.port = port;
     this.host = host;
     try {
@@ -48,10 +48,8 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
   public void boot() {
     if (!_running) {
       _running = true;
-
-      server = new XMPPServer(this, host, port, jid, password);
       _serverThread = new Thread(this::run);
-      _serverThread.setName("XMPPProtocolServer");
+      _serverThread.setName("XMPPServer");
       _serverThread.start();
       log.info("XMPPProtocolServer booted successfully");
     }
@@ -59,6 +57,7 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
 
   @Override
   public void run() {
+    server = new XMPPServer(this, host, port, jid, password);
   }
 
   /**
