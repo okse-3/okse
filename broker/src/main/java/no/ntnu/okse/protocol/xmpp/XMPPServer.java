@@ -46,6 +46,7 @@ public class XMPPServer implements SubscriptionChangeListener {
   private XMPPProtocolServer protocolServer;
   private PubSubManager pubSubManager;
   private AbstractXMPPConnection connection;
+  private NewNodeListener nnListener;
 
   private Logger log = Logger.getLogger(XMPPServer.class);
 
@@ -84,6 +85,9 @@ public class XMPPServer implements SubscriptionChangeListener {
     } catch (XmppStringprepException e) {
       e.printStackTrace();
     }
+
+    nnListener = new NewNodeListener(this, pubSubManager);
+    nnListener.run();
 
     SubscriptionService.getInstance().addSubscriptionChangeListener(this);
   }
@@ -164,6 +168,7 @@ public class XMPPServer implements SubscriptionChangeListener {
    * Disconnects ongoing connections and shuts down the server
    */
   public void stopServer() {
+    nnListener.stopListener();
     connection.disconnect();
     log.info("XMPPServer closed");
   }
