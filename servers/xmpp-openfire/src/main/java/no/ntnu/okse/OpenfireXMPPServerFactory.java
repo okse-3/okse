@@ -22,32 +22,16 @@ public class OpenfireXMPPServerFactory {
       throw new IllegalStateException("Config file is not correct");
     }
 
+    // Start with clean database
+    OpenfireXMPPServerDBManager.deleteDatabase();
+
     xmppServer = new XMPPServer();
     xmppServer.finishSetup();
 
-    // If the domain is not the same in the database and in the config, reset database
-    if (!isCorrectDomain()) {
-      OpenfireXMPPServerDBManager.deleteDatabase();
-      startXMPPServer();
-    } else {
-      // Listen for clients on
-      xmppServer.getConnectionManager().enableClientListener(true);
-      // Everyone should be able to create nodes
-      xmppServer.getPubSubModule().setNodeCreationRestricted(true);
-    }
-  }
-
-  /**
-   * Checks if the domain in the database is the same as the one in the config file
-   *
-   * @return A boolean indicating if the domain is the same
-   */
-  private static boolean isCorrectDomain() {
-    if (!serverRunning()) {
-      throw new IllegalStateException("XMPP server is not running");
-    }
-    String domain = xmppServer.getPubSubModule().getAddress().getDomain();
-    return JiveGlobals.getProperty("xmpp.domain").equals(domain.substring(7));
+    // Listen for clients on
+    xmppServer.getConnectionManager().enableClientListener(true);
+    // Everyone should be able to create nodes
+    xmppServer.getPubSubModule().setNodeCreationRestricted(false);
   }
 
   /**
@@ -67,6 +51,10 @@ public class OpenfireXMPPServerFactory {
    */
   public static boolean serverRunning() {
     return xmppServer != null && xmppServer.isStarted() && !xmppServer.isShuttingDown();
+  }
+
+  public static void main(String[] args) {
+    startXMPPServer();
   }
 
 }
