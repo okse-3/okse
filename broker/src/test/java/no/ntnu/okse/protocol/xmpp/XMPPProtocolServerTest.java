@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 public class XMPPProtocolServerTest {
 
   @InjectMocks
-  XMPPProtocolServer xmppPS = new XMPPProtocolServer("localhost", 5222, "user@test", "pass");
+  XMPPProtocolServer xmppPS = new XMPPProtocolServer("localhost", 5222, "okse@localhost", "pass");
   @Mock(name = "server")
   XMPPServer xmppServerSpy;
 

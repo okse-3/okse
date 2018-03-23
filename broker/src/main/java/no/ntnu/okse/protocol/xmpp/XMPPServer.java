@@ -33,9 +33,13 @@ import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.xdata.packet.DataForm.Type;
 import org.jxmpp.jid.EntityBareJid;
+import org.jxmpp.jid.impl.JidCreate;
+import org.jxmpp.stringprep.XmppStringprepException;
 
 public class XMPPServer implements SubscriptionChangeListener {
 
+  private String host;
+  private Integer port;
   private EntityBareJid jid;
   private String password;
   private static ConfigureForm form = createNodeForm();
@@ -58,6 +62,8 @@ public class XMPPServer implements SubscriptionChangeListener {
   public XMPPServer(XMPPProtocolServer protocolServer, String host, Integer port, EntityBareJid jid,
       String password) {
 
+    this.host = host;
+    this.port = port;
     this.jid = jid;
     this.password = password;
     this.protocolServer = protocolServer;
@@ -71,29 +77,42 @@ public class XMPPServer implements SubscriptionChangeListener {
       e.printStackTrace();
     }
 
+    logInToHost(connection);
+
+    try {
+      this.pubSubManager = PubSubManager.getInstance(connection, JidCreate.domainBareFrom("pubsub." + host));
+    } catch (XmppStringprepException e) {
+      e.printStackTrace();
+    }
+
+    SubscriptionService.getInstance().addSubscriptionChangeListener(this);
+  }
+
+  private void logInToHost(AbstractXMPPConnection connection) {
     AccountManager accountManager = AccountManager.getInstance(connection);
     accountManager.sensitiveOperationOverInsecureConnection(true);
 
     try {
-      accountManager.createAccount(jid.getLocalpart(), password);
-    } catch (NoResponseException | XMPPErrorException | InterruptedException | NotConnectedException e) {
-      log.info("User already exists, Logging in");
-      //e.printStackTrace();
-    }
-    try {
       connection.login(jid.getLocalpart(), password);
       log.info("Logged in successfully.");
     } catch (XMPPException e) {
-      log.error("Could not log in."); //FIXME this is not only when user already exists, try other way?
-      e.printStackTrace();
+      log.error("Attempting to create user.");
+      try {
+        accountManager.createAccount(jid.getLocalpart(), password);
+      } catch (NoResponseException | XMPPErrorException | NotConnectedException | InterruptedException e1) {
+        log.error("Could not create account.");
+        e1.printStackTrace();
+      }
+      try {
+        connection.login(jid.getLocalpart(), password);
+      } catch (XMPPException | SmackException | InterruptedException | IOException e1) {
+        log.error("Could not connect.");
+        e1.printStackTrace();
+      }
     } catch (InterruptedException | IOException | SmackException e) {
       log.error("Could not connect.");
       e.printStackTrace();
     }
-
-    this.pubSubManager = PubSubManager.getInstance(connection, jid.asDomainBareJid()); //FIXME this might be causing the error?
-
-    SubscriptionService.getInstance().addSubscriptionChangeListener(this);
   }
 
   /**
@@ -129,7 +148,12 @@ public class XMPPServer implements SubscriptionChangeListener {
     configBuilder.setConnectTimeout(30000);
     configBuilder.setSecurityMode(SecurityMode.disabled);
     configBuilder.setUsernameAndPassword(jid.getLocalpart(), password);
-    configBuilder.setXmppDomain(jid.asDomainBareJid());
+    try {
+      configBuilder.setXmppDomain(host);
+    } catch (XmppStringprepException e) {
+      log.error("Could not set domain host.");
+      e.printStackTrace();
+    }
     XMPPTCPConnectionConfiguration config = configBuilder.build();
 
     return new XMPPTCPConnection(config);
@@ -169,7 +193,7 @@ public class XMPPServer implements SubscriptionChangeListener {
   public LeafNode getLeafNode(String topic)
       throws InterruptedException, NotAPubSubNodeException, NotConnectedException, NoResponseException, XMPPErrorException {
     try {
-      return pubSubManager.getNode("/" + topic);
+      return pubSubManager.getNode(topic);
     } catch (XMPPErrorException e) {
       log.debug("Node not found, creating new.");
       return createLeafNode(topic);
@@ -202,8 +226,7 @@ public class XMPPServer implements SubscriptionChangeListener {
     log.debug(String.format("Subscribing to %s ", node.getId()));
     PubSubListener listener = new PubSubListener<PayloadItem>(this, node.getId());
     node.addItemEventListener(listener);
-    node.subscribe(jid.asDomainBareJid() + "/" + node.getId()); //FIXME this is not working properly
-    node.unsubscribe(jid.toString());
+    node.subscribe(connection.getUser().asEntityBareJidString());
     log.debug(String.format("Successfully subscribed to %s ", node.getId()));
   }
 
@@ -233,7 +256,7 @@ public class XMPPServer implements SubscriptionChangeListener {
   public void unsubscribeFromNode(LeafNode node)
       throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
     log.debug(String.format("Unsubscribing from %s ", node.getId()));
-    node.unsubscribe(jid.toString());
+    node.unsubscribe(connection.getUser().asEntityBareJidString());
     log.debug(String.format("Successfully unsubscribed from %s ", node.getId()));
   }
 
@@ -258,7 +281,7 @@ public class XMPPServer implements SubscriptionChangeListener {
    */
   private PayloadItem<SimplePayload> messageToPayloadItem(Message message) {
     SimplePayload payload = new SimplePayload(message.getTopic(),
-        jid.asDomainBareJid() + "/" + message.getTopic(), message.getMessage());
+        host + "/" + message.getTopic(), message.getMessage());
     return new PayloadItem<>(payload);
   }
 

@@ -18,7 +18,7 @@ public class XMPPServerTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    ps = new XMPPProtocolServer("localhost", 5222, "user@test", "pass");
+    ps = new XMPPProtocolServer("localhost", 5222, "okse@localhost", "pass");
     ps.boot();
     server = ((XMPPServer) ps.getClass().getField("server").get(ps));
     client = new XMPPClient("testClient", "localhost", 5222);
