@@ -3,16 +3,12 @@ package no.ntnu.okse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-import org.apache.tools.ant.types.Path;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
-import org.jivesoftware.openfire.XMPPServer;
-import org.jivesoftware.util.JiveGlobals;
 
 public class OpenfireXMPPServerDBManager {
 
