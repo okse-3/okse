@@ -9,6 +9,7 @@
     <modules>
         <module>clients</module>
         <module>broker</module>
+        <module>servers</module>
     </modules>
     <packaging>pom</packaging>
 
