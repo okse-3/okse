@@ -5,4 +5,5 @@
     <server type="mqtt" />
     <server type="wsn" />
     <server type="stomp" />
+    <server type="xmpp" host="192.168.0.101" port="5222" jid="okse@192.168.0.101" password="password" />
 </servers>

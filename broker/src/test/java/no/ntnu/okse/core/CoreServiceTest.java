@@ -24,6 +24,18 @@
 
 package no.ntnu.okse.core;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import no.ntnu.okse.protocol.ProtocolServer;
@@ -31,14 +43,6 @@ import org.junit.BeforeClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import static org.testng.Assert.*;
 
 @Test(singleThreaded = true)
 public class CoreServiceTest {

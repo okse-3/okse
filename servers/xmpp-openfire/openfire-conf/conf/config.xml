@@ -3,8 +3,13 @@
 <jive>
   <xmpp>
     <domain>
-      okse
+      192.168.0.101
     </domain>
+    <server>
+      <certificate>
+        <verify>false</verify>
+      </certificate>
+    </server>
   </xmpp>
   <adminConsole>
     <port>-1</port>
