@@ -85,3 +85,4 @@ moquette_store.*
 **/backup/
 server-update.xml
 available-plugins.xml
+openfire.xml
