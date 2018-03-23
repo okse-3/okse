@@ -25,6 +25,7 @@
 package no.ntnu.okse.core;
 
 import no.ntnu.okse.Application;
+import no.ntnu.okse.OpenfireXMPPServerFactory;
 import no.ntnu.okse.core.event.Event;
 import no.ntnu.okse.core.event.SystemEvent;
 import no.ntnu.okse.core.messaging.Message;
@@ -191,6 +192,8 @@ public class CoreService extends AbstractCoreService {
   public void stop() {
     // Shut down all the Protocol Servers
     stopAllProtocolServers();
+    // Stop all optional protocol servers started in the application here
+    stopAllOptionalProtocolSupportServers();
 
     // Give the threads a few seconds to complete
     try {
@@ -209,6 +212,15 @@ public class CoreService extends AbstractCoreService {
       eventQueue.put(new SystemEvent(SystemEvent.Type.SHUTDOWN, null));
     } catch (InterruptedException e) {
       log.error("Interrupted while trying to inject the SHUTDOWN event to eventQueue");
+    }
+  }
+
+  /**
+   * Stop all optional protocol support servers
+   */
+  private void stopAllOptionalProtocolSupportServers() {
+    if (OpenfireXMPPServerFactory.serverRunning()) {
+      OpenfireXMPPServerFactory.stopXMPPServer();
     }
   }
 
