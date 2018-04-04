@@ -3,7 +3,8 @@
 <jive>
   <xmpp>
     <domain>
-      10.24.20.29
+      <!-- The domain to run the openfire server on -->
+      localhost
     </domain>
     <server>
       <certificate>
