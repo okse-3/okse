@@ -1,7 +1,7 @@
 package no.ntnu.okse.protocol.xmpp;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+
+import static org.testng.Assert.*;
 
 import java.util.concurrent.ConcurrentHashMap;
 import no.ntnu.okse.clients.xmpp.XMPPClient;
@@ -31,12 +31,12 @@ public class XMPPServerTest {
   }
 
   @Test
-  public void testCreateAndGetLeafNode() throws Exception {
+  public void testCreateOrGetLeafNode() throws Exception {
     assertNotNull(server.getLeafNode("testTopic"));
   }
 
   @Test
-  public void testSendMessage() throws Exception {
+  public void testCreateAndSendMessage() throws Exception {
     server.subscribeToTopic("testTopic");
     client.subscribe("testTopic");
     int oldCount = client.messageCounter;
@@ -49,8 +49,6 @@ public class XMPPServerTest {
     ConcurrentHashMap listenerMap = (ConcurrentHashMap) server.getClass().getField("listenerMap").get(server);
     server.subscribeToTopic("testTopic");
     assertTrue(listenerMap.get("testTopic") != null);
-    server.unsubscribeFromTopic("testTopic");
-    assertTrue(listenerMap.get("testTopic") == null);
   }
 
   @Test
