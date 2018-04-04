@@ -250,8 +250,14 @@ public class Application {
   private static void createOptionalProtocolSupportServers(String name) {
     switch (name) {
       case "openfire-xmpp":
-        if (!OpenfireXMPPServerFactory.serverRunning()) {
-          OpenfireXMPPServerFactory.startXMPPServer();
+        try {
+          OpenfireXMPPServerFactory.start();
+          // Let the XMPP server start before continuing
+          Thread.sleep(5000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        } catch (IOException e) {
+          e.printStackTrace();
         }
         break;
     }

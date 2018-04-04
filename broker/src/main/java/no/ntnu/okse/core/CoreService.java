@@ -216,8 +216,8 @@ public class CoreService extends AbstractCoreService {
    * Stop all optional protocol support servers
    */
   private void stopAllOptionalProtocolSupportServers() {
-    if (OpenfireXMPPServerFactory.serverRunning()) {
-      OpenfireXMPPServerFactory.stopXMPPServer();
+    if (OpenfireXMPPServerFactory.isRunning()) {
+      OpenfireXMPPServerFactory.stop();
     }
   }
 

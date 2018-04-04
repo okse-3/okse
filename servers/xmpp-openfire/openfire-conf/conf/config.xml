@@ -3,14 +3,20 @@
 <jive>
   <xmpp>
     <domain>
-      192.168.0.101
+      10.24.20.29
     </domain>
     <server>
       <certificate>
         <verify>false</verify>
       </certificate>
     </server>
+    <auth>
+      <retries>10</retries>
+    </auth>
   </xmpp>
+  <sasl>
+    <mechs>PLAIN</mechs>
+  </sasl>
   <adminConsole>
     <port>-1</port>
     <securePort>-1</securePort>
