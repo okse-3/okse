@@ -13,7 +13,7 @@ public class EclipsePahoMQTTSNGateway {
     if (running) {
       throw new IllegalStateException("Server already running");
     }
-    new Gateway().start("gateway.properties");
+    new Gateway().start("config/gateway.properties");
     running = true;
   }
 
