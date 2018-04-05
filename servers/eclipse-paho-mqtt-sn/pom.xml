@@ -16,7 +16,10 @@
   <description>Eclipse Paho MQTT-SN Gateway for the OKSE project</description>
 
   <dependencies>
-
+    <dependency>
+      <groupId>com.eclipse.paho</groupId>
+      <artifactId>MQTT-SN-Gateway</artifactId>
+    </dependency>
   </dependencies>
 
   <repositories>
