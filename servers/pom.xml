@@ -6,7 +6,10 @@
   <groupId>no.ntnu</groupId>
   <artifactId>okse-servers</artifactId>
   <version>3.0.0</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
+  <modules>
+    <module>eclipse-paho-mqtt-sn</module>
+  </modules>
 
   <name>OKSE Servers</name>
   <description>External protocol servers for the OKSE project</description>
