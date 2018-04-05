@@ -188,6 +188,11 @@
             <artifactId>netty</artifactId>
             <version>3.2.7.Final</version>
         </dependency>
+        <dependency>
+            <groupId>no.ntnu</groupId>
+            <artifactId>xmpp-openfire</artifactId>
+            <version>3.0.0</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.igniterealtime.smack/smack-core -->
         <dependency>
             <groupId>org.igniterealtime.smack</groupId>
@@ -209,10 +214,8 @@
         <dependency>
             <groupId>org.igniterealtime.smack</groupId>
             <artifactId>smack-java7</artifactId>
-            <version>4.2.0</version>
+            <version>4.2.2</version>
         </dependency>
-
-
     </dependencies>
 
     <build>
