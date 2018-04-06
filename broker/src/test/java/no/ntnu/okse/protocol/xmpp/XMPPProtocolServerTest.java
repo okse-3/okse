@@ -43,6 +43,7 @@ public class XMPPProtocolServerTest {
 
   @Test
   public void testGetProtocolServerType() throws Exception {
+    // comment for creation of branch
     assertNotNull(xmppPS.getProtocolServerType());
     assertEquals(xmppPS.getProtocolServerType(), "xmpp");
   }
