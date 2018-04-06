@@ -68,17 +68,9 @@ public class XMPPServer implements SubscriptionChangeListener {
     this.jid = jid;
     this.password = password;
     this.protocolServer = protocolServer;
-    this.connection = setUpConnection(host, port);
 
-    try {
-      connection.connect();
-      log.info("XMPP TCP connection established.");
-    } catch (SmackException | IOException | InterruptedException | XMPPException e) {
-      log.error("Could not connect to xmpp server");
-      e.printStackTrace();
-    }
-
-    logInToHost(connection);
+    createConnection();
+    logInToHost();
 
     try {
       this.pubSubManager = PubSubManager.getInstance(connection, JidCreate.domainBareFrom("pubsub." + host));
@@ -92,7 +84,10 @@ public class XMPPServer implements SubscriptionChangeListener {
     SubscriptionService.getInstance().addSubscriptionChangeListener(this);
   }
 
-  private void logInToHost(AbstractXMPPConnection connection) {
+  /**
+   * Logs in to the host
+   */
+  private void logInToHost() {
     AccountManager accountManager = AccountManager.getInstance(connection);
     accountManager.sensitiveOperationOverInsecureConnection(true);
 
@@ -107,6 +102,8 @@ public class XMPPServer implements SubscriptionChangeListener {
         log.error("Could not create account.");
         e1.printStackTrace();
       }
+      // Must create new connection for Openfire to work correctly
+      createConnection();
       try {
         connection.login(jid.getLocalpart(), password);
       } catch (XMPPException | SmackException | InterruptedException | IOException e1) {
@@ -115,6 +112,21 @@ public class XMPPServer implements SubscriptionChangeListener {
       }
     } catch (InterruptedException | IOException | SmackException e) {
       log.error("Could not connect.");
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Create a connection to the server
+   */
+  private void createConnection() {
+    this.connection = setUpConnection(host, port);
+
+    try {
+      connection.connect();
+      log.info("XMPP TCP connection established.");
+    } catch (SmackException | IOException | InterruptedException | XMPPException e) {
+      log.error("Could not connect to xmpp server");
       e.printStackTrace();
     }
   }

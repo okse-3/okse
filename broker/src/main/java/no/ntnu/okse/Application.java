@@ -24,6 +24,10 @@
 
 package no.ntnu.okse;
 
+import java.io.IOException;
+import java.io.InputStream;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import no.ntnu.okse.core.CoreService;
 import no.ntnu.okse.core.Utilities;
 import no.ntnu.okse.core.messaging.MessageService;
@@ -38,6 +42,11 @@ import org.ntnunotif.wsnu.base.util.Log;
 import java.io.File;
 import java.time.Duration;
 import java.util.Properties;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class Application {
 
@@ -67,7 +76,7 @@ public class Application {
    *
    * @param args Command line arguments
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
         /*
         // Check for presence of the needed config files, if they do not exist, they must be created
         Utilities.createConfigDirectoryAndFilesIfNotExists();
@@ -97,6 +106,12 @@ public class Application {
     cs.registerService(TopicService.getInstance());
     cs.registerService(MessageService.getInstance());
     cs.registerService(SubscriptionService.getInstance());
+
+    // This must be done here, as Spring creates certificates that result in an unwanted setup of
+    // the openfire server
+    log.info("Booting optional protocol support servers");
+    bootOptionalProtocolSupportServers();
+    log.info("Completed optional protocol support servers");
 
     // Start the admin console
     webserver.run();
@@ -191,4 +206,61 @@ public class Application {
       }
     }
   }
+
+  private static void bootOptionalProtocolSupportServers() {
+    bootOptionalProtocolSupportServers(
+        Application.class.getResourceAsStream("/config/optionalprotocolsupportservers.xml"));
+  }
+
+  /**
+   * Finds all optional protocol support servers that are going to be used and starts them
+   *
+   * @param configStream Inputstream of the optional protocol support servers file
+   */
+  private static void bootOptionalProtocolSupportServers(InputStream configStream) {
+    NodeList servers;
+    try {
+      Document cfg;
+      cfg = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(configStream);
+      servers = cfg.getElementsByTagName("server");
+      if (servers != null) {
+        for (int serverIndex = 0; serverIndex < servers.getLength(); serverIndex++) {
+          Node serverNode = servers.item(serverIndex);
+          NamedNodeMap attributes = serverNode.getAttributes();
+          if (attributes.getNamedItem("use_other") != null &&
+              attributes.getNamedItem("use_other").getNodeValue().equals("no") &&
+              attributes.getNamedItem("type") != null) {
+            createOptionalProtocolSupportServers(attributes.getNamedItem("type").getNodeValue());
+          }
+        }
+      } else {
+        log.error("No optional protocol servers.xml");
+      }
+    } catch (SAXException | IOException | ParserConfigurationException e) {
+      log.error("ProtocolServer configuration parsing error, message: " + e.getMessage());
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Starts an optional protocol support server with the given name
+   *
+   * @param name The name of the optional protocol support server to start
+   */
+  private static void createOptionalProtocolSupportServers(String name) {
+    switch (name) {
+      case "openfire-xmpp":
+        try {
+          OpenfireXMPPServerFactory.start();
+          // Let the XMPP server start before continuing
+          Thread.sleep(5000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+        break;
+    }
+  }
+
 }
