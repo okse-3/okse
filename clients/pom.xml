@@ -18,6 +18,8 @@
         <module>amqp091-publisher</module>
         <module>stomp-subscriber</module>
         <module>stomp-publisher</module>
+        <module>xmpp-subscriber</module>
+        <module>xmpp-publisher</module>
     </modules>
     <packaging>pom</packaging>
 
