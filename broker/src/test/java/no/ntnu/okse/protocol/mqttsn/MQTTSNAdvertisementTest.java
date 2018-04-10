@@ -3,7 +3,6 @@ package no.ntnu.okse.protocol.mqttsn;
 import static org.testng.Assert.assertTrue;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import no.ntnu.okse.EclipsePahoMQTTSNGateway;
 import no.ntnu.okse.clients.mqttsn.MQTTSNClient;
 import no.ntnu.okse.protocol.mqtt.MQTTProtocolServer;
@@ -11,7 +10,6 @@ import org.eclipse.paho.mqttsn.gateway.messages.control.ControlMessage;
 import org.eclipse.paho.mqttsn.gateway.timer.TimerService;
 import org.eclipse.paho.mqttsn.gateway.utils.GWParameters;
 import org.eclipse.paho.mqttsn.udpclient.MqttsClient;
-import org.eclipse.paho.mqttsn.udpclient.SimpleMqttsClient;
 import org.eclipse.paho.mqttsn.udpclient.messages.mqttsn.MqttsMessage;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;

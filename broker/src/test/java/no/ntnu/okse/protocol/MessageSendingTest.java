@@ -56,11 +56,6 @@ public class MessageSendingTest {
     Thread.sleep(3000);
   }
 
-  @AfterClass
-  public void classTearDown() {
-    CoreService.getInstance().stop();
-  }
-
   @BeforeMethod
   public void setUp() {
     subscriptionMock = mock(SubscriptionChangeListener.class);
