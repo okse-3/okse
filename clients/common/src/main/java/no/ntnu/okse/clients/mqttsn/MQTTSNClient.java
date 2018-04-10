@@ -9,7 +9,11 @@ import org.eclipse.paho.mqttsn.udpclient.SimpleMqttsClient;
 public class MQTTSNClient extends SimpleMqttsClient implements TestClient {
 
   public MQTTSNClient() {
-    super("localhost", 20000);
+    this("localhost", 20000);
+  }
+
+  public MQTTSNClient(String host, int port) {
+    super(host, port);
   }
 
   /**
