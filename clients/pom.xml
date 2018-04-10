@@ -18,6 +18,7 @@
         <module>amqp091-publisher</module>
         <module>stomp-subscriber</module>
         <module>stomp-publisher</module>
+        <module>mqtt-sn-subscriber</module>
     </modules>
     <packaging>pom</packaging>
 
