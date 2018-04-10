@@ -183,7 +183,7 @@ public class MessageSendingTest {
 
   @Test
   public void allToAll() throws Exception {
-    int numberOfProtocols = 5;
+    int numberOfProtocols = 6;
     // WSN
     WSNClient wsnClient = new WSNClient();
     Consumer.Callback wsnCallback = mock(Consumer.Callback.class);
@@ -193,6 +193,11 @@ public class MessageSendingTest {
     MQTTClient mqttClient = new MQTTClient("localhost", 1883, "clientAll");
     MqttCallback mqttCallback = mock(MqttCallback.class);
     mqttClient.setCallback(mqttCallback);
+
+    // MQTT-SN
+    MQTTSNClient mqttsnClient = new MQTTSNClient("localhost", 20000);
+    SimpleMqttsCallback mqttsnCallback = mock(SimpleMqttsCallback.class);
+    mqttsnClient.setCallback(mqttsnCallback);
 
     // AMQP 0.9.1
     AMQP091Client amqp091Client = new AMQP091Client();
@@ -213,6 +218,7 @@ public class MessageSendingTest {
 
     // Connecting
     mqttClient.connect();
+    mqttsnClient.connect();
     amqp091Client.connect();
     amqpClient.connect();
     amqpSender.connect();
@@ -221,6 +227,7 @@ public class MessageSendingTest {
     // Subscribing
     wsnClient.subscribe("all", "localhost", 9002);
     mqttClient.subscribe("all");
+    mqttsnClient.subscribe("all");
     amqp091Client.subscribe("all");
     amqpClient.subscribe("all");
     stompClient.subscribe("all");
@@ -230,6 +237,7 @@ public class MessageSendingTest {
     // Publishing
     wsnClient.publish("all", "WSN");
     mqttClient.publish("all", "MQTT");
+    mqttsnClient.publish("all", "MQTT-SN");
     amqp091Client.publish("all", "AMQP 0.9.1");
     amqpSender.publish("all", "AMQP 1.0");
     stompClient.publish("all", "STOMP");
@@ -240,6 +248,7 @@ public class MessageSendingTest {
     // Unsubscribing/disconnecting
     wsnClient.unsubscribe("all");
     mqttClient.disconnect();
+    mqttsnClient.disconnect();
     amqp091Client.disconnect();
     amqpClient.disconnect();
     amqpSender.disconnect();
@@ -249,6 +258,9 @@ public class MessageSendingTest {
     verify(amqpCallback, times(numberOfProtocols)).onReceive(any());
     verify(mqttCallback, times(numberOfProtocols))
         .messageArrived(anyString(), any(MqttMessage.class));
+    // MQTT-SN test client will not receive its own messages to a topic it is subscribed to
+    verify(mqttsnCallback, times(numberOfProtocols - 1))
+        .publishArrived(anyBoolean(), anyInt(), anyString(), any());
     verify(amqp091Callback, times(numberOfProtocols)).messageReceived(any(), any());
     verify(wsnCallback, times(numberOfProtocols)).notify(any());
     verify(stompCallback, times(numberOfProtocols)).messageReceived(any());
