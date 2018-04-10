@@ -1,6 +1,9 @@
 package no.ntnu.okse.protocol;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import no.ntnu.okse.clients.amqp091.AMQP091Callback;
+import no.ntnu.okse.clients.mqttsn.MQTTSNClient;
 import no.ntnu.okse.clients.stomp.StompCallback;
 import no.ntnu.okse.clients.stomp.StompClient;
 import no.ntnu.okse.core.CoreService;
@@ -15,6 +18,7 @@ import no.ntnu.okse.clients.wsn.WSNClient;
 import org.apache.cxf.wsn.client.Consumer;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.mqttsn.udpclient.SimpleMqttsCallback;
 import org.testng.annotations.*;
 
 import java.io.InputStream;
@@ -27,7 +31,8 @@ public class MessageSendingTest {
   private final SubscriptionService subscriptionService = SubscriptionService.getInstance();
 
   @BeforeClass
-  public void classSetUp() throws InterruptedException {
+  public void classSetUp()
+      throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     CoreService cs = CoreService.getInstance();
 
     cs.registerService(MessageService.getInstance());
@@ -37,6 +42,14 @@ public class MessageSendingTest {
         .getResourceAsStream("/config/protocolservers.xml");
     cs.bootProtocolServers(resourceAsStream);
     cs.bootProtocolServers();
+
+    // Wait for protocol servers to boot
+    Thread.sleep(1000);
+
+    Method bootSecondaryServers = CoreService.class.getDeclaredMethod("bootSecondaryServers");
+    bootSecondaryServers.setAccessible(true);
+    bootSecondaryServers.invoke(cs);
+
     cs.boot();
 
     // Make sure servers have booted properly
@@ -71,6 +84,27 @@ public class MessageSendingTest {
     subscriber.disconnect();
     publisher.disconnect();
     verify(callback).messageArrived(anyString(), any(MqttMessage.class));
+  }
+
+  @Test
+  public void mqttSNToMqttSN() throws Exception {
+    MQTTSNClient subscriber = new MQTTSNClient("localhost", 20000);
+    MQTTSNClient publisher = new MQTTSNClient("localhost", 20000);
+
+    subscriber.connect();
+    publisher.connect();
+
+    SimpleMqttsCallback callback = mock(SimpleMqttsCallback.class);
+    subscriber.setCallback(callback);
+    subscriber.subscribe("mqtt-sn");
+
+    verify(subscriptionMock, timeout(500).atLeastOnce()).subscriptionChanged(any());
+
+    publisher.publish("mqtt-sn", "Text content");
+    Thread.sleep(2000);
+    verify(callback).publishArrived(anyBoolean(), anyInt(), anyString(), any());
+    publisher.disconnect();
+    subscriber.disconnect();
   }
 
   @Test
