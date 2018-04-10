@@ -69,7 +69,7 @@ public class CoreService extends AbstractCoreService {
   private ArrayList<ProtocolServer> protocolServers;
   private ArrayList<String> secondaryServers = new ArrayList<>();
   private Properties config;
-  public static boolean protocolServersBooted = false;
+  public static boolean protocolServersBooted = false, secondaryServersBooted;
 
   /**
    * Constructs the CoreService instance. Constructor is private due to the singleton pattern used
@@ -442,6 +442,7 @@ public class CoreService extends AbstractCoreService {
     getAllProtocolServers().forEach(ProtocolServer::stopServer);
     getAllProtocolServers().clear();
     protocolServersBooted = false;
+    secondaryServersBooted = false;
 
     // Let the thread wait a bit, for tasks to be completed.
     try {
@@ -570,6 +571,9 @@ public class CoreService extends AbstractCoreService {
    * @param configStream An input stream representing the config file for the servers
    */
   private void bootSecondaryServers(InputStream configStream) {
+    if (secondaryServersBooted) {
+      return;
+    }
     try {
       Document cfg = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(configStream);
       NodeList servers = cfg.getElementsByTagName("secondaryServer");
@@ -578,6 +582,7 @@ public class CoreService extends AbstractCoreService {
             .range(0, servers.getLength())
             .forEach(serverIndex -> bootSecondaryServer(servers.item(serverIndex)));
       }
+      secondaryServersBooted = true;
     } catch (SAXException | ParserConfigurationException | IOException e) {
       log.error("ProtocolServer configuration parsing error, message: " + e.getMessage());
     }
