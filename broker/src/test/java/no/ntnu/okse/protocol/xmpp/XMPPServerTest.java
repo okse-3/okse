@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import no.ntnu.okse.OpenfireXMPPServerFactory;
 import no.ntnu.okse.clients.xmpp.XMPPClient;
 import no.ntnu.okse.core.messaging.Message;
+import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -34,10 +35,12 @@ public class XMPPServerTest {
     xmppServerSpy = (XMPPServer) serverField.get(ps);
     OpenfireXMPPServerFactory.start();
     client = new XMPPClient("testClient", "localhost", 5222);
+    client.connect();
   }
 
   @AfterMethod
   private void tearDown() throws Exception {
+    client.disconnect();
     client = null;
     ps.stopServer();
     OpenfireXMPPServerFactory.stop();
@@ -54,14 +57,14 @@ public class XMPPServerTest {
     assertNotNull(xmppServerSpy.getLeafNode("testTopic"));
   }
 
-/*  @Test
+  @Test
   public void testCreateAndSendMessage() throws Exception {
     //server.subscribeToTopic("testTopic");
     client.subscribe("testTopic");
     int oldCount = client.messageCounter;
-    server.sendMessage(new Message("testMessage", "testTopic", null, ps.getProtocolServerType()));
+    xmppServerSpy.sendMessage(new Message("testMessage", "testTopic", null, ps.getProtocolServerType()));
     assertTrue(client.messageCounter == oldCount + 1);
-  }*/
+  }
 
   @Test
   public void testSubscribeUnsubscribeToNode() throws Exception {
