@@ -17,7 +17,7 @@ public class XMPPPublisher extends PublishClient {
 
   @Override
   protected void createClient() {
-    client = new XMPPClient("okse@okse", host, port);
+    client = new XMPPClient(host, port);
   }
 
   @Override
