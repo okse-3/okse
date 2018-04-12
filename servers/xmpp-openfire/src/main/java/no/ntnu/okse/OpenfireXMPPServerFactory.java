@@ -58,6 +58,7 @@ public class OpenfireXMPPServerFactory {
     try {
       OpenfireXMPPServerDBManager.setupConfigFile();
     } catch (IOException e) {
+      e.printStackTrace();
       throw new IllegalStateException("Config file is not correct");
     }
 

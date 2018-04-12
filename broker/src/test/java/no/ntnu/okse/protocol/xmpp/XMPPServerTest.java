@@ -3,6 +3,7 @@ package no.ntnu.okse.protocol.xmpp;
 
 import static org.testng.Assert.*;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentHashMap;
 import no.ntnu.okse.OpenfireXMPPServerFactory;
@@ -26,14 +27,15 @@ public class XMPPServerTest {
 
   private XMPPClient client;
 
+
   @BeforeMethod
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
+    OpenfireXMPPServerFactory.start();
     ps.boot();
     Field serverField = ps.getClass().getDeclaredField("server");
     serverField.setAccessible(true);
     xmppServerSpy = (XMPPServer) serverField.get(ps);
-    OpenfireXMPPServerFactory.start();
     client = new XMPPClient("testClient", "localhost", 5222);
     client.connect();
   }
@@ -75,9 +77,20 @@ public class XMPPServerTest {
 
   @Test
   public void testOnMessageReceived() throws Exception {
+    int messageCount = ps.getTotalMessagesReceived();
     xmppServerSpy.subscribeToTopic("testTopic");
     client.publish("testTopic", "testMessage");
-
+    assertEquals(messageCount + 1, ps.getTotalMessagesReceived());
   }
+
+  @Test
+  public void testEndToEnd() throws Exception {
+
+    XMPPClient receiver = new XMPPClient("testReceiverClient", "localhost", 5222 );
+    receiver.connect();
+    client.subscribe("testTopic");
+    receiver.subscribe("testTopic");
+  }
+
 
 }

@@ -96,7 +96,7 @@ public class XMPPServer implements SubscriptionChangeListener {
       connection.login(jid.getLocalpart(), password);
       log.info("Logged in successfully.");
     } catch (XMPPException e) {
-      log.error("Attempting to create user.");
+      log.info("Attempting to create user.");
       try {
         accountManager.createAccount(jid.getLocalpart(), password);
       } catch (NoResponseException | XMPPErrorException | NotConnectedException
