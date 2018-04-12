@@ -38,7 +38,7 @@ import org.jxmpp.stringprep.XmppStringprepException;
 
 public class XMPPServer implements SubscriptionChangeListener {
 
-  private String host;
+  public String host;
   private Integer port;
   private EntityBareJid jid;
   private String password;
@@ -68,6 +68,7 @@ public class XMPPServer implements SubscriptionChangeListener {
     this.jid = jid;
     this.password = password;
     this.protocolServer = protocolServer;
+    this.protocolServer.setServer(this);
 
     createConnection();
     logInToHost();

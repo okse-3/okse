@@ -11,40 +11,43 @@ import no.ntnu.okse.clients.xmpp.XMPPClient;
 import no.ntnu.okse.core.Utilities;
 import no.ntnu.okse.core.messaging.Message;
 import org.jivesoftware.smackx.pubsub.LeafNode;
+import org.jxmpp.jid.impl.JidCreate;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class XMPPServerTest {
 
-  @InjectMocks
-  private XMPPProtocolServer ps = new XMPPProtocolServer("localhost", 5222, "okse@localhost", "pass");
-  @Mock(name = "server")
-  private XMPPServer xmppServerSpy;
+
+  //@InjectMocks
+  private XMPPProtocolServer ps;
+  //@Mock(name = "server")
+  private XMPPServer server;
 
 
   private XMPPClient client;
 
 
-  @BeforeMethod
+
+  @BeforeClass
   public void setUp() throws Exception {
-    MockitoAnnotations.initMocks(this);
+    //MockitoAnnotations.initMocks(this);
     Utilities.createConfigDirectoryAndFilesIfNotExists();
     OpenfireXMPPServerFactory.start();
     // Make sure the server starts
     Thread.sleep(5000);
+    ps = new XMPPProtocolServer("localhost", 5222, "okse@localhost", "pass");
     ps.boot();
-    Field serverField = ps.getClass().getDeclaredField("server");
-    serverField.setAccessible(true);
-    xmppServerSpy = (XMPPServer) serverField.get(ps);
+    Thread.sleep(1000);
+    this.server = ps.getServer();
     client = new XMPPClient("testClient", "localhost", 5222);
     client.connect();
   }
 
-  @AfterMethod
+  @AfterClass
   private void tearDown() throws Exception {
     client.disconnect();
     client = null;
@@ -56,11 +59,14 @@ public class XMPPServerTest {
   public void bootServerTest() {
     assertTrue(OpenfireXMPPServerFactory.isRunning());
     assertTrue(ps.isRunning());
+    assertNotNull(this.client);
+    assertNotNull(this.server);
   }
 
   @Test
   public void testCreateOrGetLeafNode() throws Exception {
-    assertNotNull(xmppServerSpy.getLeafNode("testTopic"));
+    this.client.connect();
+    assertNotNull(server.getLeafNode("testTopic"));
   }
 
   @Test
@@ -68,28 +74,27 @@ public class XMPPServerTest {
     //server.subscribeToTopic("testTopic");
     client.subscribe("testTopic");
     int oldCount = client.messageCounter;
-    xmppServerSpy.sendMessage(new Message("testMessage", "testTopic", null, ps.getProtocolServerType()));
+    server.sendMessage(new Message("testMessage", "testTopic", null, ps.getProtocolServerType()));
     assertTrue(client.messageCounter == oldCount + 1);
   }
 
   @Test
   public void testSubscribeUnsubscribeToNode() throws Exception {
-    ConcurrentHashMap listenerMap = (ConcurrentHashMap) xmppServerSpy.getClass().getField("listenerMap").get(xmppServerSpy);
-    xmppServerSpy.subscribeToTopic("testTopic");
+    ConcurrentHashMap listenerMap = (ConcurrentHashMap) server.getClass().getField("listenerMap").get(server);
+    server.subscribeToTopic("testTopic");
     assertTrue(listenerMap.get("testTopic") != null);
   }
 
   @Test
   public void testOnMessageReceived() throws Exception {
     int messageCount = ps.getTotalMessagesReceived();
-    xmppServerSpy.subscribeToTopic("testTopic");
+    server.subscribeToTopic("testTopic");
     client.publish("testTopic", "testMessage");
     assertEquals(messageCount + 1, ps.getTotalMessagesReceived());
   }
 
   @Test
   public void testEndToEnd() throws Exception {
-
     XMPPClient receiver = new XMPPClient("testReceiverClient", "localhost", 5222 );
     receiver.connect();
     client.subscribe("testTopic");

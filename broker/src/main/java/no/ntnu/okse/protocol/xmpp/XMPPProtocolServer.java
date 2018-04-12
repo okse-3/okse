@@ -108,4 +108,7 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
   public boolean isRunning() {
     return _running;
   }
+
+  public void setServer(XMPPServer toSet){ this.server = toSet; }
+  public XMPPServer getServer(){return this.server;}
 }
