@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentHashMap;
 import no.ntnu.okse.OpenfireXMPPServerFactory;
 import no.ntnu.okse.clients.xmpp.XMPPClient;
+import no.ntnu.okse.core.Utilities;
 import no.ntnu.okse.core.messaging.Message;
 import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.mockito.InjectMocks;
@@ -31,7 +32,10 @@ public class XMPPServerTest {
   @BeforeMethod
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
+    Utilities.createConfigDirectoryAndFilesIfNotExists();
     OpenfireXMPPServerFactory.start();
+    // Make sure the server starts
+    Thread.sleep(5000);
     ps.boot();
     Field serverField = ps.getClass().getDeclaredField("server");
     serverField.setAccessible(true);
