@@ -73,7 +73,8 @@ public class XMPPServer implements SubscriptionChangeListener {
     logInToHost();
 
     try {
-      this.pubSubManager = PubSubManager.getInstance(connection, JidCreate.domainBareFrom("pubsub." + host));
+      this.pubSubManager = PubSubManager.getInstance(connection,
+          JidCreate.domainBareFrom("pubsub." + host));
     } catch (XmppStringprepException e) {
       e.printStackTrace();
     }
@@ -98,7 +99,8 @@ public class XMPPServer implements SubscriptionChangeListener {
       log.info("Attempting to create user.");
       try {
         accountManager.createAccount(jid.getLocalpart(), password);
-      } catch (NoResponseException | XMPPErrorException | NotConnectedException | InterruptedException e1) {
+      } catch (NoResponseException | XMPPErrorException | NotConnectedException
+          | InterruptedException e1) {
         log.error("Could not create account.");
         e1.printStackTrace();
       }
@@ -147,7 +149,8 @@ public class XMPPServer implements SubscriptionChangeListener {
 
   /**
    * Sets up the XMPP connection over TCP.
-   * @param host, the host address to connect to as a {@link String} (needs to be parsable by {@link InetAddress#getByName})
+   * @param host, the host address to connect to as a {@link String}
+   * (needs to be parsable by {@link InetAddress#getByName})
    * @param port, the port number the service is running on as a {@link Integer}
    * @return A {@link XMPPTCPConnection}
    */
@@ -188,7 +191,7 @@ public class XMPPServer implements SubscriptionChangeListener {
 
   /**
    * Create a {@link LeafNode} with a topic/ID. The node will be configured with what we set to be
-   * standard: an open PublishModel, so that everyone can subscribe to the node; an open
+   * standard: an open PublishModel, so that everyone can publish to the node; an open
    * AccessModel, so that everyone can subscribe to the node; not delivering payloads; and having
    * persistent items.
    *
@@ -208,7 +211,8 @@ public class XMPPServer implements SubscriptionChangeListener {
    * @return a {@link LeafNode} of the matching topic
    */
   public LeafNode getLeafNode(String topic)
-      throws InterruptedException, NotAPubSubNodeException, NotConnectedException, NoResponseException, XMPPErrorException {
+      throws InterruptedException, NotAPubSubNodeException, NotConnectedException,
+      NoResponseException, XMPPErrorException {
     try {
       return pubSubManager.getNode(topic);
     } catch (XMPPErrorException e) {
@@ -253,7 +257,8 @@ public class XMPPServer implements SubscriptionChangeListener {
    * @param topic, a topic/ID as a {@link String}
    */
   public void subscribeToTopic(String topic)
-      throws NotConnectedException, InterruptedException, NoResponseException, XMPPErrorException, NotALeafNodeException {
+      throws NotConnectedException, InterruptedException, NoResponseException, XMPPErrorException,
+      NotALeafNodeException {
     subscribeToNode(pubSubManager.getOrCreateLeafNode(topic));
   }
 
@@ -262,7 +267,8 @@ public class XMPPServer implements SubscriptionChangeListener {
    * @param topic, the topic id as a {@link String}
    */
   public void unsubscribeFromTopic(String topic)
-      throws InterruptedException, NotALeafNodeException, XMPPErrorException, NotConnectedException, NoResponseException, NotAPubSubNodeException {
+      throws InterruptedException, NotALeafNodeException, XMPPErrorException, NotConnectedException,
+      NoResponseException, NotAPubSubNodeException {
     unsubscribeFromNode(pubSubManager.getLeafNode(topic));
   }
 
@@ -334,7 +340,8 @@ public class XMPPServer implements SubscriptionChangeListener {
         try {
           log.debug("Unsubscribe event received");
           unsubscribeFromTopic(e.getData().getTopic());
-        } catch (InterruptedException | NotALeafNodeException | XMPPErrorException | NoResponseException | NotConnectedException | NotAPubSubNodeException e1) {
+        } catch (InterruptedException | NotALeafNodeException | XMPPErrorException
+            | NoResponseException | NotConnectedException | NotAPubSubNodeException e1) {
           e1.printStackTrace();
         }
         //TODO logging and docs
