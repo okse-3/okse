@@ -60,6 +60,10 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
     server = new XMPPServer(this, host, port, jid, password);
   }
 
+  public void setServer(XMPPServer server) {
+    this.server = server;
+  }
+
   /**
    * Stops the XMPPProtocolServer and {@link XMPPServer}
    */

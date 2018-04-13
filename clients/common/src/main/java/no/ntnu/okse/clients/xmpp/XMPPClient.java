@@ -15,19 +15,24 @@ import org.jivesoftware.smack.XMPPException.XMPPErrorException;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.iqregister.AccountManager;
+import org.jivesoftware.smackx.pubsub.AccessModel;
+import org.jivesoftware.smackx.pubsub.ConfigureForm;
 import org.jivesoftware.smackx.pubsub.ItemPublishEvent;
 import org.jivesoftware.smackx.pubsub.LeafNode;
+import org.jivesoftware.smackx.pubsub.NodeType;
 import org.jivesoftware.smackx.pubsub.PayloadItem;
 import org.jivesoftware.smackx.pubsub.PubSubException.NotALeafNodeException;
 import org.jivesoftware.smackx.pubsub.PubSubException.NotAPubSubNodeException;
 import org.jivesoftware.smackx.pubsub.PubSubManager;
+import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.pubsub.listener.ItemEventListener;
+import org.jivesoftware.smackx.xdata.packet.DataForm.Type;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
-public class XMPPClient implements TestClient{
+public class XMPPClient implements TestClient {
 
   private EntityBareJid jid;
   private String password;
@@ -41,7 +46,7 @@ public class XMPPClient implements TestClient{
 
   public XMPPClient(String host, Integer port) {
     try {
-      this.jid = JidCreate.entityBareFrom(host);
+      this.jid = JidCreate.entityBareFrom("testclient@localhost");
     } catch (XmppStringprepException e) {
       e.printStackTrace();
     }
@@ -77,8 +82,17 @@ public class XMPPClient implements TestClient{
   @Override
   public void connect() {
     createConnection();
-    pubSubManager = PubSubManager.getInstance(connection);
-    logInToHost();
+    try {
+      pubSubManager = PubSubManager
+          .getInstance(connection, JidCreate.domainBareFrom("pubsub." + serverHost));
+    } catch (XmppStringprepException e) {
+      e.printStackTrace();
+    }
+    try {
+      logInToHost();
+    } catch (SmackException | InterruptedException | XMPPException | IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private void createConnection() {
@@ -90,27 +104,15 @@ public class XMPPClient implements TestClient{
     }
   }
 
-  private void logInToHost() {
+  private void logInToHost()
+      throws SmackException, InterruptedException, IOException, XMPPException {
     AccountManager accountManager = AccountManager.getInstance(connection);
     accountManager.sensitiveOperationOverInsecureConnection(true);
-
     try {
-      connection.login(jid.getLocalpart(), password);
-    } catch (XMPPException e) {
-      try {
-        accountManager.createAccount(jid.getLocalpart(), password);
-      } catch (NoResponseException | XMPPErrorException | NotConnectedException | InterruptedException e1) {
-        e1.printStackTrace();
-      }
-      createConnection();
-      try {
-        connection.login(jid.getLocalpart(), password);
-      } catch (XMPPException | SmackException | InterruptedException | IOException e1) {
-        e1.printStackTrace();
-      }
-    } catch (InterruptedException | IOException | SmackException e) {
-      e.printStackTrace();
+      accountManager.createAccount(jid.getLocalpart(), password);
+    } catch (XMPPErrorException e) {
     }
+    connection.login(jid.getLocalpart(), password);
   }
 
   @Override
@@ -140,8 +142,8 @@ public class XMPPClient implements TestClient{
     try {
       LeafNode node = pubSubManager.getLeafNode(topic);
       node.unsubscribe(connection.getUser().asEntityBareJidString());
-      node.removeItemEventListener(listenerMap.get(topic));
-      listenerMap.remove(topic);
+      //node.removeItemEventListener(listenerMap.get(topic));
+      //listenerMap.remove(topic);
     } catch (NoResponseException | XMPPErrorException | InterruptedException | NotConnectedException | NotALeafNodeException | NotAPubSubNodeException e) {
       e.printStackTrace();
     }
@@ -151,9 +153,31 @@ public class XMPPClient implements TestClient{
   @Override
   public void publish(String topic, String content) {
     SimplePayload payload = new SimplePayload(topic, serverHost + "/" + topic, content);
+    LeafNode node = null;
     try {
-      pubSubManager.getLeafNode(topic).publish(new PayloadItem<>(payload));
-    } catch (NotConnectedException | InterruptedException | NoResponseException | NotALeafNodeException | NotAPubSubNodeException | XMPPErrorException e) {
+      try {
+        node = pubSubManager.getLeafNode(topic);
+      } catch (NotALeafNodeException | NoResponseException | InterruptedException | NotConnectedException | NotAPubSubNodeException e) {
+        e.printStackTrace();
+      }
+    } catch (XMPPErrorException e) {
+      ConfigureForm form = new ConfigureForm(Type.submit);
+      form.setAccessModel(AccessModel.open);
+      form.setDeliverPayloads(true);
+      form.setPersistentItems(false);
+      form.setPublishModel(PublishModel.open);
+      form.setNodeType(NodeType.leaf);
+      try {
+        node = (LeafNode) pubSubManager.createNode(topic, form);
+      } catch (NoResponseException | XMPPErrorException | InterruptedException | NotConnectedException e1) {
+        e1.printStackTrace();
+        return;
+      }
+
+    }
+    try {
+      node.publish(new PayloadItem<>(payload));
+    } catch (NotConnectedException | InterruptedException e) {
       e.printStackTrace();
     }
   }

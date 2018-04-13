@@ -1,14 +1,14 @@
 package no.ntnu.okse.protocol.xmpp;
 
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentHashMap;
 import no.ntnu.okse.OpenfireXMPPServerFactory;
 import no.ntnu.okse.clients.xmpp.XMPPClient;
 import no.ntnu.okse.core.messaging.Message;
-import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -34,7 +34,7 @@ public class XMPPServerTest {
     serverField.setAccessible(true);
     xmppServerSpy = (XMPPServer) serverField.get(ps);
     OpenfireXMPPServerFactory.start();
-    client = new XMPPClient("testClient", "localhost", 5222);
+    client = new XMPPClient("localhost", 5222);
     client.connect();
   }
 

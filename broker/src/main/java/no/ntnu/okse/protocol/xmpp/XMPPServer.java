@@ -68,6 +68,7 @@ public class XMPPServer implements SubscriptionChangeListener {
     this.jid = jid;
     this.password = password;
     this.protocolServer = protocolServer;
+    protocolServer.setServer(this);
 
     createConnection();
     logInToHost();
@@ -79,7 +80,28 @@ public class XMPPServer implements SubscriptionChangeListener {
       e.printStackTrace();
     }
 
-    nnListener = new NewNodeListener(this, pubSubManager);
+    /*try {
+      Node root = pubSubManager.getNode("");
+      System.out.println(root.getSubscriptionOptions(jid.getLocalpart().toString()).getFields());
+      SubscribeForm subForm = new SubscribeForm(Type.submit);
+      subForm.setDeliverOn(true);
+      subForm.setDigestOn(true);
+      subForm.setDigestFrequency(5000);
+      subForm.setIncludeBody(true);
+      FormField formField = new FormField(SubscribeOptionFields.subscription_depth.getFieldName());
+      formField.setType(FormField.Type.list_single);
+      formField.addValue("all");
+      subForm.addField(formField);
+      formField = new FormField(SubscribeOptionFields.subscription_type.getFieldName());
+      formField.setType(FormField.Type.list_single);
+      formField.addValue("items");
+      subForm.addField(formField);
+      root.subscribe(connection.getUser().asEntityBareJidString(), subForm);
+    } catch (NoResponseException | XMPPErrorException | InterruptedException | NotConnectedException | NotAPubSubNodeException e) {
+      log.error("Could not subscribe to root node.");
+      e.printStackTrace();
+    }*/
+    nnListener = new NewNodeListener(this, pubSubManager, jid.toString());
     nnListener.run();
 
     SubscriptionService.getInstance().addSubscriptionChangeListener(this);
@@ -141,7 +163,7 @@ public class XMPPServer implements SubscriptionChangeListener {
     ConfigureForm form = new ConfigureForm(Type.submit);
     form.setAccessModel(AccessModel.open);
     form.setDeliverPayloads(true);
-    form.setPersistentItems(true);
+    form.setPersistentItems(false);
     form.setPublishModel(PublishModel.open);
     form.setNodeType(NodeType.leaf);
     return form;
@@ -344,7 +366,6 @@ public class XMPPServer implements SubscriptionChangeListener {
             | NoResponseException | NotConnectedException | NotAPubSubNodeException e1) {
           e1.printStackTrace();
         }
-        //TODO logging and docs
       }
     }
   }
