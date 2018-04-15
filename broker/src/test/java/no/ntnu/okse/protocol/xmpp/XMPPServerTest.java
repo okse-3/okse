@@ -1,25 +1,18 @@
 package no.ntnu.okse.protocol.xmpp;
 
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import no.ntnu.okse.OpenfireXMPPServerFactory;
-import no.ntnu.okse.clients.xmpp.XMPPClient;
 import no.ntnu.okse.core.Utilities;
 import no.ntnu.okse.core.messaging.Message;
 import org.jivesoftware.smackx.pubsub.Item;
 import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.jivesoftware.smackx.pubsub.Node;
 import org.jivesoftware.smackx.pubsub.PayloadItem;
-import org.jxmpp.jid.impl.JidCreate;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -27,9 +20,7 @@ import org.testng.annotations.Test;
 public class XMPPServerTest {
 
 
-  //@InjectMocks
   private XMPPProtocolServer ps;
-  //@Mock(name = "server")
   private XMPPServer server;
 
   private ArrayList<Item> itemList = new ArrayList<>();
@@ -37,7 +28,6 @@ public class XMPPServerTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    //MockitoAnnotations.initMocks(this);
     Utilities.createConfigDirectoryAndFilesIfNotExists();
     OpenfireXMPPServerFactory.start();
     // Make sure the server starts
@@ -49,7 +39,7 @@ public class XMPPServerTest {
   }
 
   @AfterClass
-  private void tearDown() throws Exception {
+  private void tearDown() {
     ps.stopServer();
     server = null;
     OpenfireXMPPServerFactory.stop();
@@ -70,24 +60,24 @@ public class XMPPServerTest {
 
   @Test
   public void testCreateAndSendMessage() throws Exception {
-    LeafNode nodeToCheck = server.getLeafNode("testTopic");
-    assertEquals(nodeToCheck.getItems().size(), 0);
-    server.sendMessage(new Message("testMessage", "testTopic", null, ps.getProtocolServerType()));
-    assertEquals(nodeToCheck.getItems().size(), 1);
+    Message testMessage = new Message("testMessage", "testTopic", null, ps.getProtocolServerType());
+    LeafNode nodeToCheck = server.getLeafNode(testMessage.getTopic());
+    server.sendMessage(testMessage);
+    assertNotNull(nodeToCheck.discoverItems());
   }
 
   @Test
   public void testSubscribeUnsubscribeToNode() throws Exception {
-    Node nodeToCheck = server.getLeafNode("testTopic");
+    LeafNode nodeToCheck = server.getLeafNode("testTopic");
     assertEquals(nodeToCheck.getSubscriptions().size(), 1);
-    server.subscribeToTopic("testTopic");
+    server.subscribeToNode(nodeToCheck);
     assertEquals(nodeToCheck.getSubscriptions().size(), 2);
-    server.unsubscribeFromTopic("testTopic");
+    server.unsubscribeFromNode(nodeToCheck);
     assertEquals(nodeToCheck.getSubscriptions().size(), 1);
   }
 
   @Test
-  public void testOnMessageReceived() throws Exception {
+  public void testOnMessageReceived() {
     itemList.add(new PayloadItem<>("item1", new Item()));
     int messageCount = ps.getTotalMessagesReceived();
     server.onMessageReceived(itemList, "testTopic");
