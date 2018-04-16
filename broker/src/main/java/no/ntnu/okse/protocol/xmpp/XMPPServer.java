@@ -265,8 +265,15 @@ public class XMPPServer {
    * @return a {@link Message} object containing the payload data, topic and protocol origin
    */
   private Message payloadItemToMessage(PayloadItem pi, String topic) {
-    return new Message(pi.getPayload().toString(), topic, null,
-        protocolServer.getProtocolServerType());
+    try {
+      String content = new SAXBuilder()
+          .build(new ByteArrayInputStream(pi.getPayload().toXML().toString().getBytes("UTF-8")))
+          .getRootElement().getValue();
+      return new Message(content, topic, null, protocolServer.getProtocolServerType());
+    } catch (JDOMException | IOException e) {
+      log.info("Could not get message content");
+    }
+    return null;
   }
 
   /**
@@ -306,11 +313,17 @@ public class XMPPServer {
         PayloadItem message = (PayloadItem) item;
         String topic = message.getNode();
         log.debug("Received a message with topic: " + topic);
-        MessageService.getInstance().distributeMessage(
-            payloadItemToMessage(message, topic));
-        log.debug("Redistributed message with topic: " + topic);
-        protocolServer.incrementTotalMessagesReceived();
-        protocolServer.incrementTotalRequests();
+        Message systemMessage = payloadItemToMessage(message, topic);
+        if (systemMessage != null) {
+          MessageService.getInstance().distributeMessage(
+              payloadItemToMessage(message, topic));
+          log.debug("Redistributed message with topic: " + topic);
+          protocolServer.incrementTotalMessagesReceived();
+          protocolServer.incrementTotalRequests();
+        } else {
+          log.warn("Received message with malformed content");
+          protocolServer.incrementTotalBadRequest();
+        }
       }
     }
   }
@@ -328,8 +341,7 @@ public class XMPPServer {
           .build(new ByteArrayInputStream(item.getPayload().toXML().toString().getBytes("UTF-8")));
       return document.getRootElement().getAttribute("from").getValue()
           .equals(jid.toString());
-    } catch (JDOMException | IOException e) {
-      e.printStackTrace();
+    } catch (JDOMException | IOException | NullPointerException e) {
       return false;
     }
   }
