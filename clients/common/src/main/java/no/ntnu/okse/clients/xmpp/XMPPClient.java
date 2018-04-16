@@ -181,8 +181,8 @@ public class XMPPClient implements TestClient {
 
   @Override
   public void publish(String topic, String content) {
-    SimplePayload payload = new SimplePayload(topic,  jid.getDomain() + "/" + topic,
-        String.format("<body>%s'<body>", content));
+    SimplePayload payload = new SimplePayload(topic, serverHost + "/" + topic,
+        String.format("<body>%s</body>", content));
     LeafNode node;
     try {
       node = pubSubManager.getLeafNode(topic);
