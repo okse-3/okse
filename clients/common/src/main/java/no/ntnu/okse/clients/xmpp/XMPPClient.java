@@ -14,9 +14,11 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.XMPPException.XMPPErrorException;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
+import org.jivesoftware.smack.util.XmlStringBuilder;
 import org.jivesoftware.smackx.iqregister.AccountManager;
 import org.jivesoftware.smackx.pubsub.AccessModel;
 import org.jivesoftware.smackx.pubsub.ConfigureForm;
+import org.jivesoftware.smackx.pubsub.Item;
 import org.jivesoftware.smackx.pubsub.ItemPublishEvent;
 import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.jivesoftware.smackx.pubsub.NodeType;
@@ -43,10 +45,9 @@ public class XMPPClient implements TestClient {
   private PubSubManager pubSubManager;
   private ConcurrentHashMap<String, ItemEventListener> listenerMap;
 
-
-  public XMPPClient(String host, Integer port) {
+  public XMPPClient(String host, Integer port, String jid) {
     try {
-      this.jid = JidCreate.entityBareFrom("testclient@localhost");
+      this.jid = JidCreate.entityBareFrom(jid);
     } catch (XmppStringprepException e) {
       e.printStackTrace();
     }
@@ -55,6 +56,10 @@ public class XMPPClient implements TestClient {
     serverHost = host;
     messageCounter = 0;
     serverPort = port;
+  }
+
+  public XMPPClient(String host, Integer port) {
+    this(host, port, "testclient@127.0.0.1");
   }
 
   private XMPPTCPConnection setUpConnection(String host, Integer port) {
@@ -123,16 +128,25 @@ public class XMPPClient implements TestClient {
   @Override
   public void subscribe(String topic) {
     try {
-      LeafNode node = pubSubManager.getOrCreateLeafNode(topic);
-      node.addItemEventListener(new ItemEventListener() {
-        @Override
-        public void handlePublishedItems(ItemPublishEvent itemPublishEvent) {
-          listenerMap.put(topic, this);
-          messageCounter++;
+      LeafNode node;
+      try {
+        node = pubSubManager.getLeafNode(topic);
+      } catch (NotAPubSubNodeException | InterruptedException | XMPPErrorException | NotALeafNodeException | NotConnectedException | NoResponseException e) {
+        node = createNode(topic);
+        if (node == null) {
+          return;
         }
-      });
+      }
+      ItemEventListener itemEventListener = itemPublishEvent -> {
+        for (Object item : itemPublishEvent.getItems()) {
+          System.out.println(item);
+        }
+        messageCounter++;
+      };
+      listenerMap.put(topic, itemEventListener);
+      node.addItemEventListener(itemEventListener);
       node.subscribe(connection.getUser().asEntityBareJidString());
-    } catch (NoResponseException | XMPPErrorException | NotConnectedException | NotALeafNodeException | InterruptedException e) {
+    } catch (NoResponseException | XMPPErrorException | NotConnectedException | InterruptedException e) {
       e.printStackTrace();
     }
   }
@@ -142,43 +156,50 @@ public class XMPPClient implements TestClient {
     try {
       LeafNode node = pubSubManager.getLeafNode(topic);
       node.unsubscribe(connection.getUser().asEntityBareJidString());
-      //node.removeItemEventListener(listenerMap.get(topic));
-      //listenerMap.remove(topic);
+      node.removeItemEventListener(listenerMap.get(topic));
+      listenerMap.remove(topic);
     } catch (NoResponseException | XMPPErrorException | InterruptedException | NotConnectedException | NotALeafNodeException | NotAPubSubNodeException e) {
       e.printStackTrace();
     }
 
   }
 
+  private LeafNode createNode(String topic) {
+    ConfigureForm form = new ConfigureForm(Type.submit);
+    form.setAccessModel(AccessModel.open);
+    form.setDeliverPayloads(true);
+    form.setPersistentItems(false);
+    form.setPublishModel(PublishModel.open);
+    form.setNodeType(NodeType.leaf);
+    try {
+      return (LeafNode) pubSubManager.createNode(topic, form);
+    } catch (NoResponseException | XMPPErrorException | InterruptedException | NotConnectedException e1) {
+      e1.printStackTrace();
+      return null;
+    }
+  }
+
   @Override
   public void publish(String topic, String content) {
-    SimplePayload payload = new SimplePayload(topic, serverHost + "/" + topic, content);
-    LeafNode node = null;
+    SimplePayload payload = new SimplePayload(topic,  jid.getDomain() + "/" + topic,
+        String.format("<body>%s'<body>", content));
+    LeafNode node;
     try {
-      try {
-        node = pubSubManager.getLeafNode(topic);
-      } catch (NotALeafNodeException | NoResponseException | InterruptedException | NotConnectedException | NotAPubSubNodeException e) {
-        e.printStackTrace();
-      }
-    } catch (XMPPErrorException e) {
-      ConfigureForm form = new ConfigureForm(Type.submit);
-      form.setAccessModel(AccessModel.open);
-      form.setDeliverPayloads(true);
-      form.setPersistentItems(false);
-      form.setPublishModel(PublishModel.open);
-      form.setNodeType(NodeType.leaf);
-      try {
-        node = (LeafNode) pubSubManager.createNode(topic, form);
-      } catch (NoResponseException | XMPPErrorException | InterruptedException | NotConnectedException e1) {
-        e1.printStackTrace();
+      node = pubSubManager.getLeafNode(topic);
+    } catch (NotALeafNodeException | NoResponseException | InterruptedException | NotConnectedException | NotAPubSubNodeException | XMPPErrorException e) {
+      node = createNode(topic);
+      if (node == null) {
         return;
       }
-
     }
     try {
-      node.publish(new PayloadItem<>(payload));
+      node.publish(new PayloadItem<>(generateItemID(), payload));
     } catch (NotConnectedException | InterruptedException e) {
       e.printStackTrace();
     }
+  }
+
+  private String generateItemID() {
+    return String.format("id*%f*%d", Math.random(), System.currentTimeMillis());
   }
 }

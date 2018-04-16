@@ -17,7 +17,7 @@ public class XMPPSubscriber extends SubscribeClient {
 
   @Override
   protected void createClient() {
-    client = new XMPPClient(host, port);
+    client = new XMPPClient(host, port, "subscriber@127.0.0.1");
   }
 
   @Override

@@ -19,7 +19,8 @@ import org.testng.annotations.Test;
 public class XMPPServerTest {
 
   @InjectMocks
-  private XMPPProtocolServer ps = new XMPPProtocolServer("localhost", 5222, "okse@localhost", "pass");
+  private XMPPProtocolServer ps = new XMPPProtocolServer("localhost", 5222, "okse@localhost",
+      "pass");
   @Mock(name = "server")
   private XMPPServer xmppServerSpy;
 
@@ -59,23 +60,15 @@ public class XMPPServerTest {
 
   @Test
   public void testCreateAndSendMessage() throws Exception {
-    //server.subscribeToTopic("testTopic");
     client.subscribe("testTopic");
     int oldCount = client.messageCounter;
-    xmppServerSpy.sendMessage(new Message("testMessage", "testTopic", null, ps.getProtocolServerType()));
+    xmppServerSpy
+        .sendMessage(new Message("testMessage", "testTopic", null, ps.getProtocolServerType()));
     assertTrue(client.messageCounter == oldCount + 1);
   }
 
   @Test
-  public void testSubscribeUnsubscribeToNode() throws Exception {
-    ConcurrentHashMap listenerMap = (ConcurrentHashMap) xmppServerSpy.getClass().getField("listenerMap").get(xmppServerSpy);
-    xmppServerSpy.subscribeToTopic("testTopic");
-    assertTrue(listenerMap.get("testTopic") != null);
-  }
-
-  @Test
   public void testOnMessageReceived() throws Exception {
-    xmppServerSpy.subscribeToTopic("testTopic");
     client.publish("testTopic", "testMessage");
 
   }
