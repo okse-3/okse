@@ -1,5 +1,6 @@
 package no.ntnu.okse.core;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.security.crypto.codec.Hex;
 
@@ -63,6 +64,10 @@ public class Utilities {
       "config/protocolservers.xml"
   };
 
+  protected static final String configFolders[] = {
+      "config/openfire-conf",
+  };
+
   /**
    * Helper method that creates a config file directory and checks for presence of the default
    * properties files If directory does not exist, it creates it, and then proceeds to copy the
@@ -85,6 +90,17 @@ public class Utilities {
         }
       } catch (IOException e) {
         log.error("Could not create configuration file " + filename);
+        e.printStackTrace();
+      }
+    }
+
+    for (String foldername : configFolders) {
+      File newConfigFolder = new File(foldername);
+      File baseConfigFolder = new File(Utilities.class.getResource("/" + foldername).getFile());
+      try {
+        FileUtils.copyDirectory(baseConfigFolder, newConfigFolder);
+      } catch (IOException e) {
+        log.error("Could not create configuration folder " + foldername);
         e.printStackTrace();
       }
     }
