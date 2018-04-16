@@ -326,7 +326,7 @@ public class XMPPServer {
     try {
       Document document = saxBuilder
           .build(new ByteArrayInputStream(item.getPayload().toXML().toString().getBytes("UTF-8")));
-      return document.getRootElement().getChild("body").getAttribute("from").getValue()
+      return document.getRootElement().getAttribute("from").getValue()
           .equals(jid.toString());
     } catch (JDOMException | IOException e) {
       e.printStackTrace();
