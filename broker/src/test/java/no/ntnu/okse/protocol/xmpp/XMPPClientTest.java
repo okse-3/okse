@@ -57,6 +57,8 @@ public class XMPPClientTest {
     client2.disconnect();
     client = null;
     client2 = null;
+    OpenfireXMPPServerFactory.stop();
+    XMPPProtocolServerUtil.stop();
   }
 
   @Test
