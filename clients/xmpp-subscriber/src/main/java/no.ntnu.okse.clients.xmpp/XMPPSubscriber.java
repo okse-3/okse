@@ -9,6 +9,9 @@ public class XMPPSubscriber extends SubscribeClient {
   @Parameter(names = {"--port", "-p"}, description = "Port")
   public final int port = 5222;
 
+  @Parameter(names = {"--jid"}, description = "JID")
+  public String jid = "subscriber@localhost";
+
   private XMPPClient client;
 
   public static void main(String[] args) {
@@ -17,7 +20,7 @@ public class XMPPSubscriber extends SubscribeClient {
 
   @Override
   protected void createClient() {
-    client = new XMPPClient(host, port, "subscriber@127.0.0.1");
+    client = new XMPPClient(host, port, jid);
   }
 
   @Override

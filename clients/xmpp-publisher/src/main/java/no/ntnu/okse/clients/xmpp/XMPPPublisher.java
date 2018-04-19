@@ -9,6 +9,9 @@ public class XMPPPublisher extends PublishClient {
   @Parameter(names = {"--port", "-p"}, description = "Port")
   public final int port = 5222;
 
+  @Parameter(names = {"--jid"}, description = "JID")
+  public String jid = "publisher@localhost";
+
   private XMPPClient client;
 
   public static void main(String[] args) {
@@ -17,7 +20,7 @@ public class XMPPPublisher extends PublishClient {
 
   @Override
   protected void createClient() {
-    client = new XMPPClient(host, port, "publisher@localhost");
+    client = new XMPPClient(host, port, jid);
   }
 
   @Override
