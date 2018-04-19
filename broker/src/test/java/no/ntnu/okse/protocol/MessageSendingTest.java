@@ -164,19 +164,19 @@ public class MessageSendingTest {
     XMPPClient client2 = new XMPPClient("localhost", 5222, "okse2@localhost");
     client1.connect();
     client2.connect();
-    client1.subscribe("SujetDeTest");
-    client2.subscribe("SujetDeTest");
-    client1.publish("SujetDeTest", "This is a test message.");
-    client1.publish("SujetDeTest", "This is a test messagex.");
-    client2.publish("SujetDeTest", "This is a test message.");
+    client1.subscribe("xmpp");
+    client2.subscribe("xmpp");
+    client1.publish("xmpp", "This is a test message.");
+    client1.publish("xmpp", "This is a test message.");
+    client2.publish("xmpp", "This is a test message.");
 
     Thread.sleep(1000);
 
     assertEquals(client1.messageCounter, 3);
     assertEquals(client2.messageCounter,  3);
 
-    client1.unsubscribe("SujetDeTest");
-    client2.unsubscribe("SujetDeTest");
+    client1.unsubscribe("xmpp");
+    client2.unsubscribe("xmpp");
     client1.disconnect();
     client2.disconnect();
   }
