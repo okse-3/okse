@@ -574,6 +574,7 @@ public class CoreService extends AbstractCoreService {
     if (secondaryServersBooted) {
       return;
     }
+    secondaryServersBooted = true;
     try {
       Document cfg = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(configStream);
       NodeList servers = cfg.getElementsByTagName("secondaryServer");
@@ -582,7 +583,6 @@ public class CoreService extends AbstractCoreService {
             .range(0, servers.getLength())
             .forEach(serverIndex -> bootSecondaryServer(servers.item(serverIndex)));
       }
-      secondaryServersBooted = true;
     } catch (SAXException | ParserConfigurationException | IOException e) {
       log.error("ProtocolServer configuration parsing error, message: " + e.getMessage());
     }

@@ -35,11 +35,11 @@ public class MQTTSNAdvertisementTest {
         .register(GWParameters.getGatewayAddress(), ControlMessage.ADVERTISE, 1);
   }
 
-  @AfterTest
+  /*@AfterTest
   public void tearDown() {
     EclipsePahoMQTTSNGateway.stop();
     mqttServer.stopServer();
-  }
+  }*/
 
   @Test
   public void testReceiveAdvertisementMessage() throws Exception {

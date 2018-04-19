@@ -39,6 +39,8 @@ public class FullMessageFunctionalityTest {
     bootSecondaryServers.setAccessible(true);
     bootSecondaryServers.invoke(cs);
 
+    Thread.sleep(1000);
+
     cs.boot();
 
     // Make sure servers have booted properly
@@ -56,9 +58,5 @@ public class FullMessageFunctionalityTest {
     subscriptionService.removeAllListeners();
   }
 
-  @AfterClass
-  public void classTearDown() {
-    CoreService.getInstance().stop();
-  }
 
 }
