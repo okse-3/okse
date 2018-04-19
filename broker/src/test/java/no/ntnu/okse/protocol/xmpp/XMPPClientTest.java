@@ -113,9 +113,9 @@ public class XMPPClientTest {
   }
 
 
-  //Manual integration testing preferred due to nature of smackx library.
-  //Does not properly verify actual transmission.
-  @Test
+  //XMPP to XMPP Client test runs in MessageSendingTest.java
+
+/*
   public void testClientEndToEndMessageContent() throws Exception {
     client.subscribe("messageReceptionTopic");
     int clientMessageCount = client.messageCounter;
@@ -123,4 +123,5 @@ public class XMPPClientTest {
     client.publish("messageReceptionTopic", "End to end transmission");
     assertEquals(clientMessageCount, clientMessageCount++);
   }
+  */
 }

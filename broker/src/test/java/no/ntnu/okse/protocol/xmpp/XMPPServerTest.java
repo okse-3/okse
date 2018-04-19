@@ -50,6 +50,7 @@ public class XMPPServerTest {
     ps.stopServer();
     server = null;
     OpenfireXMPPServerFactory.stop();
+
   }
 
   @Test
