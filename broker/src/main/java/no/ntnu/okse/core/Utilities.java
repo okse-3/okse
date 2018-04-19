@@ -64,6 +64,7 @@ public class Utilities {
       "config/protocolservers.xml",
       "config/gateway.properties",
       "config/predefinedTopics.properties",
+      "config/optionalprotocolsupportservers.xml"
   };
 
   protected static final String configFolders[] = {

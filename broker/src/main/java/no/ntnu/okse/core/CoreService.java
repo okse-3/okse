@@ -503,9 +503,13 @@ public class CoreService extends AbstractCoreService {
    */
 
   public void bootProtocolServers() {
-    InputStream is = this.getClass().getResourceAsStream("/config/protocolservers.xml");
-    if (is == null) throw new IllegalStateException("Could not load protocolservers.xml");
-    bootProtocolServers(is);
+    try {
+      FileInputStream is = new FileInputStream("config/protocolservers.xml");
+      bootProtocolServers(is);
+    } catch (FileNotFoundException e) {
+      log.error("config/protocolservers.xml not found");
+      e.printStackTrace();
+    }
   }
 
   /**

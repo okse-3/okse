@@ -24,6 +24,8 @@
 
 package no.ntnu.okse;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -208,8 +210,12 @@ public class Application {
   }
 
   private static void bootOptionalProtocolSupportServers() {
-    bootOptionalProtocolSupportServers(
-        Application.class.getResourceAsStream("/config/optionalprotocolsupportservers.xml"));
+    try {
+      bootOptionalProtocolSupportServers(new FileInputStream("config/optionalprotocolsupportservers.xml"));
+    } catch (FileNotFoundException e) {
+      log.error("config/optionalprotocolsupportservers.xml not found");
+      e.printStackTrace();
+    }
   }
 
   /**
