@@ -1,15 +1,9 @@
 package no.ntnu.okse.protocol;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import no.ntnu.okse.clients.amqp091.AMQP091Callback;
 import no.ntnu.okse.clients.mqttsn.MQTTSNClient;
 import no.ntnu.okse.clients.stomp.StompCallback;
 import no.ntnu.okse.clients.stomp.StompClient;
-import no.ntnu.okse.core.CoreService;
-import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
-import no.ntnu.okse.core.messaging.MessageService;
-import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.clients.amqp.AMQPCallback;
 import no.ntnu.okse.clients.amqp.AMQPClient;
 import no.ntnu.okse.clients.amqp091.AMQP091Client;
@@ -21,56 +15,9 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.mqttsn.udpclient.SimpleMqttsCallback;
 import org.testng.annotations.*;
 
-import java.io.InputStream;
-
 import static org.mockito.Mockito.*;
 
-public class MessageSendingTest {
-
-  private SubscriptionChangeListener subscriptionMock;
-  private final SubscriptionService subscriptionService = SubscriptionService.getInstance();
-
-  @BeforeClass
-  public void classSetUp()
-      throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    CoreService cs = CoreService.getInstance();
-
-    cs.registerService(MessageService.getInstance());
-    cs.registerService(subscriptionService);
-
-    InputStream resourceAsStream = CoreService.class
-        .getResourceAsStream("/config/protocolservers.xml");
-    cs.bootProtocolServers(resourceAsStream);
-    cs.bootProtocolServers();
-
-    // Wait for protocol servers to boot
-    Thread.sleep(1000);
-
-    Method bootSecondaryServers = CoreService.class.getDeclaredMethod("bootSecondaryServers");
-    bootSecondaryServers.setAccessible(true);
-    bootSecondaryServers.invoke(cs);
-
-    cs.boot();
-
-    // Make sure servers have booted properly
-    Thread.sleep(3000);
-  }
-
-  @BeforeMethod
-  public void setUp() {
-    subscriptionMock = mock(SubscriptionChangeListener.class);
-    subscriptionService.addSubscriptionChangeListener(subscriptionMock);
-  }
-
-  @AfterMethod
-  public void tearDown() {
-    subscriptionService.removeAllListeners();
-  }
-
-  @AfterClass
-  public void classTearDown() {
-    CoreService.getInstance().stop();
-  }
+public class MessageSendingTest extends FullMessageFunctionalityTest {
 
   @Test
   public void mqttToMqtt() throws Exception {
