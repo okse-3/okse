@@ -11,14 +11,17 @@ import org.eclipse.paho.mqttsn.gateway.timer.TimerService;
 import org.eclipse.paho.mqttsn.gateway.utils.GWParameters;
 import org.eclipse.paho.mqttsn.udpclient.MqttsClient;
 import org.eclipse.paho.mqttsn.udpclient.messages.mqttsn.MqttsMessage;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class MQTTSNAdvertisementTest {
 
+  private MQTTProtocolServer mqttServer;
+
   @BeforeTest
   public void setUp() throws InterruptedException {
-    MQTTProtocolServer mqttServer = new MQTTProtocolServer("localhost", 1883);
+    mqttServer = new MQTTProtocolServer("localhost", 1883);
     mqttServer.boot();
 
     // Wait for MQTT to start, before starting MQTT-SN
@@ -30,6 +33,12 @@ public class MQTTSNAdvertisementTest {
         .unregister(GWParameters.getGatewayAddress(), ControlMessage.ADVERTISE);
     TimerService.getInstance()
         .register(GWParameters.getGatewayAddress(), ControlMessage.ADVERTISE, 1);
+  }
+
+  @AfterTest
+  public void tearDown() {
+    EclipsePahoMQTTSNGateway.stop();
+    mqttServer.stopServer();
   }
 
   @Test

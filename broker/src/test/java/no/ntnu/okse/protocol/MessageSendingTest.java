@@ -67,6 +67,11 @@ public class MessageSendingTest {
     subscriptionService.removeAllListeners();
   }
 
+  @AfterClass
+  public void classTearDown() {
+    CoreService.getInstance().stop();
+  }
+
   @Test
   public void mqttToMqtt() throws Exception {
     MQTTClient subscriber = new MQTTClient("localhost", 1883, "client1");
