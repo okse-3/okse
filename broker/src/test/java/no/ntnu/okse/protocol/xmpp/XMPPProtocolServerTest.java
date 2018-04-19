@@ -2,56 +2,44 @@ package no.ntnu.okse.protocol.xmpp;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import no.ntnu.okse.core.messaging.Message;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.testng.annotations.BeforeMethod;
+import java.io.IOException;
+import no.ntnu.okse.OpenfireXMPPServerFactory;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class XMPPProtocolServerTest {
 
-  @InjectMocks
-  XMPPProtocolServer xmppPS = new XMPPProtocolServer("localhost", 5222, "okse@localhost", "pass");
-  @Mock(name = "server")
-  XMPPServer xmppServerSpy;
+  private XMPPProtocolServer xmppProtocolServer;
 
-  @BeforeMethod
-  public void setUp() throws Exception {
-    MockitoAnnotations.initMocks(this);
+  @BeforeClass
+  public void classSetUp() throws IOException, InterruptedException {
+    OpenfireXMPPServerFactory.start();
+    // Allow Openfire to start correctly
+    Thread.sleep(5000);
+    xmppProtocolServer = new XMPPProtocolServer("localhost", 5222, "okse@localhost", "pass");
+  }
+
+  @AfterClass
+  public void classTearDown() {
+    OpenfireXMPPServerFactory.stop();
   }
 
   @Test
-  public void testBoot() throws Exception {
-    assertFalse(xmppPS.isRunning());
-    xmppPS.boot();
-    assertTrue(xmppPS.isRunning());
-  }
-
-  @Test
-  public void testStopServer() throws Exception {
-    xmppPS.boot();
+  public void testBootAndShutdown() throws InterruptedException {
+    assertFalse(xmppProtocolServer.isRunning());
+    xmppProtocolServer.boot();
     Thread.sleep(1000);
-    assertTrue(xmppPS.isRunning());
-    xmppPS.stopServer();
-    assertFalse(xmppPS.isRunning());
+    assertTrue(xmppProtocolServer.isRunning());
+    xmppProtocolServer.stopServer();
+    assertFalse(xmppProtocolServer.isRunning());
   }
 
   @Test
-  public void testGetProtocolServerType() throws Exception {
-    assertNotNull(xmppPS.getProtocolServerType());
-    assertEquals(xmppPS.getProtocolServerType(), "xmpp");
-  }
-
-  @Test
-  public void testSendMessage() throws Exception {
-    Message message = new Message("testMessage", "testTopic", null, xmppPS.getProtocolServerType());
-    xmppPS.sendMessage(message);
-    //Mockito.verify(xmppServerSpy).onMessageReceived(null, message.getTopic());
+  public void testProtocolServerType() {
+    assertEquals(xmppProtocolServer.getProtocolServerType(), "xmpp");
   }
 
 }
