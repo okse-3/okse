@@ -1,15 +1,17 @@
 package no.ntnu.okse.protocol.xmpp;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-import no.ntnu.okse.core.event.SubscriptionChangeEvent;
-import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
-import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.SmackException;
@@ -21,22 +23,26 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.iqregister.AccountManager;
 import org.jivesoftware.smackx.pubsub.AccessModel;
+import org.jivesoftware.smackx.pubsub.CollectionNode;
 import org.jivesoftware.smackx.pubsub.ConfigureForm;
 import org.jivesoftware.smackx.pubsub.Item;
+import org.jivesoftware.smackx.pubsub.ItemPublishEvent;
 import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.jivesoftware.smackx.pubsub.NodeType;
 import org.jivesoftware.smackx.pubsub.PayloadItem;
-import org.jivesoftware.smackx.pubsub.PubSubException.NotALeafNodeException;
 import org.jivesoftware.smackx.pubsub.PubSubException.NotAPubSubNodeException;
 import org.jivesoftware.smackx.pubsub.PubSubManager;
 import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
+import org.jivesoftware.smackx.pubsub.SubscribeForm;
+import org.jivesoftware.smackx.pubsub.SubscribeOptionFields;
+import org.jivesoftware.smackx.xdata.FormField;
 import org.jivesoftware.smackx.xdata.packet.DataForm.Type;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
-public class XMPPServer implements SubscriptionChangeListener {
+public class XMPPServer {
 
   private String host;
   private Integer port;
@@ -46,7 +52,6 @@ public class XMPPServer implements SubscriptionChangeListener {
   private XMPPProtocolServer protocolServer;
   private PubSubManager pubSubManager;
   private AbstractXMPPConnection connection;
-  private NewNodeListener nnListener;
 
   private Logger log = Logger.getLogger(XMPPServer.class);
 
@@ -68,20 +73,39 @@ public class XMPPServer implements SubscriptionChangeListener {
     this.jid = jid;
     this.password = password;
     this.protocolServer = protocolServer;
+    protocolServer.setServer(this);
 
     createConnection();
     logInToHost();
 
     try {
-      this.pubSubManager = PubSubManager.getInstance(connection, JidCreate.domainBareFrom("pubsub." + host));
+      this.pubSubManager = PubSubManager.getInstance(connection,
+          JidCreate.domainBareFrom("pubsub." + host));
     } catch (XmppStringprepException e) {
       e.printStackTrace();
     }
 
-    nnListener = new NewNodeListener(this, pubSubManager);
-    nnListener.run();
-
-    SubscriptionService.getInstance().addSubscriptionChangeListener(this);
+    try {
+      CollectionNode root = pubSubManager.getNode("");
+      SubscribeForm subForm = new SubscribeForm(Type.submit);
+      subForm.setDeliverOn(true);
+      subForm.setDigestOn(true);
+      subForm.setDigestFrequency(5000);
+      subForm.setIncludeBody(true);
+      FormField formField = new FormField(SubscribeOptionFields.subscription_depth.getFieldName());
+      formField.setType(FormField.Type.list_single);
+      formField.addValue("all");
+      subForm.addField(formField);
+      formField = new FormField(SubscribeOptionFields.subscription_type.getFieldName());
+      formField.setType(FormField.Type.list_single);
+      formField.addValue("items");
+      subForm.addField(formField);
+      root.addItemEventListener(this::onMessageReceived);
+      root.subscribe(connection.getUser().asEntityBareJidString(), subForm);
+    } catch (NoResponseException | XMPPErrorException | InterruptedException | NotConnectedException | NotAPubSubNodeException e) {
+      log.error("Could not subscribe to root node.");
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -95,10 +119,11 @@ public class XMPPServer implements SubscriptionChangeListener {
       connection.login(jid.getLocalpart(), password);
       log.info("Logged in successfully.");
     } catch (XMPPException e) {
-      log.error("Attempting to create user.");
+      log.info("Attempting to create user.");
       try {
         accountManager.createAccount(jid.getLocalpart(), password);
-      } catch (NoResponseException | XMPPErrorException | NotConnectedException | InterruptedException e1) {
+      } catch (NoResponseException | XMPPErrorException | NotConnectedException
+          | InterruptedException e1) {
         log.error("Could not create account.");
         e1.printStackTrace();
       }
@@ -133,13 +158,14 @@ public class XMPPServer implements SubscriptionChangeListener {
 
   /**
    * Sets up the {@link ConfigureForm} used when creating a new {@link LeafNode}
+   *
    * @return the configure form
    */
   private static ConfigureForm createNodeForm() {
     ConfigureForm form = new ConfigureForm(Type.submit);
     form.setAccessModel(AccessModel.open);
     form.setDeliverPayloads(true);
-    form.setPersistentItems(true);
+    form.setPersistentItems(false);
     form.setPublishModel(PublishModel.open);
     form.setNodeType(NodeType.leaf);
     return form;
@@ -147,7 +173,9 @@ public class XMPPServer implements SubscriptionChangeListener {
 
   /**
    * Sets up the XMPP connection over TCP.
-   * @param host, the host address to connect to as a {@link String} (needs to be parsable by {@link InetAddress#getByName})
+   *
+   * @param host, the host address to connect to as a {@link String} (needs to be parsable by {@link
+   * InetAddress#getByName})
    * @param port, the port number the service is running on as a {@link Integer}
    * @return A {@link XMPPTCPConnection}
    */
@@ -180,17 +208,15 @@ public class XMPPServer implements SubscriptionChangeListener {
    * Disconnects ongoing connections and shuts down the server
    */
   public void stopServer() {
-    nnListener.stopListener();
     connection.disconnect();
     log.info("XMPPServer closed");
   }
 
-
   /**
    * Create a {@link LeafNode} with a topic/ID. The node will be configured with what we set to be
-   * standard: an open PublishModel, so that everyone can subscribe to the node; an open
-   * AccessModel, so that everyone can subscribe to the node; not delivering payloads; and having
-   * persistent items.
+   * standard: an open PublishModel, so that everyone can publish to the node; an open AccessModel,
+   * so that everyone can subscribe to the node; not delivering payloads; and having persistent
+   * items.
    *
    * @param topic the ID of the created node as a {@link String}
    * @return a configured {@link LeafNode} with the given NodeID.
@@ -208,7 +234,8 @@ public class XMPPServer implements SubscriptionChangeListener {
    * @return a {@link LeafNode} of the matching topic
    */
   public LeafNode getLeafNode(String topic)
-      throws InterruptedException, NotAPubSubNodeException, NotConnectedException, NoResponseException, XMPPErrorException {
+      throws InterruptedException, NotAPubSubNodeException, NotConnectedException,
+      NoResponseException, XMPPErrorException {
     try {
       return pubSubManager.getNode(topic);
     } catch (XMPPErrorException e) {
@@ -218,7 +245,6 @@ public class XMPPServer implements SubscriptionChangeListener {
 
   }
 
-
   /**
    * Sends the Message to a node with the messages topic
    *
@@ -227,54 +253,8 @@ public class XMPPServer implements SubscriptionChangeListener {
   public void sendMessage(Message message) throws XMPPErrorException, NotConnectedException,
       InterruptedException, NoResponseException, NotAPubSubNodeException {
     LeafNode node = getLeafNode(message.getTopic());
-    subscribeToNode(node);
     node.publish(messageToPayloadItem(message));
     log.debug("Distributed messages with topic: " + message.getTopic());
-  }
-
-
-  /**
-   * Sets up a subscription to a node by adding an event listener
-   *
-   * @param node, the {@link LeafNode} to subscribe to
-   */
-  public void subscribeToNode(LeafNode node)
-      throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
-    log.debug(String.format("Subscribing to %s ", node.getId()));
-    PubSubListener listener = new PubSubListener<PayloadItem>(this, node.getId());
-    node.addItemEventListener(listener);
-    node.subscribe(connection.getUser().asEntityBareJidString());
-    log.debug(String.format("Successfully subscribed to %s ", node.getId()));
-  }
-
-  /**
-   * Fetches and subscribes to a node with the given topic
-   *
-   * @param topic, a topic/ID as a {@link String}
-   */
-  public void subscribeToTopic(String topic)
-      throws NotConnectedException, InterruptedException, NoResponseException, XMPPErrorException, NotALeafNodeException {
-    subscribeToNode(pubSubManager.getOrCreateLeafNode(topic));
-  }
-
-  /**
-   * Removes a subscription on the given topic
-   * @param topic, the topic id as a {@link String}
-   */
-  public void unsubscribeFromTopic(String topic)
-      throws InterruptedException, NotALeafNodeException, XMPPErrorException, NotConnectedException, NoResponseException, NotAPubSubNodeException {
-    unsubscribeFromNode(pubSubManager.getLeafNode(topic));
-  }
-
-  /**
-   * Removes a subscription on the given topic node
-   * @param node, the topic node as a {@link LeafNode}
-   */
-  public void unsubscribeFromNode(LeafNode node)
-      throws XMPPErrorException, NotConnectedException, InterruptedException, NoResponseException {
-    log.debug(String.format("Unsubscribing from %s ", node.getId()));
-    node.unsubscribe(connection.getUser().asEntityBareJidString());
-    log.debug(String.format("Successfully unsubscribed from %s ", node.getId()));
   }
 
   /**
@@ -285,8 +265,15 @@ public class XMPPServer implements SubscriptionChangeListener {
    * @return a {@link Message} object containing the payload data, topic and protocol origin
    */
   private Message payloadItemToMessage(PayloadItem pi, String topic) {
-    return new Message(pi.getPayload().toString(), topic, null,
-        protocolServer.getProtocolServerType());
+    try {
+      String content = new SAXBuilder()
+          .build(new ByteArrayInputStream(pi.getPayload().toXML().toString().getBytes("UTF-8")))
+          .getRootElement().getValue();
+      return new Message(content, topic, null, protocolServer.getProtocolServerType());
+    } catch (JDOMException | IOException e) {
+      log.info("Could not get message content");
+    }
+    return null;
   }
 
   /**
@@ -298,47 +285,65 @@ public class XMPPServer implements SubscriptionChangeListener {
    */
   private PayloadItem<SimplePayload> messageToPayloadItem(Message message) {
     SimplePayload payload = new SimplePayload(message.getTopic(),
-        host + "/" + message.getTopic(), message.getMessage());
-    return new PayloadItem<>(payload);
+        host + "/" + message.getTopic(),
+        String.format("<body from='%s'>%s</body>", jid.toString(), message.getMessage()));
+    return new PayloadItem<>(generateItemID(), payload);
+  }
+
+  /**
+   * Generates a pseudo random unique id for use in PayloadItems. Use current time to generate
+   * unique ids, with a random number to separate ids within a single millisecond
+   *
+   * @return Pseudo random id
+   */
+  private String generateItemID() {
+    return String.format("id*%f*%d", Math.random(), System.currentTimeMillis());
   }
 
   /**
    * Forwards a received message to the OKSE core to be distributed and updates the tracked
    * information
    *
-   * @param itemList, a list of {@link Item} objects passed on from the event listener
-   * @param topic, the {@link String} of the node that sent the payload
+   * @param event, the publish event containing messages
    */
-  public void onMessageReceived(List<Item> itemList, String topic) {
-    log.debug("Received a message with topic: " + topic);
+  private void onMessageReceived(ItemPublishEvent event) {
+    List<Item> itemList = event.getItems();
     for (Item item : itemList) {
-      if (item instanceof PayloadItem) {
-        MessageService.getInstance().distributeMessage(
-            payloadItemToMessage((PayloadItem) item, topic));
-        log.debug("Redistributed message with topic: " + topic);
-        protocolServer.incrementTotalMessagesReceived();
-        protocolServer.incrementTotalRequests();
-
+      if (item instanceof PayloadItem && !isOwner((PayloadItem) item)) {
+        PayloadItem message = (PayloadItem) item;
+        String topic = message.getNode();
+        log.debug("Received a message with topic: " + topic);
+        Message systemMessage = payloadItemToMessage(message, topic);
+        if (systemMessage != null) {
+          MessageService.getInstance().distributeMessage(
+              payloadItemToMessage(message, topic));
+          log.debug("Redistributed message with topic: " + topic);
+          protocolServer.incrementTotalMessagesReceived();
+          protocolServer.incrementTotalRequests();
+        } else {
+          log.warn("Received message with malformed content");
+          protocolServer.incrementTotalBadRequest();
+        }
       }
     }
   }
 
   /**
-   * Delegates subscription events received from other protocols to the corresponding methods
-   * @param e, the {@link SubscriptionChangeEvent} to handle
+   * Checks if the server owns the item
+   *
+   * @param item The item to check
+   * @return A boolean indicating if the server owns the item
    */
-  @Override
-  public void subscriptionChanged(SubscriptionChangeEvent e) {
-    if (e.getData().getOriginProtocol().equals(XMPPProtocolServer.SERVERTYPE)) {
-      if (e.getType() == SubscriptionChangeEvent.Type.UNSUBSCRIBE) {
-        try {
-          log.debug("Unsubscribe event received");
-          unsubscribeFromTopic(e.getData().getTopic());
-        } catch (InterruptedException | NotALeafNodeException | XMPPErrorException | NoResponseException | NotConnectedException | NotAPubSubNodeException e1) {
-          e1.printStackTrace();
-        }
-        //TODO logging and docs
-      }
+  private boolean isOwner(PayloadItem item) {
+    SAXBuilder saxBuilder = new SAXBuilder();
+    try {
+      Document document = saxBuilder
+          .build(new ByteArrayInputStream(item.getPayload().toXML().toString().getBytes("UTF-8")));
+      return document.getRootElement().getAttribute("from").getValue()
+          .equals(jid.toString());
+    } catch (JDOMException | IOException | NullPointerException e) {
+      return false;
     }
   }
+
 }

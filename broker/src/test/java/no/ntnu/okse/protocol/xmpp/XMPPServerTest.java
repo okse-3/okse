@@ -1,33 +1,52 @@
 package no.ntnu.okse.protocol.xmpp;
 
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.lang.reflect.Method;
+import no.ntnu.okse.OpenfireXMPPServerFactory;
 import no.ntnu.okse.clients.xmpp.XMPPClient;
 import no.ntnu.okse.core.messaging.Message;
+import org.mockito.InjectMocks;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class XMPPServerTest {
 
-  XMPPServer server;
-  XMPPProtocolServer ps;
-  XMPPClient client;
+  @InjectMocks
+  private XMPPProtocolServer ps;
+  private XMPPClient client;
+  private XMPPServer server;
 
   @BeforeMethod
   public void setUp() throws Exception {
+    OpenfireXMPPServerFactory.start();
+    // Make sure the server starts
+    Thread.sleep(5000);
     ps = new XMPPProtocolServer("localhost", 5222, "okse@localhost", "pass");
     ps.boot();
-    server = ((XMPPServer) ps.getClass().getField("server").get(ps));
-    client = new XMPPClient("testClient", "localhost", 5222);
+    Thread.sleep(3000);
+    server = ps.getServer();
+
+    client = new XMPPClient("localhost", 5222);
+    client.connect();
   }
 
   @AfterMethod
-  private void tearDown() throws Exception {
-    client = null;
+  private void tearDown() {
+    client.disconnect();
     ps.stopServer();
+    OpenfireXMPPServerFactory.stop();
+  }
+
+  @Test
+  public void bootServerTest() {
+    assertTrue(OpenfireXMPPServerFactory.isRunning());
+    assertTrue(ps.isRunning());
+    assertNotNull(server);
   }
 
   @Test
@@ -35,27 +54,15 @@ public class XMPPServerTest {
     assertNotNull(server.getLeafNode("testTopic"));
   }
 
+
   @Test
   public void testCreateAndSendMessage() throws Exception {
-    server.subscribeToTopic("testTopic");
     client.subscribe("testTopic");
-    int oldCount = client.messageCounter;
-    server.sendMessage(new Message("testMessage", "testTopic", null, ps.getProtocolServerType()));
-    assertTrue(client.messageCounter == oldCount + 1);
+    Method sendMessage = XMPPServer.class.getDeclaredMethod("sendMessage", Message.class);
+    sendMessage.setAccessible(true);
+    sendMessage
+        .invoke(server, new Message("testMessage", "testTopic", null, ps.getProtocolServerType()));
+    Thread.sleep(1000);
+    assertEquals(client.messageCounter, 1);
   }
-
-  @Test
-  public void testSubscribeUnsubscribeToNode() throws Exception {
-    ConcurrentHashMap listenerMap = (ConcurrentHashMap) server.getClass().getField("listenerMap").get(server);
-    server.subscribeToTopic("testTopic");
-    assertTrue(listenerMap.get("testTopic") != null);
-  }
-
-  @Test
-  public void testOnMessageReceived() throws Exception {
-    server.subscribeToTopic("testTopic");
-    client.publish("testTopic", "testMessage");
-
-  }
-
 }
