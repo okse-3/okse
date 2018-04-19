@@ -1,9 +1,12 @@
 package no.ntnu.okse.protocol;
 
+import no.ntnu.okse.OpenfireXMPPServerFactory;
 import no.ntnu.okse.clients.amqp091.AMQP091Callback;
 import no.ntnu.okse.clients.stomp.StompCallback;
 import no.ntnu.okse.clients.stomp.StompClient;
+import no.ntnu.okse.clients.xmpp.XMPPClient;
 import no.ntnu.okse.core.CoreService;
+import no.ntnu.okse.core.Utilities;
 import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.SubscriptionService;
@@ -12,10 +15,15 @@ import no.ntnu.okse.clients.amqp.AMQPClient;
 import no.ntnu.okse.clients.amqp091.AMQP091Client;
 import no.ntnu.okse.clients.mqtt.MQTTClient;
 import no.ntnu.okse.clients.wsn.WSNClient;
+import no.ntnu.okse.protocol.xmpp.XMPPProtocolServer;
+import no.ntnu.okse.protocol.xmpp.XMPPProtocolServerUtil;
+import no.ntnu.okse.protocol.xmpp.XMPPServer;
 import org.apache.cxf.wsn.client.Consumer;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.jivesoftware.openfire.net.XMPPCallbackHandler;
 import org.testng.annotations.*;
+import static org.testng.Assert.*;
 
 import java.io.InputStream;
 
@@ -25,10 +33,11 @@ public class MessageSendingTest {
 
   private SubscriptionChangeListener subscriptionMock;
   private final SubscriptionService subscriptionService = SubscriptionService.getInstance();
+  private CoreService cs;
 
   @BeforeClass
-  public void classSetUp() throws InterruptedException {
-    CoreService cs = CoreService.getInstance();
+  public void classSetUp() throws Exception {
+    cs = CoreService.getInstance();
 
     cs.registerService(MessageService.getInstance());
     cs.registerService(subscriptionService);
@@ -39,8 +48,12 @@ public class MessageSendingTest {
     cs.bootProtocolServers();
     cs.boot();
 
+    //XMPP setup
+    Utilities.createConfigDirectoryAndFilesIfNotExists();
+    OpenfireXMPPServerFactory.start();
+
     // Make sure servers have booted properly
-    Thread.sleep(3000);
+    Thread.sleep(5000);
   }
 
   @BeforeMethod
@@ -53,6 +66,16 @@ public class MessageSendingTest {
   public void tearDown() {
     subscriptionService.removeAllListeners();
   }
+
+  @AfterClass
+  public void tearDownClass(){
+    try {
+      OpenfireXMPPServerFactory.stop();
+    } catch (Exception e) { }
+    try {
+      XMPPProtocolServerUtil.stop();
+    } catch (Exception e){ }
+    }
 
   @Test
   public void mqttToMqtt() throws Exception {
@@ -148,8 +171,39 @@ public class MessageSendingTest {
   }
 
   @Test
+  public void xmppToXmpp() throws Exception{
+    XMPPProtocolServer ps = new XMPPProtocolServer("localhost", 5222, "okse@localhost", "pass");
+    ps.boot();
+    Thread.sleep(1000);
+    XMPPServer server = ps.getServer();
+
+    XMPPClient client1 = new XMPPClient("localhost", 5222, "okse1@localhost");
+    XMPPClient client2 = new XMPPClient("localhost", 5222, "okse2@localhost");
+    client1.connect();
+    client2.connect();
+    client1.subscribe("SujetDeTest");
+    client2.subscribe("SujetDeTest");
+    client1.publish("SujetDeTest", "This is a test message.");
+    client1.publish("SujetDeTest", "This is a test messagex.");
+    client2.publish("SujetDeTest", "This is a test message.");
+
+    Thread.sleep(1000);
+
+    assertEquals(client1.messageCounter, 3);
+    assertEquals(client2.messageCounter,  3);
+
+    server.stopServer();
+    client1.unsubscribe("SujetDeTest");
+    client2.unsubscribe("SujetDeTest");
+    client1.disconnect();
+    client2.disconnect();
+  }
+
+
+  @Test
   public void allToAll() throws Exception {
-    int numberOfProtocols = 5;
+    int numberOfProtocols = 6;
+    int protocolsNotSupportingCallbackMocking = 1;
     // WSN
     WSNClient wsnClient = new WSNClient();
     Consumer.Callback wsnCallback = mock(Consumer.Callback.class);
@@ -177,12 +231,26 @@ public class MessageSendingTest {
     StompCallback stompCallback = mock(StompCallback.class);
     stompClient.setCallback(stompCallback);
 
+    // XMPP
+
+    // Make sure the server starts
+    XMPPProtocolServer ps = new XMPPProtocolServer("localhost", 5222, "okse@localhost", "pass");
+    ps.boot();
+    XMPPServer server = ps.getServer();
+    Thread.sleep(1000);
+    assertTrue(OpenfireXMPPServerFactory.isRunning());
+    Thread.sleep(1000);
+    XMPPClient xmppClient = new XMPPClient("localhost", 5222, "okse1@localhost");
+
     // Connecting
     mqttClient.connect();
     amqp091Client.connect();
     amqpClient.connect();
     amqpSender.connect();
     stompClient.connect();
+    xmppClient.connect();
+
+    Thread.sleep(300);
 
     // Subscribing
     wsnClient.subscribe("all", "localhost", 9002);
@@ -190,10 +258,14 @@ public class MessageSendingTest {
     amqp091Client.subscribe("all");
     amqpClient.subscribe("all");
     stompClient.subscribe("all");
+    xmppClient.subscribe("all");
 
-    verify(subscriptionMock, timeout(500).atLeast(numberOfProtocols)).subscriptionChanged(any());
+    Thread.sleep(300);
+
+    verify(subscriptionMock, timeout(500).atLeast(numberOfProtocols-protocolsNotSupportingCallbackMocking)).subscriptionChanged(any());
 
     // Publishing
+    xmppClient.publish("all", "XMPP");
     wsnClient.publish("all", "WSN");
     mqttClient.publish("all", "MQTT");
     amqp091Client.publish("all", "AMQP 0.9.1");
@@ -201,7 +273,7 @@ public class MessageSendingTest {
     stompClient.publish("all", "STOMP");
 
     // Wait for messages to arrive
-    Thread.sleep(2000);
+    Thread.sleep(3000);
 
     // Unsubscribing/disconnecting
     wsnClient.unsubscribe("all");
@@ -210,13 +282,16 @@ public class MessageSendingTest {
     amqpClient.disconnect();
     amqpSender.disconnect();
     stompClient.disconnect();
+    xmppClient.unsubscribe("all");
+    xmppClient.disconnect();
 
     // Verifying that all messages were sent
     verify(amqpCallback, times(numberOfProtocols)).onReceive(any());
-    verify(mqttCallback, times(numberOfProtocols))
-        .messageArrived(anyString(), any(MqttMessage.class));
+    verify(mqttCallback, times(numberOfProtocols)).messageArrived(anyString(), any(MqttMessage.class));
     verify(amqp091Callback, times(numberOfProtocols)).messageReceived(any(), any());
     verify(wsnCallback, times(numberOfProtocols)).notify(any());
+    assertEquals(xmppClient.messageCounter, numberOfProtocols);
     verify(stompCallback, times(numberOfProtocols)).messageReceived(any());
+
   }
 }
