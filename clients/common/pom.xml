@@ -110,6 +110,11 @@
             <artifactId>smack-java7</artifactId>
             <version>4.2.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.eclipse.paho</groupId>
+            <artifactId>MQTT-SN-UDP-Client</artifactId>
+            <version>1.1.1-OKSE</version>
+        </dependency>
     </dependencies>
 
     <repositories>

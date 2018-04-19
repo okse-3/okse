@@ -20,6 +20,8 @@
         <module>stomp-publisher</module>
         <module>xmpp-subscriber</module>
         <module>xmpp-publisher</module>
+        <module>mqtt-sn-subscriber</module>
+        <module>mqtt-sn-publisher</module>
     </modules>
     <packaging>pom</packaging>
 

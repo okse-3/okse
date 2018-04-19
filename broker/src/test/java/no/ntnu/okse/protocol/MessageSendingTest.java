@@ -1,14 +1,10 @@
 package no.ntnu.okse.protocol;
 
-import no.ntnu.okse.OpenfireXMPPServerFactory;
 import no.ntnu.okse.clients.amqp091.AMQP091Callback;
+import no.ntnu.okse.clients.mqttsn.MQTTSNClient;
 import no.ntnu.okse.clients.stomp.StompCallback;
 import no.ntnu.okse.clients.stomp.StompClient;
 import no.ntnu.okse.clients.xmpp.XMPPClient;
-import no.ntnu.okse.core.CoreService;
-import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
-import no.ntnu.okse.core.messaging.MessageService;
-import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.clients.amqp.AMQPCallback;
 import no.ntnu.okse.clients.amqp.AMQPClient;
 import no.ntnu.okse.clients.amqp091.AMQP091Client;
@@ -17,53 +13,16 @@ import no.ntnu.okse.clients.wsn.WSNClient;
 import org.apache.cxf.wsn.client.Consumer;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.mqttsn.udpclient.SimpleMqttsCallback;
 import org.testng.annotations.*;
-import static org.testng.Assert.*;
 
-import java.io.InputStream;
+import static org.testng.Assert.*;
 
 import static org.mockito.Mockito.*;
 
-public class MessageSendingTest {
 
-  private SubscriptionChangeListener subscriptionMock;
-  private final SubscriptionService subscriptionService = SubscriptionService.getInstance();
-  private CoreService cs;
+public class MessageSendingTest extends FullMessageFunctionalityTest {
 
-  @BeforeClass
-  public void classSetUp() throws Exception {
-    OpenfireXMPPServerFactory.start();
-    Thread.sleep(5000);
-
-    cs = CoreService.getInstance();
-
-    cs.registerService(MessageService.getInstance());
-    cs.registerService(subscriptionService);
-
-    InputStream resourceAsStream = CoreService.class
-        .getResourceAsStream("/config/protocolservers.xml");
-    cs.bootProtocolServers(resourceAsStream);
-    cs.bootProtocolServers();
-    cs.boot();
-
-    Thread.sleep(5000);
-  }
-
-  @BeforeMethod
-  public void setUp() {
-    subscriptionMock = mock(SubscriptionChangeListener.class);
-    subscriptionService.addSubscriptionChangeListener(subscriptionMock);
-  }
-
-  @AfterMethod
-  public void tearDown() {
-    subscriptionService.removeAllListeners();
-  }
-
-  @AfterClass
-  public void tearDownClass() {
-    OpenfireXMPPServerFactory.stop();
-  }
 
   @Test
   public void mqttToMqtt() throws Exception {
@@ -82,6 +41,27 @@ public class MessageSendingTest {
     subscriber.disconnect();
     publisher.disconnect();
     verify(callback).messageArrived(anyString(), any(MqttMessage.class));
+  }
+
+  @Test
+  public void mqttSNToMqttSN() throws Exception {
+    MQTTSNClient subscriber = new MQTTSNClient("localhost", 20000);
+    MQTTSNClient publisher = new MQTTSNClient("localhost", 20000);
+
+    subscriber.connect();
+    publisher.connect();
+
+    SimpleMqttsCallback callback = mock(SimpleMqttsCallback.class);
+    subscriber.setCallback(callback);
+    subscriber.subscribe("mqtt-sn");
+
+    verify(subscriptionMock, timeout(500).atLeastOnce()).subscriptionChanged(any());
+
+    publisher.publish("mqtt-sn", "Text content");
+    Thread.sleep(2000);
+    verify(callback).publishArrived(anyBoolean(), anyInt(), anyString(), any());
+    publisher.disconnect();
+    subscriber.disconnect();
   }
 
   @Test
@@ -159,7 +139,7 @@ public class MessageSendingTest {
   }
 
   @Test
-  public void xmppToXmpp() throws Exception{
+  public void xmppToXmpp() throws Exception {
     XMPPClient client1 = new XMPPClient("localhost", 5222, "okse1@localhost");
     XMPPClient client2 = new XMPPClient("localhost", 5222, "okse2@localhost");
     client1.connect();
@@ -173,7 +153,7 @@ public class MessageSendingTest {
     Thread.sleep(1000);
 
     assertEquals(client1.messageCounter, 3);
-    assertEquals(client2.messageCounter,  3);
+    assertEquals(client2.messageCounter, 3);
 
     client1.unsubscribe("xmpp");
     client2.unsubscribe("xmpp");
@@ -184,8 +164,7 @@ public class MessageSendingTest {
 
   @Test
   public void allToAll() throws Exception {
-    int numberOfProtocols = 6;
-
+    int numberOfProtocols = 7;
     // WSN
     WSNClient wsnClient = new WSNClient();
     Consumer.Callback wsnCallback = mock(Consumer.Callback.class);
@@ -195,6 +174,11 @@ public class MessageSendingTest {
     MQTTClient mqttClient = new MQTTClient("localhost", 1883, "clientAll");
     MqttCallback mqttCallback = mock(MqttCallback.class);
     mqttClient.setCallback(mqttCallback);
+
+    // MQTT-SN
+    MQTTSNClient mqttsnClient = new MQTTSNClient("localhost", 20000);
+    SimpleMqttsCallback mqttsnCallback = mock(SimpleMqttsCallback.class);
+    mqttsnClient.setCallback(mqttsnCallback);
 
     // AMQP 0.9.1
     AMQP091Client amqp091Client = new AMQP091Client();
@@ -218,6 +202,7 @@ public class MessageSendingTest {
 
     // Connecting
     mqttClient.connect();
+    mqttsnClient.connect();
     amqp091Client.connect();
     amqpClient.connect();
     amqpSender.connect();
@@ -229,6 +214,7 @@ public class MessageSendingTest {
     // Subscribing
     wsnClient.subscribe("all", "localhost", 9002);
     mqttClient.subscribe("all");
+    mqttsnClient.subscribe("all");
     amqp091Client.subscribe("all");
     amqpClient.subscribe("all");
     stompClient.subscribe("all");
@@ -237,12 +223,14 @@ public class MessageSendingTest {
     Thread.sleep(300);
 
     // Due to the nature of the XMPP setup, the protocol does not update the subscription service
-    verify(subscriptionMock, timeout(500).atLeast(numberOfProtocols - 1)).subscriptionChanged(any());
+    verify(subscriptionMock, timeout(500).atLeast(numberOfProtocols - 1))
+        .subscriptionChanged(any());
 
     // Publishing
     xmppClient.publish("all", "XMPP");
     wsnClient.publish("all", "WSN");
     mqttClient.publish("all", "MQTT");
+    mqttsnClient.publish("all", "MQTT-SN");
     amqp091Client.publish("all", "AMQP 0.9.1");
     amqpSender.publish("all", "AMQP 1.0");
     stompClient.publish("all", "STOMP");
@@ -253,6 +241,7 @@ public class MessageSendingTest {
     // Unsubscribing/disconnecting
     wsnClient.unsubscribe("all");
     mqttClient.disconnect();
+    mqttsnClient.disconnect();
     amqp091Client.disconnect();
     amqpClient.disconnect();
     amqpSender.disconnect();
@@ -262,7 +251,11 @@ public class MessageSendingTest {
 
     // Verifying that all messages were sent
     verify(amqpCallback, times(numberOfProtocols)).onReceive(any());
-    verify(mqttCallback, times(numberOfProtocols)).messageArrived(anyString(), any(MqttMessage.class));
+    verify(mqttCallback, times(numberOfProtocols))
+        .messageArrived(anyString(), any(MqttMessage.class));
+    // MQTT-SN test client will not receive its own messages to a topic it is subscribed to
+    verify(mqttsnCallback, times(numberOfProtocols - 1))
+        .publishArrived(anyBoolean(), anyInt(), anyString(), any());
     verify(amqp091Callback, times(numberOfProtocols)).messageReceived(any(), any());
     verify(wsnCallback, times(numberOfProtocols)).notify(any());
     assertEquals(xmppClient.messageCounter, numberOfProtocols);

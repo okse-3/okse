@@ -24,6 +24,8 @@
 
 package no.ntnu.okse.core;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -33,9 +35,11 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.IntStream;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import no.ntnu.okse.Application;
+import no.ntnu.okse.EclipsePahoMQTTSNGateway;
 import no.ntnu.okse.OpenfireXMPPServerFactory;
 import no.ntnu.okse.core.event.Event;
 import no.ntnu.okse.core.event.SystemEvent;
@@ -46,6 +50,8 @@ import no.ntnu.okse.core.topic.TopicService;
 import no.ntnu.okse.protocol.ProtocolServer;
 import no.ntnu.okse.protocol.ProtocolServerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -61,8 +67,9 @@ public class CoreService extends AbstractCoreService {
   private ExecutorService executor;
   private HashSet<AbstractCoreService> services;
   private ArrayList<ProtocolServer> protocolServers;
+  private ArrayList<String> secondaryServers = new ArrayList<>();
   private Properties config;
-  public static boolean protocolServersBooted = false;
+  public static boolean protocolServersBooted = false, secondaryServersBooted;
 
   /**
    * Constructs the CoreService instance. Constructor is private due to the singleton pattern used
@@ -158,6 +165,17 @@ public class CoreService extends AbstractCoreService {
     this.registerListenerSupportForAllCoreServices();
     log.info("Completed setting up listener support for all core services");
 
+    // Sleep for 1 second to allow the primary protocol servers to start up, as the secondary
+    // protocol servers are dependent on the primary protocol servers
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    log.info("Booting secondary protocol servers");
+    bootSecondaryServers();
+    log.info("Completed booting secondary protocol servers");
+
     log.info("OKSE " + Application.VERSION + " booted in " + Utilities
         .getDurationAsISO8601(Application.getRunningTime()));
 
@@ -170,7 +188,7 @@ public class CoreService extends AbstractCoreService {
         if (e.getType().equals(SystemEvent.Type.SHUTDOWN_PROTOCOL_SERVERS)) {
           stopAllProtocolServers();
         }
-          // Are we booting protocol servers?
+        // Are we booting protocol servers?
         else if (e.getType().equals(SystemEvent.Type.BOOT_PROTOCOL_SERVERS)) {
           bootProtocolServers();
         }
@@ -430,9 +448,12 @@ public class CoreService extends AbstractCoreService {
     }
 
     // Iterate over all protocol servers and initiate shutdown process
+    stopSecondaryServers();
+    secondaryServers.clear();
     getAllProtocolServers().forEach(ProtocolServer::stopServer);
     getAllProtocolServers().clear();
     protocolServersBooted = false;
+    secondaryServersBooted = false;
 
     // Let the thread wait a bit, for tasks to be completed.
     try {
@@ -537,6 +558,77 @@ public class CoreService extends AbstractCoreService {
       }
     }
     protocolServersBooted = true;
+  }
+
+  /**
+   * Boots all secondary servers from the default config file
+   */
+  private void bootSecondaryServers() {
+    try {
+      bootSecondaryServers(new FileInputStream("config/protocolservers.xml"));
+    } catch (FileNotFoundException e) {
+      log.error("config/protocolservers.xml not found");
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Boot all secondary servers in the supplied input stream
+   *
+   * @param configStream An input stream representing the config file for the servers
+   */
+  private void bootSecondaryServers(InputStream configStream) {
+    if (secondaryServersBooted) {
+      return;
+    }
+    secondaryServersBooted = true;
+    try {
+      Document cfg = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(configStream);
+      NodeList servers = cfg.getElementsByTagName("secondaryServer");
+      if (servers != null) {
+        IntStream
+            .range(0, servers.getLength())
+            .forEach(serverIndex -> bootSecondaryServer(servers.item(serverIndex)));
+      }
+    } catch (SAXException | ParserConfigurationException | IOException e) {
+      log.error("ProtocolServer configuration parsing error, message: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Boots a specific secondary server
+   *
+   * @param secondaryServer The node representing the secondary server
+   */
+  private void bootSecondaryServer(Node secondaryServer) {
+    NamedNodeMap attributes = secondaryServer.getAttributes();
+    if (attributes.getNamedItem("type") != null) {
+      switch (attributes.getNamedItem("type").getNodeValue()) {
+        case "mqtt-sn":
+          EclipsePahoMQTTSNGateway.start();
+          break;
+        default:
+          // Default cases should not be added to the list of current secondary servers
+          return;
+      }
+      secondaryServers.add(attributes.getNamedItem("type").getNodeValue());
+    }
+
+  }
+
+  /**
+   * Stops all secondary servers
+   */
+  private void stopSecondaryServers() {
+    secondaryServers.forEach(serverName -> {
+      switch (serverName) {
+        case "mqtt-sn":
+          EclipsePahoMQTTSNGateway.stop();
+          break;
+        default:
+          break;
+      }
+    });
   }
 
 

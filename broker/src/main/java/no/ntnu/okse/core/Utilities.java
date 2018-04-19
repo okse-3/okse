@@ -61,7 +61,9 @@ public class Utilities {
       "config/okse.properties",
       "config/log4j.properties",
       "config/topicmapping.properties",
-      "config/protocolservers.xml"
+      "config/protocolservers.xml",
+      "config/gateway.properties",
+      "config/predefinedTopics.properties",
   };
 
   protected static final String configFolders[] = {
