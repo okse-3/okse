@@ -87,6 +87,11 @@
             <artifactId>stampy-MINA-client-server-RI</artifactId>
             <version>RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>com.eclipse.paho</groupId>
+            <artifactId>MQTT-SN-UDP-Client</artifactId>
+            <version>1.1.1-OKSE</version>
+        </dependency>
     </dependencies>
 
     <repositories>
