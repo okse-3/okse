@@ -90,7 +90,7 @@
         <dependency>
             <groupId>com.eclipse.paho</groupId>
             <artifactId>MQTT-SN-UDP-Client</artifactId>
-            <version>1.0.1-OKSE</version>
+            <version>1.1.1-OKSE</version>
         </dependency>
     </dependencies>
 
