@@ -44,12 +44,14 @@ import org.ntnunotif.wsnu.base.util.Log;
 import java.io.File;
 import java.time.Duration;
 import java.util.Properties;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+@SpringBootApplication
 public class Application {
 
   // Version
