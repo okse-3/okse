@@ -2,16 +2,13 @@ package no.ntnu.okse.protocol;
 
 import static org.mockito.Mockito.mock;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import no.ntnu.okse.OpenfireXMPPServerFactory;
 import no.ntnu.okse.core.CoreService;
 import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.SubscriptionService;
-import org.jivesoftware.smackx.bytestreams.ibb.packet.Open;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -38,7 +35,7 @@ public class FullMessageFunctionalityTest {
     cs.bootProtocolServers();
 
     // Wait for protocol servers to boot
-    Thread.sleep(1000);
+    Thread.sleep(3000);
 
     Method bootSecondaryServers = CoreService.class.getDeclaredMethod("bootSecondaryServers");
     bootSecondaryServers.setAccessible(true);
