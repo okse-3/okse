@@ -4,6 +4,7 @@ import no.ntnu.okse.clients.amqp091.AMQP091Callback;
 import no.ntnu.okse.clients.mqttsn.MQTTSNClient;
 import no.ntnu.okse.clients.stomp.StompCallback;
 import no.ntnu.okse.clients.stomp.StompClient;
+import no.ntnu.okse.clients.xmpp.XMPPClient;
 import no.ntnu.okse.clients.amqp.AMQPCallback;
 import no.ntnu.okse.clients.amqp.AMQPClient;
 import no.ntnu.okse.clients.amqp091.AMQP091Client;
@@ -15,9 +16,13 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.mqttsn.udpclient.SimpleMqttsCallback;
 import org.testng.annotations.*;
 
+import static org.testng.Assert.*;
+
 import static org.mockito.Mockito.*;
 
+
 public class MessageSendingTest extends FullMessageFunctionalityTest {
+
 
   @Test
   public void mqttToMqtt() throws Exception {
@@ -134,8 +139,32 @@ public class MessageSendingTest extends FullMessageFunctionalityTest {
   }
 
   @Test
+  public void xmppToXmpp() throws Exception {
+    XMPPClient client1 = new XMPPClient("localhost", 5222, "okse1@localhost");
+    XMPPClient client2 = new XMPPClient("localhost", 5222, "okse2@localhost");
+    client1.connect();
+    client2.connect();
+    client1.subscribe("xmpp");
+    client2.subscribe("xmpp");
+    client1.publish("xmpp", "This is a test message.");
+    client1.publish("xmpp", "This is a test message.");
+    client2.publish("xmpp", "This is a test message.");
+
+    Thread.sleep(1000);
+
+    assertEquals(client1.messageCounter, 3);
+    assertEquals(client2.messageCounter, 3);
+
+    client1.unsubscribe("xmpp");
+    client2.unsubscribe("xmpp");
+    client1.disconnect();
+    client2.disconnect();
+  }
+
+
+  @Test
   public void allToAll() throws Exception {
-    int numberOfProtocols = 6;
+    int numberOfProtocols = 7;
     // WSN
     WSNClient wsnClient = new WSNClient();
     Consumer.Callback wsnCallback = mock(Consumer.Callback.class);
@@ -168,6 +197,9 @@ public class MessageSendingTest extends FullMessageFunctionalityTest {
     StompCallback stompCallback = mock(StompCallback.class);
     stompClient.setCallback(stompCallback);
 
+    // XMPP
+    XMPPClient xmppClient = new XMPPClient("localhost", 5222, "okse1@localhost");
+
     // Connecting
     mqttClient.connect();
     mqttsnClient.connect();
@@ -175,6 +207,9 @@ public class MessageSendingTest extends FullMessageFunctionalityTest {
     amqpClient.connect();
     amqpSender.connect();
     stompClient.connect();
+    xmppClient.connect();
+
+    Thread.sleep(300);
 
     // Subscribing
     wsnClient.subscribe("all", "localhost", 9002);
@@ -183,10 +218,16 @@ public class MessageSendingTest extends FullMessageFunctionalityTest {
     amqp091Client.subscribe("all");
     amqpClient.subscribe("all");
     stompClient.subscribe("all");
+    xmppClient.subscribe("all");
 
-    verify(subscriptionMock, timeout(500).atLeast(numberOfProtocols)).subscriptionChanged(any());
+    Thread.sleep(300);
+
+    // Due to the nature of the XMPP setup, the protocol does not update the subscription service
+    verify(subscriptionMock, timeout(500).atLeast(numberOfProtocols - 1))
+        .subscriptionChanged(any());
 
     // Publishing
+    xmppClient.publish("all", "XMPP");
     wsnClient.publish("all", "WSN");
     mqttClient.publish("all", "MQTT");
     mqttsnClient.publish("all", "MQTT-SN");
@@ -195,7 +236,7 @@ public class MessageSendingTest extends FullMessageFunctionalityTest {
     stompClient.publish("all", "STOMP");
 
     // Wait for messages to arrive
-    Thread.sleep(2000);
+    Thread.sleep(3000);
 
     // Unsubscribing/disconnecting
     wsnClient.unsubscribe("all");
@@ -205,6 +246,8 @@ public class MessageSendingTest extends FullMessageFunctionalityTest {
     amqpClient.disconnect();
     amqpSender.disconnect();
     stompClient.disconnect();
+    xmppClient.unsubscribe("all");
+    xmppClient.disconnect();
 
     // Verifying that all messages were sent
     verify(amqpCallback, times(numberOfProtocols)).onReceive(any());
@@ -215,6 +258,7 @@ public class MessageSendingTest extends FullMessageFunctionalityTest {
         .publishArrived(anyBoolean(), anyInt(), anyString(), any());
     verify(amqp091Callback, times(numberOfProtocols)).messageReceived(any(), any());
     verify(wsnCallback, times(numberOfProtocols)).notify(any());
+    assertEquals(xmppClient.messageCounter, numberOfProtocols);
     verify(stompCallback, times(numberOfProtocols)).messageReceived(any());
   }
 }

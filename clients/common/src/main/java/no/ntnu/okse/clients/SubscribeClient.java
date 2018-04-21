@@ -14,6 +14,11 @@ public abstract class SubscribeClient extends CommandClient {
       client.disconnect();
     }));
     System.out.println("Listening for messages...");
+    try {
+      Thread.sleep(10000000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 
   public void subscribe(String topic) {

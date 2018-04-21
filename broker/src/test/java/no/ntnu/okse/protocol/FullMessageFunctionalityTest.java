@@ -3,8 +3,8 @@ package no.ntnu.okse.protocol;
 import static org.mockito.Mockito.mock;
 
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import no.ntnu.okse.OpenfireXMPPServerFactory;
 import no.ntnu.okse.core.CoreService;
 import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.messaging.MessageService;
@@ -20,8 +20,10 @@ public class FullMessageFunctionalityTest {
   private final SubscriptionService subscriptionService = SubscriptionService.getInstance();
 
   @BeforeClass
-  public void classSetUp()
-      throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+  public void classSetUp() throws Exception {
+    OpenfireXMPPServerFactory.start();
+    Thread.sleep(5000);
+
     CoreService cs = CoreService.getInstance();
 
     cs.registerService(MessageService.getInstance());
@@ -33,7 +35,7 @@ public class FullMessageFunctionalityTest {
     cs.bootProtocolServers();
 
     // Wait for protocol servers to boot
-    Thread.sleep(1000);
+    Thread.sleep(3000);
 
     Method bootSecondaryServers = CoreService.class.getDeclaredMethod("bootSecondaryServers");
     bootSecondaryServers.setAccessible(true);
@@ -45,6 +47,12 @@ public class FullMessageFunctionalityTest {
 
     // Make sure servers have booted properly
     Thread.sleep(3000);
+  }
+
+  @AfterClass
+  public void tearDownClass() {
+    OpenfireXMPPServerFactory.stop();
+    CoreService.getInstance().stop();
   }
 
   @BeforeMethod

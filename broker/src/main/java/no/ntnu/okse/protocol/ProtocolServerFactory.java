@@ -5,6 +5,7 @@ import no.ntnu.okse.protocol.amqp091.AMQP091ProtocolServer;
 import no.ntnu.okse.protocol.mqtt.MQTTProtocolServer;
 import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
 import no.ntnu.okse.protocol.wsn.WSNotificationServer;
+import no.ntnu.okse.protocol.xmpp.XMPPProtocolServer;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -27,6 +28,8 @@ public class ProtocolServerFactory {
         return createStomp(attr);
       case "amqp091":
         return createAMQP091(attr);
+      case "xmpp":
+        return createXMPP(attr);
       default:
         return null;
     }
@@ -110,6 +113,32 @@ public class ProtocolServerFactory {
         DEFAULT_PORT;
 
     return new MQTTProtocolServer(host, port);
+  }
+
+  private static XMPPProtocolServer createXMPP(NamedNodeMap attr) {
+    final String DEFAULT_HOST = "0.0.0.0";
+    final int DEFAULT_PORT = 5222;
+    final String DEFAULT_JID = "okse@okse";
+    final String DEFAULT_PASSWORD = "password";
+
+    String host = attr.getNamedItem("host") != null ?
+        attr.getNamedItem("host").getNodeValue() :
+        DEFAULT_HOST;
+
+    int port = attr.getNamedItem("port") != null ?
+        stringToPort(attr.getNamedItem("port").getNodeValue(), DEFAULT_PORT) :
+        DEFAULT_PORT;
+
+    String jid = attr.getNamedItem("jid") != null ?
+        attr.getNamedItem("jid").getNodeValue() :
+        DEFAULT_JID;
+
+    String password = attr.getNamedItem("password") != null ?
+        attr.getNamedItem("password").getNodeValue() :
+        DEFAULT_PASSWORD;
+
+
+    return new XMPPProtocolServer(host, port, jid, password);
   }
 
   private static WSNotificationServer createWSN(NamedNodeMap attr) {

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Plugin configuration file for the admin console. Have to be included regardless of the settings
+  that disable the admin panel. Will result in 4 warnings that should be ignored.
+  Warning: admin console not started due to configuration settings.
+  Error starting 5223: null
+  Error starting 5276: null
+  Error starting 5263: null
+-->
+<plugin>
+  <class>org.jivesoftware.openfire.container.AdminConsolePlugin</class>
+</plugin>

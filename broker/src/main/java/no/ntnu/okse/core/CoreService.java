@@ -24,9 +24,23 @@
 
 package no.ntnu.okse.core;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.IntStream;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import no.ntnu.okse.Application;
 import no.ntnu.okse.EclipsePahoMQTTSNGateway;
+import no.ntnu.okse.OpenfireXMPPServerFactory;
 import no.ntnu.okse.core.event.Event;
 import no.ntnu.okse.core.event.SystemEvent;
 import no.ntnu.okse.core.messaging.Message;
@@ -40,20 +54,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class CoreService extends AbstractCoreService {
 
@@ -191,6 +191,8 @@ public class CoreService extends AbstractCoreService {
         // Are we booting protocol servers?
         else if (e.getType().equals(SystemEvent.Type.BOOT_PROTOCOL_SERVERS)) {
           bootProtocolServers();
+          Thread.sleep(3000);
+          bootSecondaryServers();
         }
       } catch (InterruptedException e) {
         log.error("Interrupted while attempting to fetch next event from eventQueue");
@@ -207,6 +209,8 @@ public class CoreService extends AbstractCoreService {
   public void stop() {
     // Shut down all the Protocol Servers
     stopAllProtocolServers();
+    // Stop all optional protocol servers started in the application here
+    stopAllOptionalProtocolSupportServers();
 
     // Give the threads a few seconds to complete
     try {
@@ -225,6 +229,15 @@ public class CoreService extends AbstractCoreService {
       eventQueue.put(new SystemEvent(SystemEvent.Type.SHUTDOWN, null));
     } catch (InterruptedException e) {
       log.error("Interrupted while trying to inject the SHUTDOWN event to eventQueue");
+    }
+  }
+
+  /**
+   * Stop all optional protocol support servers
+   */
+  private void stopAllOptionalProtocolSupportServers() {
+    if (OpenfireXMPPServerFactory.isRunning()) {
+      OpenfireXMPPServerFactory.stop();
     }
   }
 

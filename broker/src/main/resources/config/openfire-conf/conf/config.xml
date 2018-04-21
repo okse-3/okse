@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jive>
+  <xmpp>
+    <domain>
+      <!-- The domain to run the openfire server on -->
+      localhost
+    </domain>
+    <server>
+      <certificate>
+        <verify>false</verify>
+      </certificate>
+    </server>
+    <auth>
+      <retries>10</retries>
+    </auth>
+  </xmpp>
+  <sasl>
+    <mechs>PLAIN</mechs>
+  </sasl>
+  <adminConsole>
+    <port>-1</port>
+    <securePort>-1</securePort>
+  </adminConsole>
+  <locale>en</locale>
+  <network>
+    <interface/>
+  </network>
+  <connectionProvider>
+    <className>org.jivesoftware.database.EmbeddedConnectionProvider</className>
+  </connectionProvider>
+  <setup>true</setup>
+</jive>

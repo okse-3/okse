@@ -1,5 +1,6 @@
 package no.ntnu.okse.core;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.security.crypto.codec.Hex;
 
@@ -63,6 +64,10 @@ public class Utilities {
       "config/protocolservers.xml",
       "config/gateway.properties",
       "config/predefinedTopics.properties",
+      "config/optionalprotocolsupportservers.xml",
+      "config/openfire-conf/conf/config.xml",
+      "config/openfire-conf/plugins/admin/plugin.xml",
+      "config/openfire-conf/resources/database/openfire_hsqldb.sql"
   };
 
   /**
@@ -83,13 +88,28 @@ public class Utilities {
         // If configuration file does not exist, copy it from the classpath resources folder
         if (!configFile.exists()) {
           InputStream baseConfig = Utilities.class.getResourceAsStream("/" + filename);
-          Files.copy(baseConfig, configFile.toPath());
+          copyConfigFile(baseConfig, filename);
         }
       } catch (IOException e) {
         log.error("Could not create configuration file " + filename);
         e.printStackTrace();
       }
     }
+  }
+
+  /**
+   * Helper method to copy InputStream to file creating the missing directories
+   *
+   * @param file The content of the file to copy
+   * @param path The path of the file
+   * @throws IOException If the file cannot be copied
+   */
+  private static void copyConfigFile(InputStream file, String path) throws IOException {
+    String directory = path.substring(0, path.lastIndexOf("/"));
+    if (!new File(directory).exists()) {
+      new File(directory).mkdirs();
+    }
+    Files.copy(file, new File(path).toPath());
   }
 
   public static String generateID() throws NoSuchAlgorithmException {
