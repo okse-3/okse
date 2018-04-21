@@ -44,377 +44,370 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class SubscriptionHandler extends BaseHandler implements SubscriptionChangeListener {
 
-    /**
-     * Wrapper class around a ArrayList for holding subscribers to
-     * a topic/queue. Has additional methods to help the queue
-     * behavior and the topic behavior.
-     *
-     */
-    public static class Routes<T extends Link> {
+  /**
+   * Wrapper class around a ArrayList for holding subscribers to a topic/queue. Has additional
+   * methods to help the queue behavior and the topic behavior.
+   */
+  public static class Routes<T extends Link> {
 
-        List<T> routes = new ArrayList<>();
+    final List<T> routes = new ArrayList<>();
 
-        void add(T route) {
-            routes.add(route);
-        }
-
-        void remove(T route) {
-            routes.remove(route);
-        }
-
-        int size() {
-            return routes.size();
-        }
-
-        /**
-         * Choose a random subscriber from a queue.
-         *
-         * @return random object from list
-         */
-        public T choose() {
-            if (routes.isEmpty()) {
-                return null;
-            }
-            ThreadLocalRandom rand = ThreadLocalRandom.current();
-            int idx = rand.nextInt(0, routes.size());
-            return routes.get(idx);
-        }
-
-        /**
-         * Get all available subscribers for a topic.
-         *
-         * @return ArrayList of objects
-         */
-        public List<T> getRoutes() {
-            return routes;
-        }
-
-        public void printRouteTable() {
-            routes.forEach((route) -> {
-                System.out.println(route.toString());
-            });
-        }
-
+    void add(T route) {
+      routes.add(route);
     }
 
+    void remove(T route) {
+      routes.remove(route);
+    }
 
-    private final Routes<Sender> EMPTY_OUT = new Routes<Sender>();
-    private final Routes<Receiver> EMPTY_IN = new Routes<Receiver>();
-    private Logger log = Logger.getLogger(SubscriptionHandler.class.getName());
-
-    private ConcurrentHashMap<Sender, Subscriber> localSenderSubscriberMap = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<Subscriber, Sender> localSubscriberSenderMap = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, Sender> localRemoteContainerSenderMap = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<Sender, AbstractNotificationProducer.SubscriptionHandle> localSubscriberHandle = new ConcurrentHashMap<>();
-
-    final private Map<String, Routes<Sender>> outgoing = new ConcurrentHashMap<String, Routes<Sender>>();
-    final private Map<String, Routes<Receiver>> incoming = new ConcurrentHashMap<String, Routes<Receiver>>();
-
-    AMQProtocolServer ps;
-
-    public SubscriptionHandler(AMQProtocolServer ps) {
-        this.ps = ps;
+    int size() {
+      return routes.size();
     }
 
     /**
-     * Get the address of a Source object.
+     * Choose a random subscriber from a queue.
      *
-     * @param source : Connection information object
-     * @return the address of a Source object.
+     * @return random object from list
      */
-    private static String getAddress(Source source) {
-        if (source == null) {
-            return null;
-        } else {
-            return source.getAddress();
-        }
+    public T choose() {
+      if (routes.isEmpty()) {
+        return null;
+      }
+      ThreadLocalRandom rand = ThreadLocalRandom.current();
+      int idx = rand.nextInt(0, routes.size());
+      return routes.get(idx);
     }
 
     /**
-     * Get the address of a Target object.
+     * Get all available subscribers for a topic.
      *
-     * @param target : Connection information object
-     * @return the address of a Target object.
+     * @return ArrayList of objects
      */
-    private static String getAddress(Target target) {
-        if (target == null) {
-            return null;
-        } else {
-            return target.getAddress();
-        }
+    public List<T> getRoutes() {
+      return routes;
     }
 
-    /**
-     * Get the address of a Sender object.
-     *
-     * @param sender : Client object
-     * @return the address of a Sender object.
-     */
-    public static String getAddress(Sender sender) {
-        String source = getAddress(sender.getSource());
-        String target = getAddress(sender.getTarget());
-        return source != null ? source : target;
+    public void printRouteTable() {
+      routes.forEach((route) -> System.out.println(route.toString()));
     }
 
-    /**
-     * Get the address of a Receiver object.
-     *
-     * @param receiver : Client object
-     * @return the address of a Receiver object.
-     */
-    public static String getAddress(Receiver receiver) {
-        return getAddress(receiver.getTarget());
+  }
+
+
+  private final Routes<Sender> EMPTY_OUT = new Routes<>();
+  private final Routes<Receiver> EMPTY_IN = new Routes<>();
+  private final Logger log = Logger.getLogger(SubscriptionHandler.class.getName());
+
+  private final ConcurrentHashMap<Sender, Subscriber> localSenderSubscriberMap = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Subscriber, Sender> localSubscriberSenderMap = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, Sender> localRemoteContainerSenderMap = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<Sender, AbstractNotificationProducer.SubscriptionHandle> localSubscriberHandle = new ConcurrentHashMap<>();
+
+  final private Map<String, Routes<Sender>> outgoing = new ConcurrentHashMap<>();
+  final private Map<String, Routes<Receiver>> incoming = new ConcurrentHashMap<>();
+
+  final AMQProtocolServer ps;
+
+  public SubscriptionHandler(AMQProtocolServer ps) {
+    this.ps = ps;
+  }
+
+  /**
+   * Get the address of a Source object.
+   *
+   * @param source : Connection information object
+   * @return the address of a Source object.
+   */
+  private static String getAddress(Source source) {
+    if (source == null) {
+      return null;
+    } else {
+      return source.getAddress();
+    }
+  }
+
+  /**
+   * Get the address of a Target object.
+   *
+   * @param target : Connection information object
+   * @return the address of a Target object.
+   */
+  private static String getAddress(Target target) {
+    if (target == null) {
+      return null;
+    } else {
+      return target.getAddress();
+    }
+  }
+
+  /**
+   * Get the address of a Sender object.
+   *
+   * @param sender : Client object
+   * @return the address of a Sender object.
+   */
+  public static String getAddress(Sender sender) {
+    String source = getAddress(sender.getSource());
+    String target = getAddress(sender.getTarget());
+    return source != null ? source : target;
+  }
+
+  /**
+   * Get the address of a Receiver object.
+   *
+   * @param receiver : Client object
+   * @return the address of a Receiver object.
+   */
+  public static String getAddress(Receiver receiver) {
+    return getAddress(receiver.getTarget());
+  }
+
+  /**
+   * Get the outgoing routes of a given address.
+   *
+   * @param address : topic/route
+   * @return Routes of Sender objects
+   */
+  public Routes<Sender> getOutgoing(String address) {
+    Routes<Sender> routes = outgoing.get(address);
+    if (routes == null) {
+      return EMPTY_OUT;
+    }
+    return routes;
+  }
+
+  /**
+   * Get the incoming routes of a given address.
+   *
+   * @param address topic/route
+   * @return Routes of Receiver objects
+   */
+  public Routes<Receiver> getIncoming(String address) {
+    Routes<Receiver> routes = incoming.get(address);
+    if (routes == null) {
+      return EMPTY_IN;
+    }
+    return routes;
+  }
+
+  /**
+   * Add a Sender object to AMQPs internal routing system for topic/queue and create and add a OKSEs
+   * subscriber to the internal system.
+   *
+   * @param sender : Client object
+   */
+  private void add(Sender sender) {
+    String senderAddress = "Unknown";
+    int senderClientPort = 0;
+    String protocolServerType = "Unknown";
+
+    Session session = sender.getSession();
+    Connection connection = session.getConnection();
+
+    AMQProtocolServer server = ps;
+    Driver driver = server.getDriver();
+    int clientPort = driver.getPort();
+
+    //The connected client hostname
+    String remoteHostName = driver.getInetAddress().getHostName();
+
+    //Get RemoteContainer id for the connection, used to identify the connection
+    String remoteContainer = connection.getRemoteContainer();
+
+    //If RemoteContainer id is not null add the subscriber to HashMap with RemoteContainer id as Key
+    //Is used to identify which sender has open connections to the broker
+    if (remoteContainer != null) {
+      localRemoteContainerSenderMap.put(remoteContainer, sender);
     }
 
-    /**
-     * Get the outgoing routes of a given address.
-     *
-     * @param address : topic/route
-     * @return Routes of Sender objects
-     */
-    public Routes<Sender> getOutgoing(String address) {
-        Routes<Sender> routes = outgoing.get(address);
-        if (routes == null) {
-            return EMPTY_OUT;
-        }
-        return routes;
+    if (remoteHostName != null) {
+      senderAddress = remoteHostName;
     }
 
-    /**
-     * Get the incomming routes of a given address.
-     *
-     * @param address topic/route
-     * @return Routes of Receiver objects
-     */
-    public Routes<Receiver> getIncomming(String address) {
-        Routes<Receiver> routes = incoming.get(address);
-        if (routes == null) {
-            return EMPTY_IN;
-        }
-        return routes;
+    if (clientPort != 0) {
+      senderClientPort = clientPort;
     }
 
-    /**
-     * Add a Sender object to AMQPs internal routing system for topic/queue
-     * and create and add a OKSEs subscriber to the internal system.
-     *
-     * @param sender : Client object
-     */
-    private void add(Sender sender) {
-        String senderAddress = "Unknown";
-        int senderClientPort = 0;
-        String protocolServerType = "Unknown";
-
-        Session session = sender.getSession();
-        Connection connection = session.getConnection();
-
-        AMQProtocolServer server = ps;
-        Driver driver = server.getDriver();
-        int clientPort = driver.getPort();
-
-
-        //The connected client hostname
-        String remoteHostName = driver.getInetAddress().getHostName();
-
-        //Get RemoteContainer id for the connection, used to identify the connection
-        String remoteContainer = connection.getRemoteContainer();
-
-        //If RemoteContainer id is not null add the subscriber to HashMap with RemoteContainer id as Key
-        //Is used to identify which sender has open connections to the broker
-        if (remoteContainer != null) {
-            localRemoteContainerSenderMap.put(remoteContainer, sender);
-        }
-
-        if (remoteHostName != null) {
-            senderAddress = remoteHostName;
-        }
-
-
-        if (clientPort != 0) {
-            senderClientPort = clientPort;
-        }
-
-        if (server.getProtocolServerType() != null) {
-            protocolServerType = server.getProtocolServerType();
-        }
-
-        //Building the Subscriber from a sender object
-        Subscriber subscriber = new Subscriber(senderAddress, senderClientPort, getAddress(sender), protocolServerType);
-        SubscriptionService.getInstance().addSubscriber(subscriber);
-
-
-        localSenderSubscriberMap.put(sender, subscriber);
-        localSubscriberSenderMap.put(subscriber, sender);
-        TopicService.getInstance().addTopic(getAddress(sender));
-
-        String address = getAddress(sender);
-        Routes<Sender> routes = outgoing.get(address);
-        if (routes == null) {
-            log.debug("Route does not exist, adding route for: " + address);
-            routes = new Routes<Sender>();
-            outgoing.put(address, routes);
-        }
-        log.debug("Adding sender: " + remoteHostName + " to route: " + address);
-        log.debug(outgoing.toString());
-        log.debug("This is getAddress: " + getAddress(sender));
-        routes.add(sender);
-        ps.incrementTotalRequests();
+    if (server.getProtocolServerType() != null) {
+      protocolServerType = server.getProtocolServerType();
     }
 
-    /**
-     * Remove a sender object from AMQPs routing system and
-     * Okses internal subscriber system.
-     *
-     * @param sender : Client object
-     */
-    private void remove(Sender sender) {
-        if (sender != null) {
-            Session session = sender.getSession();
-            Connection connection = session.getConnection();
-            String remoteHostName = connection.getRemoteHostname();
-            Driver driver = ps.getDriver();
+    //Building the Subscriber from a sender object
+    Subscriber subscriber = new Subscriber(senderAddress, senderClientPort, getAddress(sender),
+        protocolServerType);
+    SubscriptionService.getInstance().addSubscriber(subscriber);
 
-            Subscriber subscriber = localSenderSubscriberMap.get(sender);
-            localSenderSubscriberMap.remove(sender);
-            localSubscriberSenderMap.remove(subscriber);
+    localSenderSubscriberMap.put(sender, subscriber);
+    localSubscriberSenderMap.put(subscriber, sender);
+    TopicService.getInstance().addTopic(getAddress(sender));
 
-            String address = getAddress(sender);
-            Routes<Sender> routes = outgoing.get(address);
-            if (routes != null) {
-                if (!ps.isShuttingDown()) {
-                    log.debug("Removing sender: " + driver.getInetAddress() + " from route: " + address);
-                }
-                routes.remove(sender);
-                if (routes.size() == 0) {
-                    outgoing.remove(address);
-                }
-            }
-            if (!ps.isShuttingDown()) {
-                log.debug("Detaching: " + driver.getInetAddress());
-            }
-            sender.abort();
-            sender.detach();
-            sender.close();
-            log.debug(outgoing.toString());
+    String address = getAddress(sender);
+    Routes<Sender> routes = outgoing.get(address);
+    if (routes == null) {
+      log.debug("Route does not exist, adding route for: " + address);
+      routes = new Routes<>();
+      outgoing.put(address, routes);
+    }
+    log.debug("Adding sender: " + remoteHostName + " to route: " + address);
+    log.debug(outgoing.toString());
+    log.debug("This is getAddress: " + getAddress(sender));
+    routes.add(sender);
+    ps.incrementTotalRequests();
+  }
+
+  /**
+   * Remove a sender object from AMQPs routing system and Okses internal subscriber system.
+   *
+   * @param sender : Client object
+   */
+  private void remove(Sender sender) {
+    if (sender != null) {
+      Session session = sender.getSession();
+      Connection connection = session.getConnection();
+      String remoteHostName = connection.getRemoteHostname();
+      Driver driver = ps.getDriver();
+
+      Subscriber subscriber = localSenderSubscriberMap.get(sender);
+      localSenderSubscriberMap.remove(sender);
+      localSubscriberSenderMap.remove(subscriber);
+
+      String address = getAddress(sender);
+      Routes<Sender> routes = outgoing.get(address);
+      if (routes != null) {
+        if (!ps.isShuttingDown()) {
+          log.debug("Removing sender: " + driver.getInetAddress() + " from route: " + address);
         }
+        routes.remove(sender);
+        if (routes.size() == 0) {
+          outgoing.remove(address);
+        }
+      }
+      if (!ps.isShuttingDown()) {
+        log.debug("Detaching: " + driver.getInetAddress());
+      }
+      sender.abort();
+      sender.detach();
+      sender.close();
+      log.debug(outgoing.toString());
+    }
+
+  }
+
+  /**
+   * Add a Receiver object to AMQPs internal routing system
+   *
+   * @param receiver : Client object
+   */
+  private void add(Receiver receiver) {
+    String address = getAddress(receiver);
+    Routes<Receiver> routes = incoming.get(address);
+    if (routes == null) {
+      log.debug("Route does not exist, adding route for: " + address);
+      routes = new Routes<>();
+      incoming.put(address, routes);
+    }
+    log.debug("Adding receiver: " + receiver.getName() + " to route: " + address);
+    log.debug(incoming.toString());
+    routes.add(receiver);
+  }
+
+  /**
+   * Remove a Receiver object from AMQPs internal routing system
+   *
+   * @param receiver : Client object
+   */
+  private void remove(Receiver receiver) {
+    String address = getAddress(receiver);
+    Routes<Receiver> routes = incoming.get(address);
+    if (routes != null) {
+      log.debug("Removing receiver: " + receiver.getName() + "from route:" + address);
+      routes.remove(receiver);
+      if (routes.size() == 0) {
+        incoming.remove(address);
+      }
+    }
+    log.debug(incoming.toString());
+  }
+
+  private void add(Link link) {
+    if (link instanceof Sender) {
+      add((Sender) link);
+    } else {
+      add((Receiver) link);
+    }
+  }
+
+  private void remove(Link link) {
+    if (link instanceof Sender) {
+      remove((Sender) link);
+    } else {
+      remove((Receiver) link);
+    }
+  }
+
+  @Override
+  public void onLinkLocalOpen(Event event) {
+    log.debug("Local link opened");
+    add(event.getLink());
+  }
+
+  @Override
+  public void onConnectionUnbound(Event event) {
+    //log.debug("This is event.getSession(): " + event.getSession());
+
+    //Getting the RemoteContainer id for the event
+    Connection eventConnection = event.getConnection();
+    String eventRemoteContainer = eventConnection.getRemoteContainer();
+    log.debug("This is event RemoteContainer: " + eventRemoteContainer);
+
+    //Setting the RemoteContainer id for the sender to "Unknown" before we get it from the sender object
+    String senderRemoteContainer = "Unknown";
+
+    //TODO: messy method, clean up
+    //Get sender from localRemoteContainerSenderMap  with eventRemoteContainer as key
+    Sender sender;
+    try {
+      sender = localRemoteContainerSenderMap.get(eventRemoteContainer);
+    } catch (NullPointerException e) {
+      sender = null;
+      log.debug("Receiver was terminated in an unexpected way");
+      ps.decrementTotalErrors();
 
     }
 
-    /**
-     * Add a Receiver object to AMQPs internal routing system
-     *
-     * @param receiver : Client object
-     */
-    private void add(Receiver receiver) {
-        String address = getAddress(receiver);
-        Routes<Receiver> routes = incoming.get(address);
-        if (routes == null) {
-            log.debug("Route does not exist, adding route for: " + address);
-            routes = new Routes<Receiver>();
-            incoming.put(address, routes);
-        }
-        log.debug("Adding receiver: " + receiver.getName() + " to route: " + address);
-        log.debug(incoming.toString());
-        routes.add(receiver);
+    if (sender != null) {
+      Session senderSession = sender.getSession();
+      Connection senderConnection = senderSession.getConnection();
+      senderRemoteContainer = senderConnection.getRemoteContainer();
     }
 
-    /**
-     * Remove a Receiver object from AMQPs internal routing system
-     *
-     * @param receiver : Client object
-     */
-    private void remove(Receiver receiver) {
-        String address = getAddress(receiver);
-        Routes<Receiver> routes = incoming.get(address);
-        if (routes != null) {
-            log.debug("Removing receiver: " + receiver.getName() + "from route:" + address);
-            routes.remove(receiver);
-            if (routes.size() == 0) {
-                incoming.remove(address);
-            }
-        }
-        log.debug(incoming.toString());
+    //Check if sender container id is equal to the event container id to see if the client has disconnected
+    if (senderRemoteContainer.equals(eventRemoteContainer)) {
+      SubscriptionService.getInstance().removeSubscriber(localSenderSubscriberMap.get(sender));
     }
+  }
 
-    private void add(Link link) {
-        if (link instanceof Sender) {
-            add((Sender) link);
-        } else {
-            add((Receiver) link);
-        }
+
+  @Override
+  @WebMethod(exclude = true)
+  public void subscriptionChanged(SubscriptionChangeEvent e) {
+    // If it is AMQP subscriber
+    if (e.getData().getOriginProtocol().equals(ps.getProtocolServerType())) {
+      // If we are dealing with an Unsubscribe
+      if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
+        log.debug("Unsubscribing " + localSubscriberSenderMap.get(e.getData()));
+        // Remove the local mappings from AMQP subscriptionKey to OKSE Subscriber object and AMQP subscriptionHandle
+        remove(localSubscriberSenderMap.get(e.getData()));
+      } else if (e.getType().equals(SubscriptionChangeEvent.Type.SUBSCRIBE)) {
+        log.debug("Received a SUBSCRIBE event");
+        // TODO: Investigate if we really need to do anything here since it will function as a callback
+        // TODO: after addSubscriber
+      }
     }
+  }
 
-    private void remove(Link link) {
-        if (link instanceof Sender) {
-            remove((Sender) link);
-        } else {
-            remove((Receiver) link);
-        }
-    }
-
-    @Override
-    public void onLinkLocalOpen(Event event) {
-        log.debug("Local link opened");
-        add(event.getLink());
-    }
-
-    @Override
-    public void onConnectionUnbound(Event event) {
-        //log.debug("This is event.getSession(): " + event.getSession());
-
-        //Getting the RemoteContainer id for the event
-        Connection eventConnection = event.getConnection();
-        String eventRemoteContainer = eventConnection.getRemoteContainer();
-        log.debug("This is event RemoteContainer: " + eventRemoteContainer);
-
-        //Setting the RemoteContainer id for the sender to "Unknown" before we get it from the sender object
-        String senderRemoteContainer = "Unknown";
-
-        //Get sender from localRemoteContainerSenderMap  with eventRemoteContainer as key
-        Sender sender;
-        try {
-            sender = localRemoteContainerSenderMap.get(eventRemoteContainer);
-        }
-
-        catch (NullPointerException e){
-            sender = null;
-            log.debug("Receiver was terminated in an unexpected way");
-            ps.decrementTotalErrors();
-
-        }
-
-        if (sender != null) {
-            Session senderSession = sender.getSession();
-            Connection senderConnection = senderSession.getConnection();
-            senderRemoteContainer = senderConnection.getRemoteContainer();
-        }
-
-        //Check if sender container id is equal to the event container id to see if the client has disconnected
-        if (senderRemoteContainer.equals(eventRemoteContainer)) {
-            SubscriptionService.getInstance().removeSubscriber(localSenderSubscriberMap.get(sender));
-        }
-    }
-
-
-    @Override
-    @WebMethod(exclude = true)
-    public void subscriptionChanged(SubscriptionChangeEvent e) {
-        // If it is AMQP subscriber
-        if (e.getData().getOriginProtocol().equals(ps.getProtocolServerType())) {
-            // If we are dealing with an Unsubscribe
-            if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
-                log.debug("Unsubscribing " + localSubscriberSenderMap.get(e.getData()));
-                // Remove the local mappings from AMQP subscriptionKey to OKSE Subscriber object and AMQP subscriptionHandle
-                remove(localSubscriberSenderMap.get(e.getData()));
-            } else if (e.getType().equals(SubscriptionChangeEvent.Type.SUBSCRIBE)) {
-                log.debug("Received a SUBSCRIBE event");
-                // TODO: Investigate if we really need to do anything here since it will function as a callback
-                // TODO: after addSubscriber
-            }
-        }
-    }
-
-    public void unsubscribeAll() {
-        localSenderSubscriberMap.forEach((sender, subscriber) -> SubscriptionService.getInstance().removeSubscriber(subscriber));
-    }
+  public void unsubscribeAll() {
+    localSenderSubscriberMap.forEach(
+        (sender, subscriber) -> SubscriptionService.getInstance().removeSubscriber(subscriber));
+  }
 }

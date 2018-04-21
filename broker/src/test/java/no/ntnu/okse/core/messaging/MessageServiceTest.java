@@ -37,36 +37,36 @@ import static org.testng.Assert.*;
 
 public class MessageServiceTest {
 
-    MessageService m;
+  MessageService m;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        m = MessageService.getInstance();
-    }
+  @BeforeMethod
+  public void setUp() {
+    m = MessageService.getInstance();
+  }
 
-    @AfterMethod
-    public void tearDown() throws Exception {
-        m = null;
-    }
+  @AfterMethod
+  public void tearDown() {
+    m = null;
+  }
 
-    @Test
-    public void testIsCachingMessages() throws Exception {
-        assertEquals(Application.CACHE_MESSAGES, m.isCachingMessages());
-    }
+  @Test
+  public void testIsCachingMessages() {
+    assertEquals(Application.CACHE_MESSAGES, m.isCachingMessages());
+  }
 
-    @Test
-    public void testGenerateMessageForAGivenTopicSet() throws Exception {
-        HashSet<Topic> topics = new HashSet<>();
-        topics.add(new Topic("test", "TEST"));
-        topics.add(new Topic("test2", "TEST"));
-        Message msg = new Message("message", "origTopic", null, "Test");
-        List<Message> generated = m.generateMessageForAGivenTopicSet(msg, topics);
+  @Test
+  public void testGenerateMessageForAGivenTopicSet() {
+    HashSet<Topic> topics = new HashSet<>();
+    topics.add(new Topic("test", "TEST"));
+    topics.add(new Topic("test2", "TEST"));
+    Message msg = new Message("message", "origTopic", null, "Test");
+    List<Message> generated = m.generateMessageForAGivenTopicSet(msg, topics);
 
-        generated.forEach(genMsg -> {
-            assertFalse(genMsg.getTopic().equals("origTopic"));
-            assertNotSame(genMsg, msg);
-            assertTrue(genMsg.getTopic().equals("test") || genMsg.getTopic().equals("test2"));
-        });
-        assertEquals(generated.size(), 2);
-    }
+    generated.forEach(genMsg -> {
+      assertFalse(genMsg.getTopic().equals("origTopic"));
+      assertNotSame(genMsg, msg);
+      assertTrue(genMsg.getTopic().equals("test") || genMsg.getTopic().equals("test2"));
+    });
+    assertEquals(generated.size(), 2);
+  }
 }

@@ -14,54 +14,55 @@ import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
 public class UnSubscriptionListenerTest {
-    private UnSubscriptionListener listener;
-    private UnSubscriptionListener listener_spy;
-    private STOMPSubscriptionManager subscritpionManager_spy;
 
-    @BeforeTest
-    public void setUp() {
-        listener = new UnSubscriptionListener();
-        STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager();
-        subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
-        subscritpionManager_spy = Mockito.spy(subscriptionManager);
+  private UnSubscriptionListener listener;
+  private UnSubscriptionListener listener_spy;
+  private STOMPSubscriptionManager subscritpionManager_spy;
 
-        listener.setSubscriptionManager(subscritpionManager_spy);
+  @BeforeTest
+  public void setUp() {
+    listener = new UnSubscriptionListener();
+    STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager();
+    subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
+    subscritpionManager_spy = Mockito.spy(subscriptionManager);
 
-        listener_spy = Mockito.spy(listener);
-    }
+    listener.setSubscriptionManager(subscritpionManager_spy);
 
-    @AfterTest
-    public void tearDown() {
-        listener = null;
-        listener_spy = null;
-    }
+    listener_spy = Mockito.spy(listener);
+  }
 
-    @Test
-    public void isForMessage(){
-        assertEquals(true, listener_spy.isForMessage(null));
-    }
+  @AfterTest
+  public void tearDown() {
+    listener = null;
+    listener_spy = null;
+  }
 
-    @Test
-    public void getMessageTypes(){
-        StompMessageType[] types = listener_spy.getMessageTypes();
-        assertEquals(StompMessageType.UNSUBSCRIBE, types[0]);
-    }
+  @Test
+  public void isForMessage() {
+    assertEquals(true, listener_spy.isForMessage(null));
+  }
 
-    @Test
-    public void messageReceived() throws Exception {
-        listener_spy.messageReceived(createUnsubMessage(), createHostPort());
-        Mockito.verify(subscritpionManager_spy).removeSubscriber("ogdans3");
-    }
+  @Test
+  public void getMessageTypes() {
+    StompMessageType[] types = listener_spy.getMessageTypes();
+    assertEquals(StompMessageType.UNSUBSCRIBE, types[0]);
+  }
 
-    private HostPort createHostPort(){
-        return new HostPort("localhost", 61613);
-    }
+  @Test
+  public void messageReceived() {
+    listener_spy.messageReceived(createUnsubMessage(), createHostPort());
+    Mockito.verify(subscritpionManager_spy).removeSubscriber("ogdans3");
+  }
 
-    private StampyMessage createUnsubMessage(){
-        UnsubscribeMessage msg = new UnsubscribeMessage();
-        msg.getHeader().setId("ogdans3");
-        return msg;
-    }
+  private HostPort createHostPort() {
+    return new HostPort("localhost", 61613);
+  }
+
+  private StampyMessage createUnsubMessage() {
+    UnsubscribeMessage msg = new UnsubscribeMessage();
+    msg.getHeader().setId("ogdans3");
+    return msg;
+  }
 
 
 }

@@ -31,102 +31,102 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
 public class PublisherTest {
-    
-    Publisher p;
 
-    @BeforeMethod
-    public void setUp() {
-        p = new Publisher("test/sub", "123.123.123.123", 8080, "Test");
-    }
+  Publisher p;
 
-    @AfterMethod
-    public void tearDown() {
-        p = null;
-    }
+  @BeforeMethod
+  public void setUp() {
+    p = new Publisher("test/sub", "123.123.123.123", 8080, "Test");
+  }
 
-    @Test
-    public void testGetOriginProtocol() throws Exception {
-        assertEquals(p.getOriginProtocol(), "Test");
-    }
+  @AfterMethod
+  public void tearDown() {
+    p = null;
+  }
 
-    @Test
-    public void testGetHost() throws Exception {
-        assertEquals(p.getHost(), "123.123.123.123");
-    }
+  @Test
+  public void testGetOriginProtocol() {
+    assertEquals(p.getOriginProtocol(), "Test");
+  }
 
-    @Test
-    public void testGetTopic() throws Exception {
-        assertEquals(p.getTopic(), "test/sub");
-    }
+  @Test
+  public void testGetHost() {
+    assertEquals(p.getHost(), "123.123.123.123");
+  }
 
-    @Test
-    public void testGetPort() throws Exception {
-        assertTrue(p.getPort() == 8080);
-    }
+  @Test
+  public void testGetTopic() {
+    assertEquals(p.getTopic(), "test/sub");
+  }
 
-    @Test
-    public void testSetTimeout() throws Exception {
-        Long timeout = System.currentTimeMillis();
-        try {
-            p.setTimeout(timeout - 20000L);
-            fail("Should not be allowed to set timeout in the past");
-        } catch (IllegalArgumentException e) {
+  @Test
+  public void testGetPort() {
+    assertTrue(p.getPort() == 8080);
+  }
 
-        }
-        timeout = System.currentTimeMillis();
-        p.setTimeout(timeout + 20000L);
-        assertTrue(p.getTimeout().equals(timeout + 20000L));
-    }
-
-    @Test
-    public void testGetTimeout() throws Exception {
-        Long timeout = System.currentTimeMillis() + 20000L;
-        assertNull(p.getTimeout());
-        p.setTimeout(timeout);
-        assertTrue(p.getTimeout().equals(timeout));
-    }
-
-    @Test
-    public void testSetAttribute() throws Exception {
-        assertNull(p.getAttribute("flag"));
-        p.setAttribute("flag", "value");
-        assertEquals(p.getAttribute("flag"), "value");
-        assertNull(p.getAttribute("FLAG"));
+  @Test
+  public void testSetTimeout() {
+    Long timeout = System.currentTimeMillis();
+    try {
+      p.setTimeout(timeout - 20000L);
+      fail("Should not be allowed to set timeout in the past");
+    } catch (IllegalArgumentException e) {
 
     }
+    timeout = System.currentTimeMillis();
+    p.setTimeout(timeout + 20000L);
+    assertTrue(p.getTimeout().equals(timeout + 20000L));
+  }
 
-    @Test
-    public void testGetAttribute() throws Exception {
-        assertNull(p.getAttribute("flag"));
-        p.setAttribute("flag", "value");
-        assertEquals(p.getAttribute("flag"), "value");
-        assertNull(p.getAttribute("null"));
-    }
+  @Test
+  public void testGetTimeout() {
+    Long timeout = System.currentTimeMillis() + 20000L;
+    assertNull(p.getTimeout());
+    p.setTimeout(timeout);
+    assertTrue(p.getTimeout().equals(timeout));
+  }
 
-    @Test
-    public void testShouldExpire() throws Exception {
-        assertFalse(p.shouldExpire());
-        p.setTimeout(System.currentTimeMillis() + 20000L);
-        assertTrue(p.shouldExpire());
-    }
+  @Test
+  public void testSetAttribute() {
+    assertNull(p.getAttribute("flag"));
+    p.setAttribute("flag", "value");
+    assertEquals(p.getAttribute("flag"), "value");
+    assertNull(p.getAttribute("FLAG"));
 
-    @Test
-    public void testHasExpired() throws Exception {
-        assertFalse(p.hasExpired());
-        p.setTimeout(System.currentTimeMillis() + 100L);
-        assertFalse(p.hasExpired());
-        Thread.sleep(150);
-        assertTrue(p.hasExpired());
-    }
+  }
 
-    @Test
-    public void testGetHostAndPort() throws Exception {
-        assertEquals(p.getHostAndPort(), "123.123.123.123:8080");
-    }
+  @Test
+  public void testGetAttribute() {
+    assertNull(p.getAttribute("flag"));
+    p.setAttribute("flag", "value");
+    assertEquals(p.getAttribute("flag"), "value");
+    assertNull(p.getAttribute("null"));
+  }
 
-    @Test
-    public void testToString() throws Exception {
-        assertNotNull(p.toString());
-        assertTrue(p.toString() instanceof String);
-    }
+  @Test
+  public void testShouldExpire() {
+    assertFalse(p.shouldExpire());
+    p.setTimeout(System.currentTimeMillis() + 20000L);
+    assertTrue(p.shouldExpire());
+  }
+
+  @Test
+  public void testHasExpired() throws Exception {
+    assertFalse(p.hasExpired());
+    p.setTimeout(System.currentTimeMillis() + 100L);
+    assertFalse(p.hasExpired());
+    Thread.sleep(150);
+    assertTrue(p.hasExpired());
+  }
+
+  @Test
+  public void testGetHostAndPort() {
+    assertEquals(p.getHostAndPort(), "123.123.123.123:8080");
+  }
+
+  @Test
+  public void testToString() {
+    assertNotNull(p.toString());
+    assertTrue(p.toString() instanceof String);
+  }
 }

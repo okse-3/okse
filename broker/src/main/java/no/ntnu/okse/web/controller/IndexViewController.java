@@ -44,90 +44,90 @@ import java.util.Properties;
 @Controller
 public class IndexViewController {
 
-    // Log4j logger
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(IndexViewController.class.getName());
+  // Log4j logger
+  private static org.apache.log4j.Logger log = org.apache.log4j.Logger
+      .getLogger(IndexViewController.class.getName());
 
-    // Properties from the okse.properties file
-    @Value("${spring.application.name}")
-    private String appName;
-    @Value("${ADMIN_PANEL_HOST}")
-    private String serverHost;
-    @Value("${server.port}")
-    private int serverPort;
+  // Properties from the okse.properties file
+  @Value("${spring.application.name}")
+  private String appName;
+  @Value("${ADMIN_PANEL_HOST}")
+  private String serverHost;
+  @Value("${server.port}")
+  private int serverPort;
 
-    // System information
-    private Properties environment = System.getProperties();
+  // System information
+  private final Properties environment = System.getProperties();
 
-    /**
-     * This method returns the view to render when a user tries to reach the '/'-url
-     *
-     * @param model The model to configure
-     * @return A string telling what HTML fragment to render
-     */
-    @RequestMapping("/")
-    public String index(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+  /**
+   * This method returns the view to render when a user tries to reach the '/'-url
+   *
+   * @param model The model to configure
+   * @return A string telling what HTML fragment to render
+   */
+  @RequestMapping("/")
+  public String index(Model model) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth instanceof AnonymousAuthenticationToken) {
-            // The user is not logged in
-            return "fragments/indexNotLoggedIn";
-        }
-
-        SubscriptionService ss = SubscriptionService.getInstance();
-        TopicService ts = TopicService.getInstance();
-        CoreService cs = CoreService.getInstance();
-
-        long totalRam = Runtime.getRuntime().totalMemory();
-        long freeRam = Runtime.getRuntime().freeMemory();
-
-        model.addAttribute("projectName", appName + " (" + Application.VERSION + ")");
-        model.addAttribute("environment", createEnvironmentList());
-        model.addAttribute("serverPort", serverPort);
-        model.addAttribute("serverHost", serverHost);
-        model.addAttribute("subscribers", ss.getNumberOfSubscribers());
-        model.addAttribute("publishers", ss.getNumberOfPublishers());
-        model.addAttribute("topics", ts.getTotalNumberOfTopics());
-        model.addAttribute("totalMessages", cs.getTotalMessagesSentFromProtocolServers());
-        model.addAttribute("uptime", Utilities.getDurationAsISO8601(Application.getRunningTime()));
-        model.addAttribute("cpuCores", Runtime.getRuntime().availableProcessors());
-        model.addAttribute("totalRam", totalRam / MainController.MB);
-        model.addAttribute("freeRam", freeRam / MainController.MB);
-        model.addAttribute("usedRam", (totalRam - freeRam) / MainController.MB);
-        //TODO: Do this per instance
-        //model.addAttribute("useQueue", AMQProtocolServer.getInstance().useQueue);
-
-        ArrayList<HashMap<String, Object>> protocols = new ArrayList<>();
-
-        Application.cs.getAllProtocolServers().forEach(p -> {
-            protocols.add(new HashMap<String, Object>() {{
-                put("host", p.getHost());
-                put("port", p.getPort());
-                put("type", p.getProtocolServerType());
-            }});
-        });
-
-        model.addAttribute("protocols", protocols);
-        model.addAttribute("protocolPower", cs.protocolServersBooted);
-
-        return "fragments/indexLoggedIn";
-
+    if (auth instanceof AnonymousAuthenticationToken) {
+      // The user is not logged in
+      return "fragments/indexNotLoggedIn";
     }
 
-    /**
-     * Private helper method that creates a HashMap of some environment specifics
-     *
-     * @return A HashMap containing JAVA information etc.
-     */
-    private HashMap<String, String> createEnvironmentList() {
-        HashMap<String, String> properties = new HashMap<>();
-        properties.put("Java Runtime Name", environment.getProperty("java.runtime.name"));
-        properties.put("Java Runtime Version", environment.getProperty("java.runtime.version"));
-        properties.put("Java VM Name", environment.getProperty("java.vm.name"));
-        properties.put("Java VM Version", environment.getProperty("java.vm.version"));
-        properties.put("OS Name", environment.getProperty("os.name"));
-        properties.put("OS Version", environment.getProperty("os.version"));
-        properties.put("OS Architecture", environment.getProperty("os.arch"));
-        return properties;
-    }
+    SubscriptionService ss = SubscriptionService.getInstance();
+    TopicService ts = TopicService.getInstance();
+    CoreService cs = CoreService.getInstance();
+
+    long totalRam = Runtime.getRuntime().totalMemory();
+    long freeRam = Runtime.getRuntime().freeMemory();
+
+    model.addAttribute("projectName", appName + " (" + Application.VERSION + ")");
+    model.addAttribute("environment", createEnvironmentList());
+    model.addAttribute("serverPort", serverPort);
+    model.addAttribute("serverHost", serverHost);
+    model.addAttribute("subscribers", ss.getNumberOfSubscribers());
+    model.addAttribute("publishers", ss.getNumberOfPublishers());
+    model.addAttribute("topics", ts.getTotalNumberOfTopics());
+    model.addAttribute("totalMessages", cs.getTotalMessagesSentFromProtocolServers());
+    model.addAttribute("uptime", Utilities.getDurationAsISO8601(Application.getRunningTime()));
+    model.addAttribute("cpuCores", Runtime.getRuntime().availableProcessors());
+    model.addAttribute("totalRam", totalRam / MainController.MB);
+    model.addAttribute("freeRam", freeRam / MainController.MB);
+    model.addAttribute("usedRam", (totalRam - freeRam) / MainController.MB);
+    //TODO: Do this per instance
+    //model.addAttribute("useQueue", AMQProtocolServer.getInstance().useQueue);
+
+    ArrayList<HashMap<String, Object>> protocols = new ArrayList<>();
+
+    Application.cs.getAllProtocolServers()
+        .forEach(p -> protocols.add(new HashMap<String, Object>() {{
+          put("host", p.getHost());
+          put("port", p.getPort());
+          put("type", p.getProtocolServerType());
+        }}));
+
+    model.addAttribute("protocols", protocols);
+    model.addAttribute("protocolPower", CoreService.protocolServersBooted);
+
+    return "fragments/indexLoggedIn";
+
+  }
+
+  /**
+   * Private helper method that creates a HashMap of some environment specifics
+   *
+   * @return A HashMap containing JAVA information etc.
+   */
+  private HashMap<String, String> createEnvironmentList() {
+    HashMap<String, String> properties = new HashMap<>();
+    properties.put("Java Runtime Name", environment.getProperty("java.runtime.name"));
+    properties.put("Java Runtime Version", environment.getProperty("java.runtime.version"));
+    properties.put("Java VM Name", environment.getProperty("java.vm.name"));
+    properties.put("Java VM Version", environment.getProperty("java.vm.version"));
+    properties.put("OS Name", environment.getProperty("os.name"));
+    properties.put("OS Version", environment.getProperty("os.version"));
+    properties.put("OS Architecture", environment.getProperty("os.arch"));
+    return properties;
+  }
 }
 

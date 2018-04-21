@@ -6,35 +6,36 @@ import org.testng.annotations.*;
 
 import static org.testng.AssertJUnit.assertEquals;
 
-public class IDontNeedSecurityTest{
-    private IDontNeedSecurity listener;
-    private IDontNeedSecurity listener_spy;
+public class IDontNeedSecurityTest {
 
-    @BeforeMethod
-    public void setUp() {
-        listener = new IDontNeedSecurity();
-        listener_spy = Mockito.spy(listener);
-    }
+  private IDontNeedSecurity listener;
+  private IDontNeedSecurity listener_spy;
 
-    @AfterMethod
-    public void tearDown() {
-        listener = null;
-        listener_spy = null;
-    }
+  @BeforeMethod
+  public void setUp() {
+    listener = new IDontNeedSecurity();
+    listener_spy = Mockito.spy(listener);
+  }
 
-    @Test
-    public void isForMessage(){
-        assertEquals(false, listener_spy.isForMessage(null));
-    }
+  @AfterMethod
+  public void tearDown() {
+    listener = null;
+    listener_spy = null;
+  }
 
-    @Test
-    public void getMessageTypes(){
-        StompMessageType[] types = listener_spy.getMessageTypes();
-        assertEquals(null, types);
-    }
+  @Test
+  public void isForMessage() {
+    assertEquals(false, listener_spy.isForMessage(null));
+  }
 
-    @Test
-    public void messageReceived() throws Exception {
-        listener_spy.messageReceived(null, null);
-    }
+  @Test
+  public void getMessageTypes() {
+    StompMessageType[] types = listener_spy.getMessageTypes();
+    assertEquals(null, types);
+  }
+
+  @Test
+  public void messageReceived() {
+    listener_spy.messageReceived(null, null);
+  }
 }

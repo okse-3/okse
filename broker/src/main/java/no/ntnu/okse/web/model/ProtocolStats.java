@@ -26,53 +26,54 @@ package no.ntnu.okse.web.model;
 
 public class ProtocolStats {
 
-    private final String protocolServer;
-    private final int totalMessagesSent;
-    private final int totalMessagesReceived;
-    private final int totalRequests;
-    private final int totalBadRequests;
-    private final int totalErrors;
+  private final String protocolServer;
+  private final int totalMessagesSent;
+  private final int totalMessagesReceived;
+  private final int totalRequests;
+  private final int totalBadRequests;
+  private final int totalErrors;
 
-    /**
-     * Constructes a model for containing protocol stats to be serialized to JSON
-     *
-     * @param protocolServer : The protocol server
-     * @param totalMessagesSent : Total amount of messages sent
-     * @param totalMessagesReceived : Total amount of messages received
-     * @param totalRequests : Total amount of requests
-     * @param totalBadRequests : Total amount of bad requests
-     * @param totalErrors : Total amount of errors
-     */
-    public ProtocolStats(String protocolServer, int totalMessagesSent, int totalMessagesReceived, int totalRequests, int totalBadRequests, int totalErrors) {
-        this.protocolServer = protocolServer;
-        this.totalMessagesSent = totalMessagesSent;
-        this.totalMessagesReceived = totalMessagesReceived;
-        this.totalRequests = totalRequests;
-        this.totalBadRequests = totalBadRequests;
-        this.totalErrors = totalErrors;
-    }
+  /**
+   * Constructs a model for containing protocol stats to be serialized to JSON
+   *
+   * @param protocolServer : The protocol server
+   * @param totalMessagesSent : Total amount of messages sent
+   * @param totalMessagesReceived : Total amount of messages received
+   * @param totalRequests : Total amount of requests
+   * @param totalBadRequests : Total amount of bad requests
+   * @param totalErrors : Total amount of errors
+   */
+  public ProtocolStats(String protocolServer, int totalMessagesSent, int totalMessagesReceived,
+      int totalRequests, int totalBadRequests, int totalErrors) {
+    this.protocolServer = protocolServer;
+    this.totalMessagesSent = totalMessagesSent;
+    this.totalMessagesReceived = totalMessagesReceived;
+    this.totalRequests = totalRequests;
+    this.totalBadRequests = totalBadRequests;
+    this.totalErrors = totalErrors;
+  }
 
-    public String getProtocolServer() {
-        return protocolServer;
-    }
+  public String getProtocolServer() {
+    return protocolServer;
+  }
 
-    public int getTotalMessagesSent() {
-        return totalMessagesSent;
-    }
+  public int getTotalMessagesSent() {
+    return totalMessagesSent;
+  }
 
-    public int getTotalMessagesReceived() {
-        return totalMessagesReceived;
-    }
+  public int getTotalMessagesReceived() {
+    return totalMessagesReceived;
+  }
 
-    public int getTotalRequests() {
-        return totalRequests;
-    }
+  public int getTotalRequests() {
+    return totalRequests;
+  }
 
-    public int getTotalBadRequests() {
-        return totalBadRequests;
-    }
+  public int getTotalBadRequests() {
+    return totalBadRequests;
+  }
 
-    public int getTotalErrors() {
-        return totalErrors;
-    }
+  public int getTotalErrors() {
+    return totalErrors;
+  }
 }

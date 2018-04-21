@@ -43,86 +43,85 @@ import java.util.HashMap;
 @RequestMapping(value = "/api/main")
 public class MainController {
 
-    // URL routes
-    private static final String MAIN_API = "/get/all";
-    private static final String PROTOCOL_POWER = "/protocols/power";
+  // URL routes
+  private static final String MAIN_API = "/get/all";
+  private static final String PROTOCOL_POWER = "/protocols/power";
 
-    // Public static field representing a MB
-    public static int MB = 1024 * 1024;
+  // Public static field representing a MB
+  public static final int MB = 1024 * 1024;
 
-    // Log4j logger
-    private static Logger log = Logger.getLogger(MainController.class.getName());
+  // Log4j logger
+  private static final Logger log = Logger.getLogger(MainController.class.getName());
 
-    /**
-     * Returns all necessary information for rendering the main-pane
-     *
-     * @return A HashMap containing all the information
-     */
-    @RequestMapping(method = RequestMethod.GET, value = MAIN_API)
-    public
-    @ResponseBody
-    HashMap<String, Object> main() {
-        SubscriptionService ss = SubscriptionService.getInstance();
-        TopicService ts = TopicService.getInstance();
-        CoreService cs = CoreService.getInstance();
+  /**
+   * Returns all necessary information for rendering the main-pane
+   *
+   * @return A HashMap containing all the information
+   */
+  @RequestMapping(method = RequestMethod.GET, value = MAIN_API)
+  public
+  @ResponseBody
+  HashMap<String, Object> main() {
+    SubscriptionService ss = SubscriptionService.getInstance();
+    TopicService ts = TopicService.getInstance();
+    CoreService cs = CoreService.getInstance();
 
-        long totalRam = Runtime.getRuntime().totalMemory();
-        long freeRam = Runtime.getRuntime().freeMemory();
+    long totalRam = Runtime.getRuntime().totalMemory();
+    long freeRam = Runtime.getRuntime().freeMemory();
 
-        HashMap<String, Object> result = new HashMap<String, Object>() {{
-            put("subscribers", ss.getNumberOfSubscribers());
-            put("publishers", ss.getNumberOfPublishers());
-            put("topics", ts.getTotalNumberOfTopics());
-            put("totalMessages", cs.getTotalMessagesSentFromProtocolServers());
-            put("uptime", Utilities.getDurationAsISO8601(Application.getRunningTime()));
-            // Runtime statistics
-            put("runtimeStatistics", new HashMap<String, Object>() {{
-                put("cpuAvailable", Runtime.getRuntime().availableProcessors());
-                put("totalRam", totalRam / MB);
-                put("freeRam", freeRam / MB);
-                put("usedRam", (totalRam - freeRam) / MB);
-            }});
-            // Protocol information
-            ArrayList<HashMap<String, Object>> protocols = new ArrayList<>();
-            Application.cs.getAllProtocolServers().forEach(p -> {
-                protocols.add(new HashMap<String, Object>() {{
-                    put("host", p.getHost());
-                    put("port", p.getPort());
-                    put("type", p.getProtocolServerType());
-                }});
-            });
-            put("protocols", protocols);
-            put("protocolPower", cs.protocolServersBooted);
-        }};
+    HashMap<String, Object> result = new HashMap<String, Object>() {{
+      put("subscribers", ss.getNumberOfSubscribers());
+      put("publishers", ss.getNumberOfPublishers());
+      put("topics", ts.getTotalNumberOfTopics());
+      put("totalMessages", cs.getTotalMessagesSentFromProtocolServers());
+      put("uptime", Utilities.getDurationAsISO8601(Application.getRunningTime()));
+      // Runtime statistics
+      put("runtimeStatistics", new HashMap<String, Object>() {{
+        put("cpuAvailable", Runtime.getRuntime().availableProcessors());
+        put("totalRam", totalRam / MB);
+        put("freeRam", freeRam / MB);
+        put("usedRam", (totalRam - freeRam) / MB);
+      }});
+      // Protocol information
+      ArrayList<HashMap<String, Object>> protocols = new ArrayList<>();
+      Application.cs.getAllProtocolServers()
+          .forEach(p -> protocols.add(new HashMap<String, Object>() {{
+            put("host", p.getHost());
+            put("port", p.getPort());
+            put("type", p.getProtocolServerType());
+          }}));
+      put("protocols", protocols);
+      put("protocolPower", CoreService.protocolServersBooted);
+    }};
 
-        return result;
+    return result;
+  }
+
+  /**
+   * This method turns on/off the protocol servers registered in the CoreService
+   *
+   * @return A message telling if the protocol servers are booted or not
+   */
+  @RequestMapping(method = RequestMethod.POST, value = PROTOCOL_POWER)
+  public
+  @ResponseBody
+  String powerProtocolServers() {
+    CoreService cs = CoreService.getInstance();
+
+    if (CoreService.protocolServersBooted) {
+      try {
+        cs.getEventQueue().put(new SystemEvent(SystemEvent.Type.SHUTDOWN_PROTOCOL_SERVERS, null));
+      } catch (InterruptedException e) {
+        log.warn("WARNING: Please don't interrupt the thread");
+      }
+    } else {
+      try {
+        cs.getEventQueue().put(new SystemEvent(SystemEvent.Type.BOOT_PROTOCOL_SERVERS, null));
+      } catch (InterruptedException e) {
+        log.warn("WARNING: Please don't interrupt the thread");
+      }
     }
-
-    /**
-     * This method turns on/off the protocol servers registered in the CoreService
-     *
-     * @return A message telling if the protocol servers are booted or not
-     */
-    @RequestMapping(method = RequestMethod.POST, value = PROTOCOL_POWER)
-    public
-    @ResponseBody
-    String powerProtocolServers() {
-        CoreService cs = CoreService.getInstance();
-
-        if (cs.protocolServersBooted) {
-            try {
-                cs.getEventQueue().put(new SystemEvent(SystemEvent.Type.SHUTDOWN_PROTOCOL_SERVERS, null));
-            } catch (InterruptedException e) {
-                log.warn("WARNING: Please don't interrupt the thread");
-            }
-        } else {
-            try {
-                cs.getEventQueue().put(new SystemEvent(SystemEvent.Type.BOOT_PROTOCOL_SERVERS, null));
-            } catch (InterruptedException e) {
-                log.warn("WARNING: Please don't interrupt the thread");
-            }
-        }
-        return "{ \"power\":" + cs.protocolServersBooted + " }";
-    }
+    return "{ \"power\":" + CoreService.protocolServersBooted + " }";
+  }
 
 }

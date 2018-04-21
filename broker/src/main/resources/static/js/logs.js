@@ -24,23 +24,23 @@
 
 var Logs = (function($) {
 
-    var url = "log?logLevel=DEBUG&logID=0"
-    var logLevel = "DEBUG"
-    var logID = 0
-    var logLength = 250
+    var url = "log?logLevel=DEBUG&logID=0";
+    var logLevel = "DEBUG";
+    var logID = 0;
+    var logLength = 250;
 
     var updateUrl = function() {
         url = "log?logLevel=" + logLevel + "&logID=" + logID + "&length=" + logLength
-    }
+    };
 
     var updateLogView = function(data) {
         var HTML = '<pre class="log-view">';
         $.each(data.lines, function (i, line) {
            HTML += line + '\n'
         });
-        HTML += '</pre>'
+        HTML += '</pre>';
         return HTML
-    }
+    };
 
     return {
         init: function() {
@@ -53,8 +53,8 @@ var Logs = (function($) {
                 url: 'log/levels',
                 type: 'GET',
                 success: function(data) {
-                    $.okseDebug.logPrint("[Debug][Logs] Adding log level buttons")
-                    var buttons = ""
+                    $.okseDebug.logPrint("[Debug][Logs] Adding log level buttons");
+                    var buttons = "";
                     $.each(data, function(i, level) {
                         if (level == 'DEBUG') {
                             buttons += '<button type="button" class="btn btn-info active" id="button-' + level + '">' + level + '</button>'
@@ -62,13 +62,13 @@ var Logs = (function($) {
                             buttons += '<button type="button" class="btn btn-info" id="button-' + level + '">' + level + '</button>'
                         }
                     });
-                    $("#log-level").html(buttons)
+                    $("#log-level").html(buttons);
                     $.each(data, function(i, level) {
                         $("#button-" + level).on("click", function(e){
-                            e.preventDefault()
+                            e.preventDefault();
                             $('#button-' + level).addClass('active').siblings().removeClass('active');
-                            logLevel = level
-                            updateUrl()
+                            logLevel = level;
+                            updateUrl();
                             Main.setIntervalForTab({
                                 url: Logs.url(),
                                 type: 'GET',
@@ -96,20 +96,20 @@ var Logs = (function($) {
                 url: 'log/files',
                 type: 'GET',
                 success: function(data) {
-                    $.okseDebug.logPrint("[Debug][Logs] Adding log files buttons")
-                    var files = ""
+                    $.okseDebug.logPrint("[Debug][Logs] Adding log files buttons");
+                    var files = "";
                     $.each(data, function(i) {
                         if (i == 0) {
                             files += '<option value="' + i + '" selected>' + data[i] + '</option>'
                         } else {
                             files += '<option value="' + i + '">' + data[i] + '</option>'
                         }
-                    })
-                    $("#log-file").html(files)
+                    });
+                    $("#log-file").html(files);
 
                     $('#log-file').on('change', function() {
-                        logID = $(this).val()
-                        updateUrl()
+                        logID = $(this).val();
+                        updateUrl();
                         Main.setIntervalForTab({
                             url: Logs.url(),
                             type: 'GET',
@@ -120,8 +120,8 @@ var Logs = (function($) {
             });
 
             $("#log-length").keyup(function(){
-                logLength = $(this).val()
-                updateUrl()
+                logLength = $(this).val();
+                updateUrl();
                 Main.setIntervalForTab({
                     url: Logs.url(),
                     type: 'GET',
@@ -133,24 +133,24 @@ var Logs = (function($) {
              * Add a listener to clear interval
              * */
             $("#logs-button-refresh").on("click", function(e) {
-                e.preventDefault()
+                e.preventDefault();
                 if (!$(this).hasClass("active")) {
-                    $(this).addClass("active")
-                    $(this).text("Stop refresh")
+                    $(this).addClass("active");
+                    $(this).text("Stop refresh");
                     Main.setIntervalForTab({
                         url: Logs.url(),
                         type: 'GET',
                         success: Logs.refresh
                     });
                 } else {
-                    $(this).removeClass("active")
-                    $(this).text("Start refresh")
+                    $(this).removeClass("active");
+                    $(this).text("Start refresh");
                     Main.clearIntervalForTab()
                 }
             })
         },
         refresh: function(data) {
-            $('#log-name').html(data.name)
+            $('#log-name').html(data.name);
             $('#log-data').html(updateLogView(data))
         },
         url: function() {

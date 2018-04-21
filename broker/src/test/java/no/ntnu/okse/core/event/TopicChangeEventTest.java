@@ -33,37 +33,37 @@ import static org.testng.Assert.*;
 
 public class TopicChangeEventTest {
 
-    Topic one;
-    Topic two;
-    TopicChangeEvent tce;
+  Topic one;
+  Topic two;
+  TopicChangeEvent tce;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        one = new Topic("root", "DEFAULT");
-        two = new Topic("sub", "DEFAULT");
-        two.setParent(one);
-        tce = new TopicChangeEvent(TopicChangeEvent.Type.NEW, two);
-    }
+  @BeforeMethod
+  public void setUp() {
+    one = new Topic("root", "DEFAULT");
+    two = new Topic("sub", "DEFAULT");
+    two.setParent(one);
+    tce = new TopicChangeEvent(TopicChangeEvent.Type.NEW, two);
+  }
 
-    @AfterMethod
-    public void tearDown() throws Exception {
-        one = null;
-        two = null;
-        tce = null;
-    }
+  @AfterMethod
+  public void tearDown() {
+    one = null;
+    two = null;
+    tce = null;
+  }
 
-    @Test
-    public void testGetData() throws Exception {
-        assertNotNull(tce.getData());
-        assertEquals(tce.getData().getFullTopicString(), "root/sub");
-        assertSame(tce.getData(), two);
-    }
+  @Test
+  public void testGetData() {
+    assertNotNull(tce.getData());
+    assertEquals(tce.getData().getFullTopicString(), "root/sub");
+    assertSame(tce.getData(), two);
+  }
 
-    @Test
-    public void testGetType() throws Exception {
-        assertNotNull(tce.getType());
-        assertEquals(tce.getType(), TopicChangeEvent.Type.NEW);
-        tce = new TopicChangeEvent(TopicChangeEvent.Type.DELETE, one);
-        assertEquals(tce.getType(), TopicChangeEvent.Type.DELETE);
-    }
+  @Test
+  public void testGetType() {
+    assertNotNull(tce.getType());
+    assertEquals(tce.getType(), TopicChangeEvent.Type.NEW);
+    tce = new TopicChangeEvent(TopicChangeEvent.Type.DELETE, one);
+    assertEquals(tce.getType(), TopicChangeEvent.Type.DELETE);
+  }
 }

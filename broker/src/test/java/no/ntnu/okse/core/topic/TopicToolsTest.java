@@ -34,130 +34,130 @@ import static org.testng.Assert.*;
 
 public class TopicToolsTest {
 
-    Topic one,two,three,four,five,six,seven,eight,nine,ten;
-    HashSet<Topic> leafNodes, childSetOne, childSetTwo, all;
+  Topic one, two, three, four, five, six, seven, eight, nine, ten;
+  HashSet<Topic> leafNodes, childSetOne, childSetTwo, all;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
+  @BeforeMethod
+  public void setUp() {
 
-        all = new HashSet<>();
-        leafNodes = new HashSet<>();
-        childSetOne = new HashSet<>();
-        childSetTwo = new HashSet<>();
+    all = new HashSet<>();
+    leafNodes = new HashSet<>();
+    childSetOne = new HashSet<>();
+    childSetTwo = new HashSet<>();
 
-        one = new Topic("One", "Default");
-        two = new Topic("Two", "Default");
-        three = new Topic("Three", "Default");
-        four = new Topic("Four", "Default");
-        five = new Topic("Five", "Default");
-        six = new Topic("One", "Default");
-        seven = new Topic("Two", "Default");
-        eight = new Topic("Three", "Default");
-        nine = new Topic("Four", "Default");
-        ten = new Topic("Five", "Default");
+    one = new Topic("One", "Default");
+    two = new Topic("Two", "Default");
+    three = new Topic("Three", "Default");
+    four = new Topic("Four", "Default");
+    five = new Topic("Five", "Default");
+    six = new Topic("One", "Default");
+    seven = new Topic("Two", "Default");
+    eight = new Topic("Three", "Default");
+    nine = new Topic("Four", "Default");
+    ten = new Topic("Five", "Default");
 
-        all.add(one);
-        all.add(two);
-        all.add(three);
-        all.add(four);
-        all.add(five);
-        all.add(six);
-        all.add(seven);
-        all.add(eight);
-        all.add(nine);
-        all.add(ten);
+    all.add(one);
+    all.add(two);
+    all.add(three);
+    all.add(four);
+    all.add(five);
+    all.add(six);
+    all.add(seven);
+    all.add(eight);
+    all.add(nine);
+    all.add(ten);
 
-        one.addChild(three);
-        one.addChild(four);
+    one.addChild(three);
+    one.addChild(four);
 
-        two.addChild(five);
+    two.addChild(five);
 
-        three.addChild(six);
+    three.addChild(six);
 
-        four.addChild(seven);
+    four.addChild(seven);
 
-        five.addChild(eight);
-        five.addChild(ten);
+    five.addChild(eight);
+    five.addChild(ten);
 
-        eight.addChild(nine);
+    eight.addChild(nine);
 
-        childSetOne.add(three);
-        childSetOne.add(four);
-        childSetOne.add(six);
-        childSetOne.add(seven);
+    childSetOne.add(three);
+    childSetOne.add(four);
+    childSetOne.add(six);
+    childSetOne.add(seven);
 
-        childSetTwo.add(five);
-        childSetTwo.add(eight);
-        childSetTwo.add(nine);
-        childSetTwo.add(ten);
+    childSetTwo.add(five);
+    childSetTwo.add(eight);
+    childSetTwo.add(nine);
+    childSetTwo.add(ten);
 
-        leafNodes.add(six);
-        leafNodes.add(seven);
-        leafNodes.add(nine);
-        leafNodes.add(ten);
+    leafNodes.add(six);
+    leafNodes.add(seven);
+    leafNodes.add(nine);
+    leafNodes.add(ten);
+  }
+
+  @AfterMethod
+  public void tearDown() {
+
+  }
+
+  @Test
+  public void testGetAllTopicNodesFromRootNodeSet() throws Exception {
+
+    HashSet<Topic> rootNodeSet = new HashSet<>();
+    rootNodeSet.add(one);
+    rootNodeSet.add(two);
+
+    HashSet<Topic> allNodesFromRootNodes = TopicTools.getAllTopicNodesFromRootNodeSet(rootNodeSet);
+
+    for (Topic t : all) {
+      assertTrue(allNodesFromRootNodes.contains(t));
+    }
+  }
+
+  @Test
+  public void testGetAllTopicNodesFromNodeSet() {
+
+    HashSet<Topic> nodeSet = new HashSet<>();
+    nodeSet.add(five);
+    nodeSet.add(six);
+
+    HashSet<Topic> nodesNonRootRequirement = TopicTools.getAllTopicNodesFromNodeSet(nodeSet);
+
+    assertTrue(nodesNonRootRequirement.contains(five));
+    assertTrue(nodesNonRootRequirement.contains(six));
+    assertTrue(nodesNonRootRequirement.contains(eight));
+    assertTrue(nodesNonRootRequirement.contains(nine));
+    assertTrue(nodesNonRootRequirement.contains(ten));
+  }
+
+  @Test
+  public void testGetAllChildrenFromNode() {
+    HashSet<Topic> results = TopicTools.getAllChildrenFromNode(one);
+    for (Topic t : childSetOne) {
+      assertTrue(results.contains(t));
     }
 
-    @AfterMethod
-    public void tearDown() throws Exception {
+    results = TopicTools.getAllChildrenFromNode(two);
 
+    for (Topic t : childSetTwo) {
+      assertTrue(results.contains(t));
+    }
+  }
+
+  @Test
+  public void testGetAllLeafNodesFromNode() {
+    HashSet<Topic> results = TopicTools.getAllLeafNodesFromNode(one);
+
+    for (Topic t : results) {
+      assertTrue(leafNodes.contains(t));
     }
 
-    @Test
-    public void testGetAllTopicNodesFromRootNodeSet() throws Exception {
+    results = TopicTools.getAllLeafNodesFromNode(two);
 
-        HashSet<Topic> rootNodeSet = new HashSet<>();
-        rootNodeSet.add(one);
-        rootNodeSet.add(two);
-
-        HashSet<Topic> allNodesFromRootNodes = TopicTools.getAllTopicNodesFromRootNodeSet(rootNodeSet);
-
-        for (Topic t : all) {
-            assertTrue(allNodesFromRootNodes.contains(t));
-        }
+    for (Topic t : results) {
+      assertTrue(leafNodes.contains(t));
     }
-
-    @Test
-    public void testGetAllTopicNodesFromNodeSet() throws Exception {
-
-        HashSet<Topic> nodeSet = new HashSet<>();
-        nodeSet.add(five);
-        nodeSet.add(six);
-
-        HashSet<Topic> nodesNonRootRequirement = TopicTools.getAllTopicNodesFromNodeSet(nodeSet);
-
-        assertTrue(nodesNonRootRequirement.contains(five));
-        assertTrue(nodesNonRootRequirement.contains(six));
-        assertTrue(nodesNonRootRequirement.contains(eight));
-        assertTrue(nodesNonRootRequirement.contains(nine));
-        assertTrue(nodesNonRootRequirement.contains(ten));
-    }
-
-    @Test
-    public void testGetAllChildrenFromNode() throws Exception {
-        HashSet<Topic> results = TopicTools.getAllChildrenFromNode(one);
-        for (Topic t : childSetOne) {
-            assertTrue(results.contains(t));
-        }
-
-        results = TopicTools.getAllChildrenFromNode(two);
-
-        for (Topic t : childSetTwo) {
-            assertTrue(results.contains(t));
-        }
-    }
-
-    @Test
-    public void testGetAllLeafNodesFromNode() throws Exception {
-        HashSet<Topic> results = TopicTools.getAllLeafNodesFromNode(one);
-
-        for (Topic t : results) {
-            assertTrue(leafNodes.contains(t));
-        }
-
-        results = TopicTools.getAllLeafNodesFromNode(two);
-
-        for (Topic t : results) {
-            assertTrue(leafNodes.contains(t));
-        }
-    }
+  }
 }

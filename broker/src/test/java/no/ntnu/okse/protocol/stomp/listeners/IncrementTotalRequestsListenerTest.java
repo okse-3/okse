@@ -10,47 +10,48 @@ import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
 public class IncrementTotalRequestsListenerTest {
-    private STOMPProtocolServer ps;
-    private IncrementTotalRequestsListener listener;
-    private STOMPProtocolServer ps_spy;
-    private IncrementTotalRequestsListener listener_spy;
 
-    @BeforeTest
-    public void setUp() {
-        listener = new IncrementTotalRequestsListener();
-        ps = new STOMPProtocolServer("localhost", 61613);
+  private STOMPProtocolServer ps;
+  private IncrementTotalRequestsListener listener;
+  private STOMPProtocolServer ps_spy;
+  private IncrementTotalRequestsListener listener_spy;
 
-        ps_spy = Mockito.spy(ps);
+  @BeforeTest
+  public void setUp() {
+    listener = new IncrementTotalRequestsListener();
+    ps = new STOMPProtocolServer("localhost", 61613);
 
-        listener.setProtocolServer(ps_spy);
+    ps_spy = Mockito.spy(ps);
 
-        listener_spy = Mockito.spy(listener);
-    }
+    listener.setProtocolServer(ps_spy);
 
-    @AfterTest
-    public void tearDown() {
-        listener = null;
-        listener_spy = null;
-        ps_spy = null;
-        ps = null;
-    }
+    listener_spy = Mockito.spy(listener);
+  }
 
-    @Test
-    public void isForMessage(){
-        assertEquals(true, listener_spy.isForMessage(null));
-    }
+  @AfterTest
+  public void tearDown() {
+    listener = null;
+    listener_spy = null;
+    ps_spy = null;
+    ps = null;
+  }
 
-    @Test
-    public void getMessageTypes(){
-        StompMessageType[] types = listener_spy.getMessageTypes();
-        assertEquals(StompMessageType.values().length, types.length);
-    }
+  @Test
+  public void isForMessage() {
+    assertEquals(true, listener_spy.isForMessage(null));
+  }
 
-    @Test
-    public void messageReceived() throws Exception {
-        listener_spy.messageReceived(null, null);
-        Mockito.verify(ps_spy).incrementTotalRequests();
-    }
+  @Test
+  public void getMessageTypes() {
+    StompMessageType[] types = listener_spy.getMessageTypes();
+    assertEquals(StompMessageType.values().length, types.length);
+  }
+
+  @Test
+  public void messageReceived() {
+    listener_spy.messageReceived(null, null);
+    Mockito.verify(ps_spy).incrementTotalRequests();
+  }
 
 
 }

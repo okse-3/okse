@@ -35,110 +35,109 @@ import java.nio.channels.UnresolvedAddressException;
 
 public class AMQProtocolServer extends AbstractProtocolServer {
 
-    protected static final String SERVERTYPE = "amqp";
+  protected static final String SERVERTYPE = "amqp";
 
-    private Logger log;
-    private Thread _serverThread;
+  private final Logger log;
+  private Thread _serverThread;
 
-    private SubscriptionHandler sh;
-    private boolean shuttingdown = false;
+  private SubscriptionHandler sh;
+  private boolean shuttingdown = false;
 
-    public boolean useQueue;
-    protected boolean useSASL;
+  public boolean useQueue;
+  protected final boolean useSASL;
 
-    private Driver driver;
+  private Driver driver;
 
-    /**
-     * Constructor that takes in configuration options for the AMQProtocolServer
-     * server.
-     * <p>
-     *
-     * @param host A String representing the host the WSNServer should bind to
-     * @param port An int representing the port the WSNServer should bind to.
-     * @param queue A boolean specifying whether to use queueing behaviour
-     * @param sasl A boolean specifying whether to use SASL for its connections
-     */
-    public AMQProtocolServer(String host, int port, boolean queue, boolean sasl) {
-        protocolServerType = "amqp";
-        useQueue = queue;
-        useSASL = sasl;
-        this.port = port;
-        this.host = host;
-        log = Logger.getLogger(AMQProtocolServer.class.getName());
+  /**
+   * Constructor that takes in configuration options for the AMQProtocolServer server. <p>
+   *
+   * @param host A String representing the host the WSNServer should bind to
+   * @param port An int representing the port the WSNServer should bind to.
+   * @param queue A boolean specifying whether to use queueing behaviour
+   * @param sasl A boolean specifying whether to use SASL for its connections
+   */
+  public AMQProtocolServer(String host, int port, boolean queue, boolean sasl) {
+    protocolServerType = "amqp";
+    useQueue = queue;
+    useSASL = sasl;
+    this.port = port;
+    this.host = host;
+    log = Logger.getLogger(AMQProtocolServer.class.getName());
+  }
+
+  @Override
+  public void boot() {
+    if (!_running) {
+      _running = true;
+      Collector collector = Collector.Factory.create();
+      this.sh = new SubscriptionHandler(this);
+      SubscriptionService.getInstance().addSubscriptionChangeListener(sh);
+      server = new AMQPServer(this, sh, false);
+      try {
+        driver = new Driver(this, collector, new Handshaker(),
+            new FlowController(1024), sh,
+            server);
+        driver.listen(this.host, this.port);
+      } catch (UnresolvedAddressException e) {
+        throw new BootErrorException("Unresolved address");
+      } catch (IOException e) {
+        throw new BootErrorException("Unable to bind to " + host + ":" + port);
+      }
+      _serverThread = new Thread(this::run);
+      _serverThread.setName("AMQProtocolServer");
+      _serverThread.start();
+      log.info("AMQProtocolServer booted successfully");
     }
 
-    @Override
-    public void boot() {
-        if (!_running) {
-            _running = true;
-            Collector collector = Collector.Factory.create();
-            this.sh = new SubscriptionHandler(this);
-            SubscriptionService.getInstance().addSubscriptionChangeListener(sh);
-            server = new AMQPServer(this, sh, false);
-            try {
-                driver = new Driver(this, collector, new Handshaker(),
-                        new FlowController(1024), sh,
-                        server);
-                driver.listen(this.host, this.port);
-            } catch(UnresolvedAddressException e) {
-                throw new BootErrorException("Unresolved address");
-            } catch (IOException e) {
-                throw new BootErrorException("Unable to bind to " + host + ":" + port);
-            }
-            _serverThread = new Thread(() -> this.run());
-            _serverThread.setName("AMQProtocolServer");
-            _serverThread.start();
-            log.info("AMQProtocolServer booted successfully");
-        }
+  }
 
+  @Override
+  public void run() {
+    try {
+      driver.run();
+    } catch (IOException e) {
+      totalErrors.incrementAndGet();
+      log.error("I/O exception during accept(): " + e.getMessage());
     }
+  }
 
-    @Override
-    public void run() {
-        try {
-            driver.run();
-        } catch (IOException e) {
-            totalErrors.incrementAndGet();
-            log.error("I/O exception during accept(): " + e.getMessage());
-        }
+  @Override
+  public void stopServer() {
+    log.info("Stopping AMQProtocolServer");
+    shuttingdown = true;
+    driver.stop();
+    sh.unsubscribeAll();
+    sh = null;
+    _running = false;
+    server = null;
+    driver = null;
+    log.info("AMQProtocolServer is stopped");
+  }
+
+  @Override
+  public String getProtocolServerType() {
+    return protocolServerType;
+  }
+
+  @Override
+  public void sendMessage(Message message) {
+    if (!message.getOriginProtocol().equals(protocolServerType)
+        || message.getAttribute("duplicate") != null) {
+      server.addMessageToQueue(message);
     }
+  }
 
-    @Override
-    public void stopServer() {
-        log.info("Stopping AMQProtocolServer");
-        shuttingdown = true;
-        driver.stop();
-        sh.unsubscribeAll();
-        sh = null;
-        _running = false;
-        server = null;
-        driver = null;
-        log.info("AMQProtocolServer is stopped");
-    }
+  private AMQPServer server;
 
-    @Override
-    public String getProtocolServerType() {
-        return protocolServerType;
-    }
+  public Driver getDriver() {
+    return driver;
+  }
 
-    @Override
-    public void sendMessage(Message message) {
-        if (!message.getOriginProtocol().equals(protocolServerType) || message.getAttribute("duplicate") != null) {
-            server.addMessageToQueue(message);
-        }
-    }
+  public SubscriptionHandler getSubscriptionHandler() {
+    return sh;
+  }
 
-    private AMQPServer server;
-
-    public Driver getDriver() {
-        return driver;
-    }
-
-    public SubscriptionHandler getSubscriptionHandler() {
-        return sh;
-    }
-
-    public boolean isShuttingDown() {
-        return shuttingdown;
-    }
+  public boolean isShuttingDown() {
+    return shuttingdown;
+  }
 }

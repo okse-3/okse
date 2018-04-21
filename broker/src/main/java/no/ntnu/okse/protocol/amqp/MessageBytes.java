@@ -26,21 +26,21 @@ package no.ntnu.okse.protocol.amqp;
 
 public class MessageBytes {
 
-    private final byte[] bytes;
+  private final byte[] bytes;
 
-    public MessageBytes(byte[] bytes) {
-        this.bytes = bytes;
-    }
+  public MessageBytes(byte[] bytes) {
+    this.bytes = bytes;
+  }
 
-    public MessageBytes(String string) {
-        this.bytes = string.getBytes();
-    }
+  public MessageBytes(String string) {
+    this.bytes = string.getBytes();
+  }
 
-    public byte[] getBytes() {
-        return bytes;
-    }
+  public byte[] getBytes() {
+    return bytes;
+  }
 
-    public String toString() {
-        return new String(bytes);
-    }
+  public String toString() {
+    return new String(bytes);
+  }
 }

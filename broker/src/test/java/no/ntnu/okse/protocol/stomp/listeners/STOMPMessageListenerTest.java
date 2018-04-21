@@ -16,108 +16,109 @@ import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
 public class STOMPMessageListenerTest {
-    private MessageListener messageListener;
-    private MessageListener messageListener_spy;
-    private MessageService messageService_spy;
 
-    @BeforeTest
-    public void setUp() {
-        messageListener = new MessageListener();
-        MessageService messageService = MessageService.getInstance();
-        STOMPProtocolServer ps = new STOMPProtocolServer("localhost", 61613);
+  private MessageListener messageListener;
+  private MessageListener messageListener_spy;
+  private MessageService messageService_spy;
 
-        messageService_spy = Mockito.spy(messageService);
+  @BeforeTest
+  public void setUp() {
+    messageListener = new MessageListener();
+    MessageService messageService = MessageService.getInstance();
+    STOMPProtocolServer ps = new STOMPProtocolServer("localhost", 61613);
 
-        messageListener.setProtocolServer(ps);
-        messageListener.setMessageService(messageService_spy);
+    messageService_spy = Mockito.spy(messageService);
 
-        messageListener_spy = Mockito.spy(messageListener);
-    }
+    messageListener.setProtocolServer(ps);
+    messageListener.setMessageService(messageService_spy);
 
-    @AfterTest
-    public void tearDown() {
-        messageListener = null;
-        messageListener_spy = null;
-    }
+    messageListener_spy = Mockito.spy(messageListener);
+  }
 
-    @Test
-    public void isForMessage(){
-        assertEquals(true, messageListener_spy.isForMessage(null));
-    }
+  @AfterTest
+  public void tearDown() {
+    messageListener = null;
+    messageListener_spy = null;
+  }
 
-    @Test
-    public void getMessageTypes(){
-        StompMessageType[] types = messageListener_spy.getMessageTypes();
-        assertEquals(StompMessageType.SEND, types[0]);
-    }
+  @Test
+  public void isForMessage() {
+    assertEquals(true, messageListener_spy.isForMessage(null));
+  }
 
-    @Test
-    public void messageReceived() throws Exception {
-        StampyMessage msg = createSendMessage();
-        messageListener_spy.messageReceived(msg, new HostPort("localhost", 61613));
+  @Test
+  public void getMessageTypes() {
+    StompMessageType[] types = messageListener_spy.getMessageTypes();
+    assertEquals(StompMessageType.SEND, types[0]);
+  }
 
-        ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
+  @Test
+  public void messageReceived() {
+    StampyMessage msg = createSendMessage();
+    messageListener_spy.messageReceived(msg, new HostPort("localhost", 61613));
 
-        Mockito.verify(messageService_spy).distributeMessage(messageArgument.capture());
-        assertEquals( "Testing", messageArgument.getValue().getMessage());
-        assertEquals( "bernt", messageArgument.getValue().getTopic());
+    ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
 
-        Mockito.reset(messageService_spy);
-    }
+    Mockito.verify(messageService_spy).distributeMessage(messageArgument.capture());
+    assertEquals("Testing", messageArgument.getValue().getMessage());
+    assertEquals("bernt", messageArgument.getValue().getTopic());
 
-    @Test
-    public void mimeTypes() throws Exception {
-        StampyMessage msg = createMimeTypeMessage("plain/text", "utf-8", "test");
-        messageListener_spy.messageReceived(msg, new HostPort("localhost", 61613));
-    }
+    Mockito.reset(messageService_spy);
+  }
 
-    @Test
-    public void differentMessageHeaders() throws Exception {
-        StampyMessage msg = createSendMessageWithHeaders();
-        messageListener_spy.messageReceived(msg, new HostPort("localhost", 61613));
+  @Test
+  public void mimeTypes() {
+    StampyMessage msg = createMimeTypeMessage("plain/text", "utf-8", "test");
+    messageListener_spy.messageReceived(msg, new HostPort("localhost", 61613));
+  }
 
-        ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
+  @Test
+  public void differentMessageHeaders() {
+    StampyMessage msg = createSendMessageWithHeaders();
+    messageListener_spy.messageReceived(msg, new HostPort("localhost", 61613));
 
-        Mockito.verify(messageService_spy).distributeMessage(messageArgument.capture());
+    ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
 
-        assertEquals( "Testing", messageArgument.getValue().getMessage());
-        assertEquals( "bernt", messageArgument.getValue().getTopic());
+    Mockito.verify(messageService_spy).distributeMessage(messageArgument.capture());
 
-        assertEquals("user defined header", messageArgument.getValue().getAttribute("testing"));
-        assertEquals(null, messageArgument.getValue().getAttribute("transaction"));
-        assertEquals("2", messageArgument.getValue().getAttribute("content-length"));
-        assertEquals("text/plain", messageArgument.getValue().getAttribute("content-type"));
-        assertEquals(null, messageArgument.getValue().getAttribute("receipt"));
+    assertEquals("Testing", messageArgument.getValue().getMessage());
+    assertEquals("bernt", messageArgument.getValue().getTopic());
 
-        Mockito.reset(messageService_spy);
-    }
+    assertEquals("user defined header", messageArgument.getValue().getAttribute("testing"));
+    assertEquals(null, messageArgument.getValue().getAttribute("transaction"));
+    assertEquals("2", messageArgument.getValue().getAttribute("content-length"));
+    assertEquals("text/plain", messageArgument.getValue().getAttribute("content-type"));
+    assertEquals(null, messageArgument.getValue().getAttribute("receipt"));
 
-    private StampyMessage createMimeTypeMessage(String mimeType, String encoding, Object body){
-        SendMessage msg = new SendMessage();
-        msg.setBody(body);
-        msg.setMimeType(mimeType, encoding);
-        msg.getHeader().setDestination("bernt");
-        return msg;
-    }
+    Mockito.reset(messageService_spy);
+  }
 
-    private StampyMessage createSendMessageWithHeaders(){
-        SendMessage msg = new SendMessage();
-        msg.setBody("Testing");
-        msg.getHeader().setDestination("bernt");
-        msg.getHeader().setTransaction("testing");
-        msg.getHeader().setContentType("text/plain");
-        msg.getHeader().setContentLength(2);
-        msg.getHeader().setReceipt("test");
-        msg.getHeader().addHeader("testing", "user defined header");
-        return msg;
-    }
+  private StampyMessage createMimeTypeMessage(String mimeType, String encoding, Object body) {
+    SendMessage msg = new SendMessage();
+    msg.setBody(body);
+    msg.setMimeType(mimeType, encoding);
+    msg.getHeader().setDestination("bernt");
+    return msg;
+  }
 
-    private StampyMessage createSendMessage(){
-        SendMessage msg = new SendMessage();
-        msg.setBody("Testing");
-        msg.getHeader().setDestination("bernt");
-        msg.getHeader().addHeader("testing", "user defined header");
-        return msg;
-    }
+  private StampyMessage createSendMessageWithHeaders() {
+    SendMessage msg = new SendMessage();
+    msg.setBody("Testing");
+    msg.getHeader().setDestination("bernt");
+    msg.getHeader().setTransaction("testing");
+    msg.getHeader().setContentType("text/plain");
+    msg.getHeader().setContentLength(2);
+    msg.getHeader().setReceipt("test");
+    msg.getHeader().addHeader("testing", "user defined header");
+    return msg;
+  }
+
+  private StampyMessage createSendMessage() {
+    SendMessage msg = new SendMessage();
+    msg.setBody("Testing");
+    msg.getHeader().setDestination("bernt");
+    msg.getHeader().addHeader("testing", "user defined header");
+    return msg;
+  }
 
 }

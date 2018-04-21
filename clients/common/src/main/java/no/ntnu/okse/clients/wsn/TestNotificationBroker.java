@@ -25,75 +25,77 @@ import org.oasis_open.docs.wsn.bw_2.*;
 import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
 
 import javax.xml.bind.JAXBElement;
+
 import static org.apache.cxf.wsn.jms.JmsTopicExpressionConverter.SIMPLE_DIALECT;
 
 public class TestNotificationBroker extends NotificationBroker {
-    public TestNotificationBroker(String address, Class<?>... cls) {
-        super(address, cls);
-    }
 
-    public Subscription subscribe(Referencable consumer, String topic,
-                                  String xpath, boolean raw, String initialTerminationTime)
-            throws TopicNotSupportedFault, InvalidFilterFault, TopicExpressionDialectUnknownFault,
-            UnacceptableInitialTerminationTimeFault, SubscribeCreationFailedFault,
-                InvalidMessageContentExpressionFault, InvalidTopicExpressionFault, UnrecognizedPolicyRequestFault,
-                UnsupportedPolicyRequestFault, ResourceUnknownFault, NotifyMessageNotSupportedFault,
-            InvalidProducerPropertiesExpressionFault {
-            Subscribe subscribeRequest = new Subscribe();
-            if (initialTerminationTime != null) {
-                subscribeRequest.setInitialTerminationTime(
-                        new JAXBElement<>(QNAME_INITIAL_TERMINATION_TIME,
-                                String.class, initialTerminationTime));
-            }
-            subscribeRequest.setConsumerReference(consumer.getEpr());
-            subscribeRequest.setFilter(new FilterType());
-            if (topic != null) {
-                TopicExpressionType topicExp = new TopicExpressionType();
-                // Modified: Added dialect
-                topicExp.setDialect(SIMPLE_DIALECT);
-                topicExp.getContent().add(topic);
-                subscribeRequest.getFilter().getAny().add(
-                        new JAXBElement<>(QNAME_TOPIC_EXPRESSION,
-                                TopicExpressionType.class, topicExp));
-            }
-            if (xpath != null) {
-                QueryExpressionType xpathExp = new QueryExpressionType();
-                xpathExp.setDialect(XPATH1_URI);
-                xpathExp.getContent().add(xpath);
-                subscribeRequest.getFilter().getAny().add(
-                        new JAXBElement<>(QNAME_MESSAGE_CONTENT,
-                                QueryExpressionType.class, xpathExp));
-            }
-            if (raw) {
-                subscribeRequest.setSubscriptionPolicy(new Subscribe.SubscriptionPolicy());
-                subscribeRequest.getSubscriptionPolicy().getAny().add(new UseRaw());
-            }
-            SubscribeResponse response = getBroker().subscribe(subscribeRequest);
-            return new Subscription(response.getSubscriptionReference());
-    }
+  public TestNotificationBroker(String address, Class<?>... cls) {
+    super(address, cls);
+  }
 
-    public void notify(String topic, Object msg) {
-        notify(null, topic, msg);
+  public Subscription subscribe(Referencable consumer, String topic,
+      String xpath, boolean raw, String initialTerminationTime)
+      throws TopicNotSupportedFault, InvalidFilterFault, TopicExpressionDialectUnknownFault,
+      UnacceptableInitialTerminationTimeFault, SubscribeCreationFailedFault,
+      InvalidMessageContentExpressionFault, InvalidTopicExpressionFault, UnrecognizedPolicyRequestFault,
+      UnsupportedPolicyRequestFault, ResourceUnknownFault, NotifyMessageNotSupportedFault,
+      InvalidProducerPropertiesExpressionFault {
+    Subscribe subscribeRequest = new Subscribe();
+    if (initialTerminationTime != null) {
+      subscribeRequest.setInitialTerminationTime(
+          new JAXBElement<>(QNAME_INITIAL_TERMINATION_TIME,
+              String.class, initialTerminationTime));
     }
-
-    public void notify(Referencable publisher, String topic, Object msg) {
-        getBroker();
-
-        Notify notify = new Notify();
-        NotificationMessageHolderType holder = new NotificationMessageHolderType();
-        if (publisher != null) {
-            holder.setProducerReference(publisher.getEpr());
-        }
-        if (topic != null) {
-            TopicExpressionType topicExp = new TopicExpressionType();
-            // Modified: Added dialect
-            topicExp.setDialect(SIMPLE_DIALECT);
-            topicExp.getContent().add(topic);
-            holder.setTopic(topicExp);
-        }
-        holder.setMessage(new NotificationMessageHolderType.Message());
-        holder.getMessage().setAny(msg);
-        notify.getNotificationMessage().add(holder);
-        getBroker().notify(notify);
+    subscribeRequest.setConsumerReference(consumer.getEpr());
+    subscribeRequest.setFilter(new FilterType());
+    if (topic != null) {
+      TopicExpressionType topicExp = new TopicExpressionType();
+      // Modified: Added dialect
+      topicExp.setDialect(SIMPLE_DIALECT);
+      topicExp.getContent().add(topic);
+      subscribeRequest.getFilter().getAny().add(
+          new JAXBElement<>(QNAME_TOPIC_EXPRESSION,
+              TopicExpressionType.class, topicExp));
     }
+    if (xpath != null) {
+      QueryExpressionType xpathExp = new QueryExpressionType();
+      xpathExp.setDialect(XPATH1_URI);
+      xpathExp.getContent().add(xpath);
+      subscribeRequest.getFilter().getAny().add(
+          new JAXBElement<>(QNAME_MESSAGE_CONTENT,
+              QueryExpressionType.class, xpathExp));
+    }
+    if (raw) {
+      subscribeRequest.setSubscriptionPolicy(new Subscribe.SubscriptionPolicy());
+      subscribeRequest.getSubscriptionPolicy().getAny().add(new UseRaw());
+    }
+    SubscribeResponse response = getBroker().subscribe(subscribeRequest);
+    return new Subscription(response.getSubscriptionReference());
+  }
+
+  public void notify(String topic, Object msg) {
+    notify(null, topic, msg);
+  }
+
+  public void notify(Referencable publisher, String topic, Object msg) {
+    getBroker();
+
+    Notify notify = new Notify();
+    NotificationMessageHolderType holder = new NotificationMessageHolderType();
+    if (publisher != null) {
+      holder.setProducerReference(publisher.getEpr());
+    }
+    if (topic != null) {
+      TopicExpressionType topicExp = new TopicExpressionType();
+      // Modified: Added dialect
+      topicExp.setDialect(SIMPLE_DIALECT);
+      topicExp.getContent().add(topic);
+      holder.setTopic(topicExp);
+    }
+    holder.setMessage(new NotificationMessageHolderType.Message());
+    holder.getMessage().setAny(msg);
+    notify.getNotificationMessage().add(holder);
+    getBroker().notify(notify);
+  }
 }

@@ -28,6 +28,5 @@ import no.ntnu.okse.core.event.SubscriptionChangeEvent;
 
 public interface SubscriptionChangeListener {
 
-    public void subscriptionChanged(SubscriptionChangeEvent e);
-
+  void subscriptionChanged(SubscriptionChangeEvent e);
 }
