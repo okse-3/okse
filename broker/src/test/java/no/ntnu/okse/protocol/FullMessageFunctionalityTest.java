@@ -52,6 +52,7 @@ public class FullMessageFunctionalityTest {
   @AfterClass
   public void tearDownClass() {
     OpenfireXMPPServerFactory.stop();
+    CoreService.getInstance().stop();
   }
 
   @BeforeMethod

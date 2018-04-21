@@ -191,6 +191,8 @@ public class CoreService extends AbstractCoreService {
         // Are we booting protocol servers?
         else if (e.getType().equals(SystemEvent.Type.BOOT_PROTOCOL_SERVERS)) {
           bootProtocolServers();
+          Thread.sleep(3000);
+          bootSecondaryServers();
         }
       } catch (InterruptedException e) {
         log.error("Interrupted while attempting to fetch next event from eventQueue");
