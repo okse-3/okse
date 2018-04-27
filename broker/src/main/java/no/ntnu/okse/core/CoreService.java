@@ -168,7 +168,7 @@ public class CoreService extends AbstractCoreService {
     // Sleep for 1 second to allow the primary protocol servers to start up, as the secondary
     // protocol servers are dependent on the primary protocol servers
     try {
-      Thread.sleep(1000);
+      Thread.sleep(5000);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
@@ -191,7 +191,7 @@ public class CoreService extends AbstractCoreService {
         // Are we booting protocol servers?
         else if (e.getType().equals(SystemEvent.Type.BOOT_PROTOCOL_SERVERS)) {
           bootProtocolServers();
-          Thread.sleep(3000);
+          Thread.sleep(5000);
           bootSecondaryServers();
         }
       } catch (InterruptedException e) {
