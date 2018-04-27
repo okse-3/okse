@@ -18,7 +18,7 @@
     <dependency>
       <groupId>org.igniterealtime.openfire</groupId>
       <artifactId>xmppserver</artifactId>
-      <version>4.2.2-okse</version>
+      <version>4.1.6</version>
     </dependency>
     <!-- Openfire 4.2.2 dependencies (Versions are important) -->
     <dependency>
