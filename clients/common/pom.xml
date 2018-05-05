@@ -115,6 +115,12 @@
             <artifactId>MQTT-SN-UDP-Client</artifactId>
             <version>1.1.1-OKSE</version>
         </dependency>
+      <dependency>
+        <groupId>org.igniterealtime.openfire</groupId>
+        <artifactId>xmppserver</artifactId>
+        <version>4.2.2-okse</version>
+        <scope>compile</scope>
+      </dependency>
     </dependencies>
 
     <repositories>

@@ -29,7 +29,7 @@ public class WSNSubscriber extends SubscribeClient {
 
   protected void createClient() {
     client = new WSNClient(host, port, host_url_extension);
-    client.setCallback(new WSNConsumer());
+    client.setCallback(new WSNConsumer(this));
   }
 
   protected TestClient getClient() {
@@ -42,10 +42,17 @@ public class WSNSubscriber extends SubscribeClient {
 
   private class WSNConsumer implements Consumer.Callback {
 
+    private SubscribeClient subscribeClient;
+
+    public WSNConsumer(SubscribeClient subscribeClient) {
+      this.subscribeClient = subscribeClient;
+    }
+
     public void notify(NotificationMessageHolderType message) {
       Object o = message.getMessage().getAny();
       if (o instanceof Element) {
-        System.out.println(((Element) o).getTextContent());
+        subscribeClient.receiveMessage(message.getTopic().getContent().toString(),
+            ((Element) o).getTextContent(), true);
       }
     }
   }

@@ -24,7 +24,7 @@ public class MQTTSubscriber extends SubscribeClient {
 
   protected void createClient() {
     client = new MQTTClient(host, port, "MQTTSubscriber");
-    client.setCallback(new Callback());
+    client.setCallback(new Callback(this));
   }
 
   protected TestClient getClient() {
@@ -33,13 +33,18 @@ public class MQTTSubscriber extends SubscribeClient {
 
   private static class Callback implements MqttCallback {
 
+    private SubscribeClient subscribeClient;
+
+    public Callback(SubscribeClient subscribeClient) {
+      this.subscribeClient = subscribeClient;
+    }
+
     public void connectionLost(Throwable throwable) {
       log.warn("Connection lost", throwable);
     }
 
     public void messageArrived(String topic, MqttMessage message) {
-      System.out
-          .println(String.format("Message arrived on topic %s with content %s", topic, message));
+      subscribeClient.receiveMessage(topic, message.toString(), true);
     }
 
     public void deliveryComplete(IMqttDeliveryToken token) {

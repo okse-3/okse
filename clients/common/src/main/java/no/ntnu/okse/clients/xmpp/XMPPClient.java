@@ -1,10 +1,13 @@
 package no.ntnu.okse.clients.xmpp;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentHashMap;
 import no.ntnu.okse.clients.TestClient;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.SmackException;
@@ -44,6 +47,7 @@ public class XMPPClient implements TestClient {
   private AbstractXMPPConnection connection;
   private PubSubManager pubSubManager;
   private ConcurrentHashMap<String, ItemEventListener> listenerMap;
+  protected Callback callback;
 
   public XMPPClient(String host, Integer port, String jid) {
     try {
@@ -139,9 +143,18 @@ public class XMPPClient implements TestClient {
       }
       ItemEventListener itemEventListener = itemPublishEvent -> {
         for (Object item : itemPublishEvent.getItems()) {
-          System.out.println(item);
+          if (item instanceof PayloadItem) {
+            try {
+              String content = new SAXBuilder()
+                  .build(new ByteArrayInputStream(((PayloadItem) item).getPayload().toXML().toString().getBytes("UTF-8")))
+                  .getRootElement().getValue();
+              callback.onMessageReceived(topic, content);
+              messageCounter++;
+            } catch (JDOMException | IOException e) {
+              e.printStackTrace();
+            }
+          }
         }
-        messageCounter++;
       };
       listenerMap.put(topic, itemEventListener);
       node.addItemEventListener(itemEventListener);
@@ -201,5 +214,11 @@ public class XMPPClient implements TestClient {
 
   private String generateItemID() {
     return String.format("id*%f*%d", Math.random(), System.currentTimeMillis());
+  }
+
+  protected interface Callback {
+
+    void onMessageReceived(String topic, String message);
+
   }
 }
