@@ -9,7 +9,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>no.ntnu</groupId>
     <artifactId>xmpp-subscriber</artifactId>
     <dependencies>
         <dependency>
@@ -57,5 +56,6 @@
                 </executions>
             </plugin>
         </plugins>
+        <finalName>${project.artifactId}</finalName>
     </build>
 </project>
