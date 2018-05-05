@@ -18,6 +18,9 @@ public class WSNSubscriber extends SubscribeClient {
   @Parameter(names = {"--client-port", "-cp"}, description = "Client Port")
   public int clientPort = 9000;
 
+  @Parameter(names = {"--host-url-extension", "-url"}, description = "Host Notification Broker url")
+  public String host_url_extension = "";
+
   private WSNClient client;
 
   public static void main(String[] args) {
@@ -25,7 +28,7 @@ public class WSNSubscriber extends SubscribeClient {
   }
 
   protected void createClient() {
-    client = new WSNClient(host, port);
+    client = new WSNClient(host, port, host_url_extension);
     client.setCallback(new WSNConsumer());
   }
 

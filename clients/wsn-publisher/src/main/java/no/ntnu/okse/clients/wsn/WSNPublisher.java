@@ -9,6 +9,9 @@ public class WSNPublisher extends PublishClient {
   @Parameter(names = {"--port", "-p"}, description = "Port")
   public int port = 61000;
 
+  @Parameter(names = {"--host-url-extension", "-url"}, description = "Host Notification Broker url")
+  public String host_url_extension = "";
+
   private WSNClient client;
 
   public static void main(String[] args) {
@@ -16,7 +19,7 @@ public class WSNPublisher extends PublishClient {
   }
 
   public void createClient() {
-    client = new WSNClient(host, port);
+    client = new WSNClient(host, port, host_url_extension);
   }
 
   public TestClient getClient() {
