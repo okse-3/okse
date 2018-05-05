@@ -7,7 +7,7 @@ import no.ntnu.okse.clients.TestClient;
 public class XMPPPublisher extends PublishClient {
 
   @Parameter(names = {"--port", "-p"}, description = "Port")
-  public final int port = 5222;
+  public int port = 5222;
 
   @Parameter(names = {"--jid"}, description = "JID")
   public String jid = "publisher@localhost";

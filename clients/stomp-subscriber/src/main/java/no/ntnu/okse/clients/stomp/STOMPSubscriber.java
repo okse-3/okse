@@ -7,7 +7,7 @@ import no.ntnu.okse.clients.TestClient;
 public class STOMPSubscriber extends SubscribeClient {
 
   @Parameter(names = {"--port", "-p"}, description = "Port")
-  public final int port = 61613;
+  public int port = 61613;
 
   private StompClient client;
 

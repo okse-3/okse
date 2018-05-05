@@ -7,9 +7,9 @@ import no.ntnu.okse.clients.TestClient;
 public class MQTTPublisher extends PublishClient {
 
   @Parameter(names = {"--port", "-p"}, description = "Port")
-  public final int port = 1883;
+  public int port = 1883;
   @Parameter(names = {"--qos", "-q"}, description = "Quality of Service")
-  public final int qos = 0;
+  public int qos = 0;
 
   private MQTTClient client;
 

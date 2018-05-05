@@ -7,7 +7,7 @@ import no.ntnu.okse.clients.TestClient;
 public class MQTTSNPublisher extends PublishClient {
 
   @Parameter(names = {"--port", "-p"}, description = "Port")
-  public final int port = 20000;
+  public int port = 20000;
 
   private MQTTSNClient client;
 

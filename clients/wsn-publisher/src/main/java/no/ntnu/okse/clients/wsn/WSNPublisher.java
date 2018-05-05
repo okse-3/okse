@@ -7,7 +7,7 @@ import no.ntnu.okse.clients.TestClient;
 public class WSNPublisher extends PublishClient {
 
   @Parameter(names = {"--port", "-p"}, description = "Port")
-  public final int port = 61000;
+  public int port = 61000;
 
   private WSNClient client;
 

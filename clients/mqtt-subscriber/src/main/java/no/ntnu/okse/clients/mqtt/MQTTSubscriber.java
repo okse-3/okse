@@ -12,7 +12,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 public class MQTTSubscriber extends SubscribeClient {
 
   @Parameter(names = {"--port", "-p"}, description = "Port")
-  public final int port = 1883;
+  public int port = 1883;
 
   private MQTTClient client;
 
