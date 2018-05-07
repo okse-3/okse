@@ -23,4 +23,16 @@ public class MQTTSNClient extends SimpleMqttsClient implements TestClient {
   public void publish(String topic, String content) {
     publish(topic, content.getBytes());
   }
+
+  /**
+   * Need to convert content to bytes to be able to use the base class
+   */
+  public void publish(String topic, String content, int qos) {
+    publish(topic, content.getBytes(), qos, false);
+  }
+
+  @Override
+  public void subscribe(String topic) {
+    subscribe(topic, 0);
+  }
 }

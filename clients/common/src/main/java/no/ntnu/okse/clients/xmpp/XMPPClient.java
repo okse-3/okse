@@ -40,7 +40,7 @@ import org.jxmpp.stringprep.XmppStringprepException;
 public class XMPPClient implements TestClient {
 
   private EntityBareJid jid;
-  private String password;
+  private String password = "Password";
   private String serverHost;
   private Integer serverPort;
   public int messageCounter;
@@ -49,21 +49,20 @@ public class XMPPClient implements TestClient {
   private ConcurrentHashMap<String, ItemEventListener> listenerMap;
   protected Callback callback;
 
-  public XMPPClient(String host, Integer port, String jid) {
+  public XMPPClient(String host, Integer port, String jid, String password) {
     try {
       this.jid = JidCreate.entityBareFrom(jid);
     } catch (XmppStringprepException e) {
       e.printStackTrace();
     }
-    password = "Password";
     listenerMap = new ConcurrentHashMap<>();
     serverHost = host;
-    messageCounter = 0;
     serverPort = port;
+    this.password = password;
   }
 
   public XMPPClient(String host, Integer port) {
-    this(host, port, "testclient@127.0.0.1");
+    this(host, port, "testclient@127.0.0.1", "password");
   }
 
   private XMPPTCPConnection setUpConnection(String host, Integer port) {
