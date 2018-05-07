@@ -147,7 +147,9 @@ public class XMPPClient implements TestClient {
               String content = new SAXBuilder()
                   .build(new ByteArrayInputStream(((PayloadItem) item).getPayload().toXML().toString().getBytes("UTF-8")))
                   .getRootElement().getValue();
-              callback.onMessageReceived(topic, content);
+              if (callback != null) {
+                callback.onMessageReceived(topic, content);
+              }
               messageCounter++;
             } catch (JDOMException | IOException e) {
               e.printStackTrace();
