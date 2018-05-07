@@ -1,10 +1,13 @@
 package no.ntnu.okse.clients.xmpp;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentHashMap;
 import no.ntnu.okse.clients.TestClient;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.SmackException;
@@ -37,29 +40,29 @@ import org.jxmpp.stringprep.XmppStringprepException;
 public class XMPPClient implements TestClient {
 
   private EntityBareJid jid;
-  private String password;
+  private String password = "Password";
   private String serverHost;
   private Integer serverPort;
   public int messageCounter;
   private AbstractXMPPConnection connection;
   private PubSubManager pubSubManager;
   private ConcurrentHashMap<String, ItemEventListener> listenerMap;
+  protected Callback callback;
 
-  public XMPPClient(String host, Integer port, String jid) {
+  public XMPPClient(String host, Integer port, String jid, String password) {
     try {
       this.jid = JidCreate.entityBareFrom(jid);
     } catch (XmppStringprepException e) {
       e.printStackTrace();
     }
-    password = "Password";
     listenerMap = new ConcurrentHashMap<>();
     serverHost = host;
-    messageCounter = 0;
     serverPort = port;
+    this.password = password;
   }
 
   public XMPPClient(String host, Integer port) {
-    this(host, port, "testclient@127.0.0.1");
+    this(host, port, "testclient@127.0.0.1", "password");
   }
 
   private XMPPTCPConnection setUpConnection(String host, Integer port) {
@@ -139,9 +142,18 @@ public class XMPPClient implements TestClient {
       }
       ItemEventListener itemEventListener = itemPublishEvent -> {
         for (Object item : itemPublishEvent.getItems()) {
-          System.out.println(item);
+          if (item instanceof PayloadItem) {
+            try {
+              String content = new SAXBuilder()
+                  .build(new ByteArrayInputStream(((PayloadItem) item).getPayload().toXML().toString().getBytes("UTF-8")))
+                  .getRootElement().getValue();
+              callback.onMessageReceived(topic, content);
+              messageCounter++;
+            } catch (JDOMException | IOException e) {
+              e.printStackTrace();
+            }
+          }
         }
-        messageCounter++;
       };
       listenerMap.put(topic, itemEventListener);
       node.addItemEventListener(itemEventListener);
@@ -201,5 +213,11 @@ public class XMPPClient implements TestClient {
 
   private String generateItemID() {
     return String.format("id*%f*%d", Math.random(), System.currentTimeMillis());
+  }
+
+  protected interface Callback {
+
+    void onMessageReceived(String topic, String message);
+
   }
 }

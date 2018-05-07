@@ -10,13 +10,16 @@ import org.w3c.dom.Element;
 public class WSNSubscriber extends SubscribeClient {
 
   @Parameter(names = {"--port", "-p"}, description = "Port")
-  public final int port = 61000;
+  public int port = 61000;
 
   @Parameter(names = {"--client-host", "-ch"}, description = "Client Port")
-  public final String clientHost = "localhost";
+  public String clientHost = "localhost";
 
   @Parameter(names = {"--client-port", "-cp"}, description = "Client Port")
-  public final int clientPort = 9000;
+  public int clientPort = 9000;
+
+  @Parameter(names = {"--host-url-extension", "-url"}, description = "Host Notification Broker url")
+  public String host_url_extension = "";
 
   private WSNClient client;
 
@@ -25,8 +28,8 @@ public class WSNSubscriber extends SubscribeClient {
   }
 
   protected void createClient() {
-    client = new WSNClient(host, port);
-    client.setCallback(new WSNConsumer());
+    client = new WSNClient(host, port, host_url_extension);
+    client.setCallback(new WSNConsumer(this));
   }
 
   protected TestClient getClient() {
@@ -39,10 +42,17 @@ public class WSNSubscriber extends SubscribeClient {
 
   private class WSNConsumer implements Consumer.Callback {
 
+    private SubscribeClient subscribeClient;
+
+    public WSNConsumer(SubscribeClient subscribeClient) {
+      this.subscribeClient = subscribeClient;
+    }
+
     public void notify(NotificationMessageHolderType message) {
       Object o = message.getMessage().getAny();
       if (o instanceof Element) {
-        System.out.println(((Element) o).getTextContent());
+        subscribeClient.receiveMessage(message.getTopic().getContent().toString(),
+            ((Element) o).getTextContent(), true);
       }
     }
   }

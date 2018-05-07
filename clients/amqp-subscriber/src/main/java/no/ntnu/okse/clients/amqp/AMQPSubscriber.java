@@ -21,7 +21,7 @@ public class AMQPSubscriber extends SubscribeClient {
     client = new AMQPClient();
     // Prevent subscriber from timing out
     client.setTimeout(-1L);
-    client.setCallback(new Callback());
+    client.setCallback(new Callback(this));
   }
 
   protected TestClient getClient() {
@@ -30,12 +30,17 @@ public class AMQPSubscriber extends SubscribeClient {
 
   private static class Callback implements AMQPCallback {
 
-    private final boolean verbose = false;
-    private int counter = 0;
+    private SubscribeClient subscribeClient;
+
+    public Callback(SubscribeClient subscribeClient) {
+      this.subscribeClient = subscribeClient;
+    }
+
+    private int counter;
 
     public void onReceive(Message message) {
-      counter++;
-      print(counter, message, verbose);
+      print(++counter, message, subscribeClient.verbose);
+      subscribeClient.receiveMessage("", "", false);
     }
   }
 

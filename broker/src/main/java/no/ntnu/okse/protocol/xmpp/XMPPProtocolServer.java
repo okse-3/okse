@@ -96,7 +96,7 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
       try {
         server.sendMessage(message);
         incrementTotalMessagesSent();
-      } catch (NotAPubSubNodeException | XMPPErrorException | NoResponseException | InterruptedException e) {
+      } catch (NotAPubSubNodeException | NoResponseException | InterruptedException e) {
         incrementTotalErrors();
         e.printStackTrace();
       } catch (NotConnectedException e) {

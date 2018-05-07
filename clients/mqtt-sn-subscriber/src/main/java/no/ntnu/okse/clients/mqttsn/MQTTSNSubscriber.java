@@ -18,7 +18,7 @@ public class MQTTSNSubscriber extends SubscribeClient {
   @Override
   protected void createClient() {
     client = new MQTTSNClient(host, port);
-    client.setCallback(new Callback());
+    client.setCallback(new Callback(this));
   }
 
   @Override
@@ -32,9 +32,15 @@ public class MQTTSNSubscriber extends SubscribeClient {
 
   private static class Callback implements SimpleMqttsCallback {
 
+    private SubscribeClient subscribeClient;
+
+    public Callback(SubscribeClient subscribeClient) {
+      this.subscribeClient = subscribeClient;
+    }
+
     @Override
     public void publishArrived(boolean ret, int qualityOfService, String topic, byte[] msg) {
-      System.out.println(String.format("Received message %s on topic %s", new String(msg), topic));
+      subscribeClient.receiveMessage(new String(msg), topic, true);
     }
 
     @Override

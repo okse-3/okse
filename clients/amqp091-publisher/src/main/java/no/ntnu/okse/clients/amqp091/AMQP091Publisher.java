@@ -7,7 +7,7 @@ import no.ntnu.okse.clients.TestClient;
 public class AMQP091Publisher extends PublishClient {
 
   @Parameter(names = {"--port", "-p"}, description = "Port")
-  public final int port = 56720;
+  public int port = 56720;
 
   private AMQP091Client client;
 
