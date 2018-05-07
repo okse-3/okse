@@ -140,8 +140,8 @@ public class MessageSendingTest extends FullMessageFunctionalityTest {
 
   @Test
   public void xmppToXmpp() throws Exception {
-    XMPPClient client1 = new XMPPClient("localhost", 5222, "okse1@localhost");
-    XMPPClient client2 = new XMPPClient("localhost", 5222, "okse2@localhost");
+    XMPPClient client1 = new XMPPClient("localhost", 5222, "okse1@localhost", "pass");
+    XMPPClient client2 = new XMPPClient("localhost", 5222, "okse2@localhost", "pass");
     client1.connect();
     client2.connect();
     client1.subscribe("xmpp");
@@ -198,7 +198,7 @@ public class MessageSendingTest extends FullMessageFunctionalityTest {
     stompClient.setCallback(stompCallback);
 
     // XMPP
-    XMPPClient xmppClient = new XMPPClient("localhost", 5222, "okse1@localhost");
+    XMPPClient xmppClient = new XMPPClient("localhost", 5222, "okse1@localhost", "pass");
 
     // Connecting
     mqttClient.connect();

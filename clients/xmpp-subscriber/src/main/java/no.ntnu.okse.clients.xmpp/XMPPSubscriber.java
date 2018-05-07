@@ -13,6 +13,9 @@ public class XMPPSubscriber extends SubscribeClient {
   @Parameter(names = {"--jid"}, description = "JID")
   public String jid = "subscriber@localhost";
 
+  @Parameter(names = {"--password", "--pass"}, description = "User password")
+  public String password = "password";
+
   private XMPPClient client;
 
   public static void main(String[] args) {
@@ -21,7 +24,7 @@ public class XMPPSubscriber extends SubscribeClient {
 
   @Override
   protected void createClient() {
-    client = new XMPPClient(host, port, jid);
+    client = new XMPPClient(host, port, jid, password);
     client.callback = new SubscriberCallback(this);
   }
 
