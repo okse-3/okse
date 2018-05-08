@@ -6,7 +6,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class SubscribeClient extends CommandClient {
+public abstract class SubscribeClient extends TopicClient {
 
   @Parameter(names = {"-n"}, description = "Number of messages to receive")
   public int numberOfMessages = Integer.MAX_VALUE;

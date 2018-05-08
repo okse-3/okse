@@ -19,7 +19,7 @@
     <dependency>
       <groupId>com.eclipse.paho</groupId>
       <artifactId>MQTT-SN-Gateway</artifactId>
-      <version>1.2.0-OKSE</version>
+      <version>1.2.1-OKSE</version>
     </dependency>
   </dependencies>
 
