@@ -1,5 +1,6 @@
 package no.ntnu.okse.clients.xmpp;
 
+import com.sun.media.jfxmedia.logging.Logger;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -89,16 +90,20 @@ public class XMPPClient implements TestClient {
 
   @Override
   public void connect() {
+    internalConnect();
+    try {
+      logInToHost();
+    } catch (SmackException | InterruptedException | XMPPException | IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  protected void internalConnect() {
     createConnection();
     try {
       pubSubManager = PubSubManager
           .getInstance(connection, JidCreate.domainBareFrom("pubsub." + serverHost));
     } catch (XmppStringprepException e) {
-      e.printStackTrace();
-    }
-    try {
-      logInToHost();
-    } catch (SmackException | InterruptedException | XMPPException | IOException e) {
       e.printStackTrace();
     }
   }
@@ -123,6 +128,22 @@ public class XMPPClient implements TestClient {
     connection.login(jid.getLocalpart(), password);
   }
 
+  public void connectAndCreateAccount() {
+    internalConnect();
+    AccountManager accountManager = AccountManager.getInstance(connection);
+    accountManager.sensitiveOperationOverInsecureConnection(true);
+    try {
+      accountManager.createAccount(jid.getLocalpart(), password);
+      System.out.println("Successfully created account");
+    } catch (NoResponseException | NotConnectedException | InterruptedException e) {
+      e.printStackTrace();
+      System.out.println("Connection failed while creating account");
+    } catch (XMPPErrorException e) {
+      System.out.println(
+          "Could not create account with the given username, the username most likely already exists");
+    }
+  }
+
   @Override
   public void disconnect() {
     connection.disconnect();
@@ -145,7 +166,8 @@ public class XMPPClient implements TestClient {
           if (item instanceof PayloadItem) {
             try {
               String content = new SAXBuilder()
-                  .build(new ByteArrayInputStream(((PayloadItem) item).getPayload().toXML().toString().getBytes("UTF-8")))
+                  .build(new ByteArrayInputStream(
+                      ((PayloadItem) item).getPayload().toXML().toString().getBytes("UTF-8")))
                   .getRootElement().getValue();
               if (callback != null) {
                 callback.onMessageReceived(topic, content);
