@@ -2,7 +2,7 @@ package no.ntnu.okse.clients;
 
 import com.beust.jcommander.Parameter;
 
-public abstract class PublishClient extends CommandClient {
+public abstract class PublishClient extends TopicClient {
 
   @Parameter(names = {"--message", "-m"}, description = "Message", required = true)
   public String message;
