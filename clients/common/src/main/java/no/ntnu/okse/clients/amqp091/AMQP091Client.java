@@ -50,7 +50,15 @@ public class AMQP091Client implements TestClient {
   public void connect() {
     try {
       log.debug("Connecting");
-      connection = factory.newConnection();
+      // Due to the AMQP client leaving lingering data in the connection. Just retry until the connection is clean.
+      // All other issues, such as connection will fall through and stop the client
+      do {
+        try {
+          connection = factory.newConnection();
+        } catch (ClassCastException cce) {
+          log.debug("Lingering data in connection. Retrying connection");
+        }
+      } while (connection == null);
       channel = connection.createChannel();
       log.debug("Connected");
     } catch (IOException | TimeoutException e) {
@@ -62,6 +70,12 @@ public class AMQP091Client implements TestClient {
   public void disconnect() {
     try {
       log.debug("Disconnecting");
+      // Allow all remaining return messages on publish to arrive4
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
       channel.close();
       connection.close();
       log.debug("Disconnected");
@@ -128,6 +142,7 @@ public class AMQP091Client implements TestClient {
   public void publish(String topic, String content) {
     log.debug(String.format("Publishing to topic %s with content %s", topic, content));
     try {
+      channel.exchangeDeclare(topic, "fanout");
       channel.basicPublish(topic, "", null, content.getBytes("UTF-8"));
       log.debug("Published message");
     } catch (IOException e) {
