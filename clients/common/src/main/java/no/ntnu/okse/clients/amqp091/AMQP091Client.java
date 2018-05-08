@@ -50,7 +50,15 @@ public class AMQP091Client implements TestClient {
   public void connect() {
     try {
       log.debug("Connecting");
-      connection = factory.newConnection();
+      // Due to the AMQP client leaving lingering data in the connection. Just retry until the connection is clean.
+      // All other issues, such as connection will fall through and stop the client
+      do {
+        try {
+          connection = factory.newConnection();
+        } catch (ClassCastException cce) {
+          log.debug("Lingering data in connection. Retrying connection");
+        }
+      } while (connection == null);
       channel = connection.createChannel();
       log.debug("Connected");
     } catch (IOException | TimeoutException e) {
