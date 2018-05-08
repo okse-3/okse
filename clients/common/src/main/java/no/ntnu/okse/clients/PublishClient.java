@@ -15,13 +15,13 @@ public abstract class PublishClient extends TopicClient {
     createClient();
     TestClient client = getClient();
     client.connect();
+    Runtime.getRuntime().addShutdownHook(new Thread(client::disconnect));
     // Send n number of messages
     for (int i = 0; i < numberOfMessages; i++) {
       for (String topic : topics) {
         publish(topic, message);
       }
     }
-    client.disconnect();
     System.exit(0);
   }
 
