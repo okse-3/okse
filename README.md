@@ -23,8 +23,10 @@ follows:
 | AMQP 0.9.1      | [Apache Qpid Proton](https://qpid.apache.org/proton/) | N/A |
 | AMQP 1.0        | [Joram](http://joram.ow2.org/)                        | [Customised fork](https://github.com/okse-3/joram)    |
 | MQTT            | [Moquette](https://github.com/andsel/moquette)        | [Customised fork](https://github.com/okse-3/moquette) |
+| MQTT-SN         | [Eclipse Paho MQTT-SN Gateway](https://www.eclipse.org/paho/components/mqtt-sn-transparent-gateway/)                                           | [Customised fork](https://github.com/okse-3/eclipse-paho-mqtt-sn-gateway) |
 | STOMP           | [Stampy](https://github.com/mrstampy/Stampy)          | [Customised fork](https://github.com/okse-3/Stampy)   |
 | WS-Notification | [WS-Nu](https://github.com/tOgg1/WS-Nu)               | [Customised fork](https://github.com/okse-3/WS-Nu)    |
+| XMPP            | [Smack](https://www.igniterealtime.org/projects/smack/) | N/A |
 
 The OKSE message broker has been written with extensibility in mind. Every
 protocol is integrated independently, only communicating with the core layer of
