@@ -55,7 +55,7 @@ import org.xml.sax.SAXException;
 public class Application {
 
   // Version
-  public static final String VERSION = "2.0.0";
+  public static final String VERSION = "3.0.0";
 
   // Initialization time
   public static long startedAt = System.currentTimeMillis();
