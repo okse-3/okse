@@ -257,6 +257,12 @@ public class Application {
    */
   private static void createOptionalProtocolSupportServers(String name) {
     switch (name) {
+      case "rabbitmq":
+        try {
+          RabbitMQServerManager.startRabbitMqBroker();
+        } catch (Exception e) {
+          e.printStackTrace(); }
+        break;
       case "openfire-xmpp":
         try {
           OpenfireXMPPServerFactory.start();

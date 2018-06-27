@@ -41,6 +41,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import no.ntnu.okse.Application;
 import no.ntnu.okse.EclipsePahoMQTTSNGateway;
 import no.ntnu.okse.OpenfireXMPPServerFactory;
+import no.ntnu.okse.RabbitMQServerManager;
 import no.ntnu.okse.core.event.Event;
 import no.ntnu.okse.core.event.SystemEvent;
 import no.ntnu.okse.core.messaging.Message;
@@ -238,6 +239,9 @@ public class CoreService extends AbstractCoreService {
   private void stopAllOptionalProtocolSupportServers() {
     if (OpenfireXMPPServerFactory.isRunning()) {
       OpenfireXMPPServerFactory.stop();
+    }
+    if (RabbitMQServerManager.isRunning()) {
+      RabbitMQServerManager.stopRabbitMqBroker();
     }
   }
 

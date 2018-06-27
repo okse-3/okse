@@ -1,8 +1,12 @@
 package no.ntnu.okse.protocol;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import no.ntnu.okse.protocol.amqp.AMQProtocolServer;
 import no.ntnu.okse.protocol.amqp091.AMQP091ProtocolServer;
 import no.ntnu.okse.protocol.mqtt.MQTTProtocolServer;
+import no.ntnu.okse.protocol.rabbitmq.RabbitMQProtocolServer;
 import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
 import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import no.ntnu.okse.protocol.xmpp.XMPPProtocolServer;
@@ -30,6 +34,8 @@ public class ProtocolServerFactory {
         return createAMQP091(attr);
       case "xmpp":
         return createXMPP(attr);
+      case "rabbitmq":
+        return createRabbitMq(attr);
       default:
         return null;
     }
@@ -137,7 +143,6 @@ public class ProtocolServerFactory {
         attr.getNamedItem("password").getNodeValue() :
         DEFAULT_PASSWORD;
 
-
     return new XMPPProtocolServer(host, port, jid, password);
   }
 
@@ -201,6 +206,31 @@ public class ProtocolServerFactory {
         DEFAULT_PORT;
 
     return new STOMPProtocolServer(host, port);
+  }
+
+  private static RabbitMQProtocolServer createRabbitMq(NamedNodeMap attr) {
+    final String DEFAULT_HOST = "localhost";
+    final int DEFAULT_PORT = 20001;
+    final List<String> DEFAULT_TOPICS = Collections.singletonList("#");
+    final String DEFAULT_EXCHANGE = "okse";
+
+    String host = attr.getNamedItem("host") != null ?
+        attr.getNamedItem("host").getNodeValue() :
+        DEFAULT_HOST;
+
+    int port = attr.getNamedItem("port") != null ?
+        stringToPort(attr.getNamedItem("port").getNodeValue(), DEFAULT_PORT) :
+        DEFAULT_PORT;
+
+    String exchange = attr.getNamedItem("exchange") != null ?
+        attr.getNamedItem("exchange").getNodeValue() :
+        DEFAULT_EXCHANGE;
+
+    List<String> topics =attr.getNamedItem("topics") != null ?
+        Arrays.asList(attr.getNamedItem("topics").getNodeValue().split(" ")) :
+        DEFAULT_TOPICS;
+
+    return new RabbitMQProtocolServer(host, port, exchange, topics);
   }
 }
 
