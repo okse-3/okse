@@ -65,8 +65,8 @@ public class RabbitMQServerManager {
     logger.info("Running RabbitMq " + config.getVersion());
     logPlugins(plugins.groupedList());
 
-    Runtime.getRuntime().addShutdownHook(new Thread(RabbitMQServerManager::stopRabbitMqBroker));
-    logger.info("Added shutdown hook for RabbitMq server");
+    //Runtime.getRuntime().addShutdownHook(new Thread(RabbitMQServerManager::stopRabbitMqBroker));
+    //logger.info("Added shutdown hook for RabbitMq server");
   }
 
   private static void logPlugins(Map<Plugin.State, Set<Plugin>> groupedPlugins) {

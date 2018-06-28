@@ -10,27 +10,26 @@ import org.apache.log4j.Logger;
 public class RabbitMQProtocolServer extends AbstractProtocolServer {
 
   protected static final String SERVERTYPE = "rabbitmq";
+  private String exchange;
+  private List<String> topics;
   private RabbitMQListenerClient client;
 
-
   /**
-   * Constructor, sets the host and port to be used
+   * Constructor, sets up the ProtocolServer
    *
-   * @param host the host to listen to
-   * @param port the port to listen to
+   * @param host, the host to listen to
+   * @param port, the port to listen to
+   * @param exchange, the rabbitMq exchange to connect to
+   * @param topics, what topics to listen to
    */
   public RabbitMQProtocolServer(String host, Integer port, String exchange, List<String> topics) {
-    log = Logger.getLogger(RabbitMQProtocolServer.class);
+    log = Logger.getLogger(RabbitMQProtocolServer.class.getName());
     log.info("Starting RabbitMQProtocolServer");
     this.host = host;
     this.port = port;
+    this.exchange = exchange;
+    this.topics = topics;
     protocolServerType = SERVERTYPE;
-    try {
-      client = new RabbitMQListenerClient(this, host, port, "OKSEListenerClient", exchange, topics);
-    } catch (IOException | TimeoutException e) {
-      e.printStackTrace();
-      log.error("Could not start RabbitMQListenerClient properly");
-    }
   }
 
   @Override
@@ -45,13 +44,20 @@ public class RabbitMQProtocolServer extends AbstractProtocolServer {
   }
 
   @Override
-  public void run() {}
+  public void run() {
+    try {
+      client = new RabbitMQListenerClient(this, host, port, "OKSEListenerClient", exchange, topics);
+    } catch (IOException | TimeoutException e) {
+      e.printStackTrace();
+      log.error("Could not start RabbitMQListenerClient properly");
+    }
+  }
 
   @Override
   public void stopServer() {
     log.info("Stopping RabbitMQListenerClient");
     try {
-      client.stopClientListener();
+      client.stopListenerClient();
     } catch (IOException | TimeoutException e) {
       e.printStackTrace();
       log.error("Failed to properly stop RabbitMQListenerClient");
@@ -59,7 +65,6 @@ public class RabbitMQProtocolServer extends AbstractProtocolServer {
     }
     _running = false;
     log.info("Stopping RabbitMQProtocolServer");
-
   }
 
   @Override

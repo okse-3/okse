@@ -212,7 +212,7 @@ public class ProtocolServerFactory {
     final String DEFAULT_HOST = "localhost";
     final int DEFAULT_PORT = 20001;
     final List<String> DEFAULT_TOPICS = Collections.singletonList("#");
-    final String DEFAULT_EXCHANGE = "okse";
+    final String DEFAULT_EXCHANGE = "amq.topic";
 
     String host = attr.getNamedItem("host") != null ?
         attr.getNamedItem("host").getNodeValue() :

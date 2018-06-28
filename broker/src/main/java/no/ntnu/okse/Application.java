@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import no.ntnu.okse.core.CoreService;
@@ -123,6 +124,19 @@ public class Application {
     // Start the CoreService
     log.info("Starting OKSE " + VERSION);
     cs.boot();
+
+    // Wait for CoreService to boot
+    Thread.sleep(30000);
+
+    // Shutdown
+    System.out.println("Enter 'stop' to shut down OKSE");
+    Scanner scn = new Scanner(System.in);
+    boolean _run = true;
+    while (_run) {
+      _run = !scn.nextLine().equals("stop");
+    }
+    cs.stop();
+    System.exit(0);
   }
 
   /**

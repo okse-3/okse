@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
-import no.ntnu.okse.RabbitMQServerManager;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 
@@ -30,6 +29,18 @@ public class RabbitMQListenerClient {
   private String exchangeName;
   private Logger logger = Logger.getLogger(RabbitMQListenerClient.class.getName());
 
+
+  /**
+   * Initialises a RabbitMq client that will listen to messages sent to the RabbitMq broker
+   * @param ps, the responsible RabbitMQProtocolServer
+   * @param host, the host of the rabbitMq broker
+   * @param port, the port of the rabbitMq broker
+   * @param clientID, a string identifier for this client, used to filter out own messages
+   * @param exchangeName, the exchange to connect to
+   * @param topics, what topics to listen for messages at
+   * @throws IOException
+   * @throws TimeoutException
+   */
   public RabbitMQListenerClient(RabbitMQProtocolServer ps, String host, int port, String clientID,
       String exchangeName, List<String> topics)
       throws IOException, TimeoutException {
@@ -43,8 +54,7 @@ public class RabbitMQListenerClient {
 
     connection = factory.newConnection();
     channel = connection.createChannel();
-
-    channel.exchangeDeclare(exchangeName, "topic");
+    channel.exchangeDeclare(exchangeName, "topic", true);
     String queueName = channel.queueDeclare().getQueue();
 
     // sets us the topics we are gonna listen to, default is "#" (wildcard: all topics)
@@ -58,33 +68,46 @@ public class RabbitMQListenerClient {
       public void handleDelivery(String consumerTag, Envelope envelope,
           AMQP.BasicProperties properties, byte[] body) throws IOException {
 
-        // ignore own messages
+        // check sender in order to ignore own messages
         if (Objects.equals(properties.getHeaders().get("sender"),
             LongStringHelper.asLongString(clientID))) {
           return;
         }
 
         logger.info("Rabbit received message at topic " + envelope.getRoutingKey());
-        if (ps != null) ps.incrementTotalMessagesReceived();
-        String message = new String(body, "UTF-8");
+        if (ps != null) {
+          ps.incrementTotalMessagesReceived();
+          String message = new String(body, "UTF-8");
+          MessageService.getInstance()
+              .distributeMessage(new Message(message, envelope.getRoutingKey(), null, "rabbitmq"));
+          logger.info("message distributed");
+        }
 
-        MessageService.getInstance()
-            .distributeMessage(new Message(message, envelope.getRoutingKey(), null, "rabbitmq"));
-        logger.info("message distributed");
       }
     };
     channel.basicConsume(queueName, true, consumer);
     logger.info("RabbitMQListenerClient started successfully");
   }
 
-  public void stopClientListener() throws IOException, TimeoutException {
+
+  /**
+   * Stops the Listener client
+   * @throws IOException
+   * @throws TimeoutException
+   */
+  public void stopListenerClient() throws IOException, TimeoutException {
     logger.info("Stopping RabbitMQListenerClient");
-    connection.close();
     channel.close();
-    RabbitMQServerManager.stopRabbitMqBroker();
+    connection.close();
     logger.info("RabbitMQListenerClient stopped");
   }
 
+  /**
+   * Formats an OKSE {@link Message} and sends it as a rabbitMq publish
+   *
+   * @param message, the message to be sent
+   * @throws IOException
+   */
   public void sendMessage(Message message) throws IOException {
     Map<String, Object> headerMap = new HashMap<>();
     headerMap.put("sender", clientID);
