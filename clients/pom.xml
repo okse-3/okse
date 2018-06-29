@@ -23,6 +23,8 @@
         <module>xmpp-account-creator</module>
         <module>mqtt-sn-subscriber</module>
         <module>mqtt-sn-publisher</module>
+        <module>rabbitmq-subscriber</module>
+        <module>rabbitmq-publisher</module>
     </modules>
     <packaging>pom</packaging>
 

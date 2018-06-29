@@ -10,7 +10,6 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.impl.LongStringHelper;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,20 +115,6 @@ public class RabbitMQListenerClient {
     channel.basicPublish(exchangeName, message.getTopic(), properties,
         message.getMessage().getBytes());
     logger.info("Rabbit sent message on topic " + message.getTopic());
-  }
-
-
-  public static void main(String[] args) {
-    try {
-      RabbitMQListenerClient testClient1 = new RabbitMQListenerClient(null, "localhost", 20001,
-          "one", "amq.topic", Collections.singletonList("#"));
-      RabbitMQListenerClient testClient2 = new RabbitMQListenerClient(null, "localhost", 20001,
-          "two", "amq.topic", Collections.singletonList("#"));
-      testClient1.sendMessage(new Message("hi to two", "test", null, "rabbitmq"));
-      testClient2.sendMessage(new Message("hi to one", "test", null, "rabbitmq"));
-    } catch (IOException | TimeoutException e) {
-      e.printStackTrace();
-    }
   }
 
 }

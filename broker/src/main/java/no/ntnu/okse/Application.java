@@ -129,10 +129,10 @@ public class Application {
     Thread.sleep(30000);
 
     // Shutdown
-    System.out.println("Enter 'stop' to shut down OKSE");
     Scanner scn = new Scanner(System.in);
     boolean _run = true;
     while (_run) {
+      System.out.println("Enter 'stop' to shut down OKSE");
       _run = !scn.nextLine().equals("stop");
     }
     cs.stop();

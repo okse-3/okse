@@ -27,6 +27,9 @@ follows:
 | STOMP           | [Stampy](https://github.com/mrstampy/Stampy)          | [Customised fork](https://github.com/okse-3/Stampy)   |
 | WS-Notification | [WS-Nu](https://github.com/tOgg1/WS-Nu)               | [Customised fork](https://github.com/okse-3/WS-Nu)    |
 | XMPP            | [Smack](https://www.igniterealtime.org/projects/smack/) | N/A |
+| RabbitMq<sup>1</sup>| [RabbitMq](https://www.rabbitmq.com/)                 | N/A
+<sup>1</sup>RabbitMq is an embedded server, it has support for AMQP (0.9.1 and 1.0), STOMP and MQTT (protocols are configured to run on different ports by default).
+
 
 The OKSE message broker has been written with extensibility in mind. Every
 protocol is integrated independently, only communicating with the core layer of
@@ -34,4 +37,3 @@ OKSE. Implementing support for a new protocol comes down to implementing a
 shared protocol server interface and hooking the protocol server up to
 necessary functionality in the OKSE core.
 
-For further information, please consult our user manual and developer guide.

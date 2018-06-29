@@ -1,10 +1,10 @@
 package no.ntnu.okse.clients.rabbitmq;
 
 import com.beust.jcommander.Parameter;
-import no.ntnu.okse.clients.PublishClient;
+import no.ntnu.okse.clients.SubscribeClient;
 import no.ntnu.okse.clients.TestClient;
 
-public class RabbitMqSubscriber  extends PublishClient {
+public class RabbitMqSubscriber  extends SubscribeClient {
 
   @Parameter(names = {"--port", "-p"}, description = "Port")
   public int port = 20001;

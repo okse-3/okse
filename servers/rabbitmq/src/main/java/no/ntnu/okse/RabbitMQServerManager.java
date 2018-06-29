@@ -10,7 +10,9 @@ import io.arivera.oss.embedded.rabbitmq.bin.plugins.Plugin;
 import io.arivera.oss.embedded.rabbitmq.bin.plugins.Plugin.State;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
@@ -45,9 +47,15 @@ public class RabbitMQServerManager {
         .build();
 
     try {
-      Files.copy(Paths.get("servers/rabbitmq/src/main/resources/rabbitmq.config"),
-          Paths.get(config.getAppFolder().getAbsolutePath() + "/etc/rabbitmq/rabbitmq.config"),
-          StandardCopyOption.REPLACE_EXISTING);
+      Path confFile = Paths.get(config.getAppFolder().getAbsolutePath() + "/etc/rabbitmq/rabbitmq.config");
+      Files.createDirectories(confFile.getParent());
+      try {
+        Files.createFile(confFile);
+      } catch (FileAlreadyExistsException ignored) {
+      }
+      Files.copy(RabbitMQServerManager.class.getResourceAsStream("/rabbitmq.config"),
+          confFile, StandardCopyOption.REPLACE_EXISTING);
+      logger.info("copied config to app folder");
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -100,10 +108,14 @@ public class RabbitMQServerManager {
       e.printStackTrace();
       System.exit(158);
     }
+    // Shutdown
     Scanner scn = new Scanner(System.in);
-    if (!scn.next().isEmpty()) {
-      stopRabbitMqBroker();
+    boolean _run = true;
+    while (_run) {
+      System.out.println("Enter 'stop' to shut down the rabbitMq broker");
+      _run = !scn.nextLine().equals("stop");
     }
+    stopRabbitMqBroker();
   }
 
 }
