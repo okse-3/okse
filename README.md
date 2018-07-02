@@ -28,6 +28,7 @@ follows:
 | WS-Notification | [WS-Nu](https://github.com/tOgg1/WS-Nu)               | [Customised fork](https://github.com/okse-3/WS-Nu)    |
 | XMPP            | [Smack](https://www.igniterealtime.org/projects/smack/) | N/A |
 | RabbitMq<sup>1</sup>| [RabbitMq](https://www.rabbitmq.com/)                 | N/A |
+
 <sup>1</sup>RabbitMq is an embedded server, it has support for AMQP (0.9.1 and 1.0), STOMP and MQTT (protocols are configured to run on different ports by default).
 
 
