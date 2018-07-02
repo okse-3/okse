@@ -89,7 +89,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>no.ntnu.okse.RabbitMQServerManager</mainClass>
+              <mainClass>no.ntnu.okse.OpenfireXMPPServerFactory</mainClass>
             </manifest>
           </archive>
         </configuration>

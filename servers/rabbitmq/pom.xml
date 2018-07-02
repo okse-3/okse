@@ -14,12 +14,18 @@
   <version>3.0.0</version>
   <name>RabbitMQ Server</name>
   <description>RabbitMQ server for the OKSE project</description>
+  <packaging>jar</packaging>
 
   <dependencies>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.25</version>
+      <version>[1.7.0, 1.7.25]</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>[1.4]</version>
     </dependency>
     <dependency>
       <groupId>io.arivera.oss</groupId>
@@ -46,6 +52,30 @@
             <manifest>
               <mainClass>no.ntnu.okse.RabbitMQServerManager</mainClass>
             </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <archive>
+            <manifest>
+              <mainClass>no.ntnu.okse.RabbitMQServerManager</mainClass>
+            </manifest>
+            <manifestEntries>
+              <Start-Class>no.ntnu.okse.RabbitMQServerManager</Start-Class>
+            </manifestEntries>
           </archive>
         </configuration>
       </plugin>

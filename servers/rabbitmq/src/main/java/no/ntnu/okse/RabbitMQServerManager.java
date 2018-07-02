@@ -40,6 +40,7 @@ public class RabbitMQServerManager {
         .version(PredefinedVersion.V3_6_9)
         .envVar(RabbitMqEnvVar.NODENAME, "Okse")
         .envVar(RabbitMqEnvVar.CONF_ENV_FILE, "/etc/rabbitmq/rabbitmq")
+        .envVar(RabbitMqEnvVar.CONSOLE_LOG, "reuse")
         .rabbitMqServerInitializationTimeoutInMillis(5000)
         .defaultRabbitMqCtlTimeoutInMillis(8000)
         .downloadFolder(new File("/tmp/okse/"))
