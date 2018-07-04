@@ -5,7 +5,7 @@
 
     <groupId>no.ntnu</groupId>
     <artifactId>okse-clients</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.0</version>
     <modules>
         <module>wsn-publisher</module>
         <module>common</module>
@@ -20,8 +20,11 @@
         <module>stomp-publisher</module>
         <module>xmpp-subscriber</module>
         <module>xmpp-publisher</module>
+        <module>xmpp-account-creator</module>
         <module>mqtt-sn-subscriber</module>
         <module>mqtt-sn-publisher</module>
+        <module>rabbitmq-subscriber</module>
+        <module>rabbitmq-publisher</module>
     </modules>
     <packaging>pom</packaging>
 

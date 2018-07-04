@@ -10,6 +10,7 @@
   <modules>
     <module>xmpp-openfire</module>
     <module>eclipse-paho-mqtt-sn</module>
+    <module>rabbitmq</module>
   </modules>
   <packaging>pom</packaging>
 

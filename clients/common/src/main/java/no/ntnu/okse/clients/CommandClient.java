@@ -8,18 +8,13 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
-import java.util.List;
-
-abstract class CommandClient {
+public abstract class CommandClient {
 
   @Parameter(names = {"--host"}, description = "Server hostname")
-  public final String host = "localhost";
-
-  @Parameter(names = {"--topic", "-t"}, description = "Topic", required = true)
-  public List<String> topics;
+  public String host = "localhost";
 
   @Parameter(names = {"--verbose", "-v"}, description = "Verbose")
-  public final boolean verbose = false;
+  public boolean verbose = false;
 
   @Parameter(names = {"--help", "-h"}, help = true, hidden = true)
   public boolean help;

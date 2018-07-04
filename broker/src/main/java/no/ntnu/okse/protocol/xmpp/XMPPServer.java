@@ -250,9 +250,24 @@ public class XMPPServer {
    *
    * @param message, {@link Message} to be sent
    */
-  public void sendMessage(Message message) throws XMPPErrorException, NotConnectedException,
+  public void sendMessage(Message message) throws NotConnectedException,
       InterruptedException, NoResponseException, NotAPubSubNodeException {
-    LeafNode node = getLeafNode(message.getTopic());
+    LeafNode node = null;
+    for (int attempt = 0; attempt < 3; attempt++) {
+      try {
+        node = getLeafNode(message.getTopic());
+      } catch (XMPPErrorException error) {
+        log.debug(String.format(
+            "Node %s is probably already defined by another thread, trying %d more attempts",
+            message.getTopic(), 3 - attempt));
+      }
+    }
+    if (node == null) {
+      log.error(
+          "Could not get node for topic %s. The server is probably wrongly configured or connection has been lost");
+      protocolServer.incrementTotalErrors();
+      return;
+    }
     node.publish(messageToPayloadItem(message));
     log.debug("Distributed messages with topic: " + message.getTopic());
   }

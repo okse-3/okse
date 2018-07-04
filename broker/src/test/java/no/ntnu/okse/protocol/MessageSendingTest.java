@@ -140,8 +140,8 @@ public class MessageSendingTest extends FullMessageFunctionalityTest {
 
   @Test
   public void xmppToXmpp() throws Exception {
-    XMPPClient client1 = new XMPPClient("localhost", 5222, "okse1@localhost");
-    XMPPClient client2 = new XMPPClient("localhost", 5222, "okse2@localhost");
+    XMPPClient client1 = new XMPPClient("localhost", 5222, "okse1@localhost", "pass");
+    XMPPClient client2 = new XMPPClient("localhost", 5222, "okse2@localhost", "pass");
     client1.connect();
     client2.connect();
     client1.subscribe("xmpp");
@@ -198,7 +198,7 @@ public class MessageSendingTest extends FullMessageFunctionalityTest {
     stompClient.setCallback(stompCallback);
 
     // XMPP
-    XMPPClient xmppClient = new XMPPClient("localhost", 5222, "okse1@localhost");
+    XMPPClient xmppClient = new XMPPClient("localhost", 5222, "okse1@localhost", "pass");
 
     // Connecting
     mqttClient.connect();
@@ -253,8 +253,7 @@ public class MessageSendingTest extends FullMessageFunctionalityTest {
     verify(amqpCallback, times(numberOfProtocols)).onReceive(any());
     verify(mqttCallback, times(numberOfProtocols))
         .messageArrived(anyString(), any(MqttMessage.class));
-    // MQTT-SN test client will not receive its own messages to a topic it is subscribed to
-    verify(mqttsnCallback, times(numberOfProtocols - 1))
+    verify(mqttsnCallback, times(numberOfProtocols))
         .publishArrived(anyBoolean(), anyInt(), anyString(), any());
     verify(amqp091Callback, times(numberOfProtocols)).messageReceived(any(), any());
     verify(wsnCallback, times(numberOfProtocols)).notify(any());

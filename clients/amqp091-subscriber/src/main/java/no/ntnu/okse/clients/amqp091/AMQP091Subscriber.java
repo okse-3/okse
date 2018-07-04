@@ -7,7 +7,7 @@ import no.ntnu.okse.clients.TestClient;
 public class AMQP091Subscriber extends SubscribeClient {
 
   @Parameter(names = {"--port", "-p"}, description = "Port")
-  public final int port = 56720;
+  public int port = 56720;
 
   private AMQP091Client client;
 
@@ -17,7 +17,7 @@ public class AMQP091Subscriber extends SubscribeClient {
 
   protected void createClient() {
     client = new AMQP091Client(host, port);
-    client.setCallback(new SubscriberCallback());
+    client.setCallback(new SubscriberCallback(this));
   }
 
   protected TestClient getClient() {
@@ -26,10 +26,14 @@ public class AMQP091Subscriber extends SubscribeClient {
 
   private class SubscriberCallback implements AMQP091Callback {
 
-    private int messagesReceived = 0;
+    private SubscribeClient subscribeClient;
+
+    public SubscriberCallback(SubscribeClient subscribeClient) {
+      this.subscribeClient = subscribeClient;
+    }
 
     public void messageReceived(String topic, String message) {
-      System.out.println(String.format("#%d [%s] %s", ++messagesReceived, topic, message));
+      subscribeClient.receiveMessage(topic, message, true);
     }
   }
 }

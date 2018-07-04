@@ -17,16 +17,19 @@
 
 package no.ntnu.okse.clients.wsn;
 
+import static org.apache.cxf.wsn.jms.JmsTopicExpressionConverter.SIMPLE_DIALECT;
+
+import javax.xml.bind.JAXBElement;
+import org.apache.cxf.wsn.client.Consumer;
 import org.apache.cxf.wsn.client.NotificationBroker;
 import org.apache.cxf.wsn.client.Referencable;
 import org.apache.cxf.wsn.client.Subscription;
-import org.oasis_open.docs.wsn.b_2.*;
-import org.oasis_open.docs.wsn.bw_2.*;
-import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
-
-import javax.xml.bind.JAXBElement;
-
-import static org.apache.cxf.wsn.jms.JmsTopicExpressionConverter.SIMPLE_DIALECT;
+import org.oasis_open.docs.wsn.b_2.FilterType;
+import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
+import org.oasis_open.docs.wsn.b_2.Notify;
+import org.oasis_open.docs.wsn.b_2.Subscribe;
+import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
+import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
 
 public class TestNotificationBroker extends NotificationBroker {
 
@@ -34,42 +37,16 @@ public class TestNotificationBroker extends NotificationBroker {
     super(address, cls);
   }
 
-  public Subscription subscribe(Referencable consumer, String topic,
-      String xpath, boolean raw, String initialTerminationTime)
-      throws TopicNotSupportedFault, InvalidFilterFault, TopicExpressionDialectUnknownFault,
-      UnacceptableInitialTerminationTimeFault, SubscribeCreationFailedFault,
-      InvalidMessageContentExpressionFault, InvalidTopicExpressionFault, UnrecognizedPolicyRequestFault,
-      UnsupportedPolicyRequestFault, ResourceUnknownFault, NotifyMessageNotSupportedFault,
-      InvalidProducerPropertiesExpressionFault {
+  public Subscription subscribe(Consumer consumer, String topic) throws Exception {
     Subscribe subscribeRequest = new Subscribe();
-    if (initialTerminationTime != null) {
-      subscribeRequest.setInitialTerminationTime(
-          new JAXBElement<>(QNAME_INITIAL_TERMINATION_TIME,
-              String.class, initialTerminationTime));
-    }
     subscribeRequest.setConsumerReference(consumer.getEpr());
     subscribeRequest.setFilter(new FilterType());
-    if (topic != null) {
-      TopicExpressionType topicExp = new TopicExpressionType();
-      // Modified: Added dialect
-      topicExp.setDialect(SIMPLE_DIALECT);
-      topicExp.getContent().add(topic);
-      subscribeRequest.getFilter().getAny().add(
-          new JAXBElement<>(QNAME_TOPIC_EXPRESSION,
-              TopicExpressionType.class, topicExp));
-    }
-    if (xpath != null) {
-      QueryExpressionType xpathExp = new QueryExpressionType();
-      xpathExp.setDialect(XPATH1_URI);
-      xpathExp.getContent().add(xpath);
-      subscribeRequest.getFilter().getAny().add(
-          new JAXBElement<>(QNAME_MESSAGE_CONTENT,
-              QueryExpressionType.class, xpathExp));
-    }
-    if (raw) {
-      subscribeRequest.setSubscriptionPolicy(new Subscribe.SubscriptionPolicy());
-      subscribeRequest.getSubscriptionPolicy().getAny().add(new UseRaw());
-    }
+    TopicExpressionType topicExp = new TopicExpressionType();
+    topicExp.setDialect("http://docs.oasis-open.org/wsn/t-1/TopicExpression/Simple");
+    topicExp.getContent().add(topic);
+    subscribeRequest.getFilter().getAny()
+        .add(new JAXBElement<>(QNAME_TOPIC_EXPRESSION, TopicExpressionType.class, topicExp));
+
     SubscribeResponse response = getBroker().subscribe(subscribeRequest);
     return new Subscription(response.getSubscriptionReference());
   }
@@ -88,8 +65,7 @@ public class TestNotificationBroker extends NotificationBroker {
     }
     if (topic != null) {
       TopicExpressionType topicExp = new TopicExpressionType();
-      // Modified: Added dialect
-      topicExp.setDialect(SIMPLE_DIALECT);
+      topicExp.setDialect("http://docs.oasis-open.org/wsn/t-1/TopicExpression/Simple");
       topicExp.getContent().add(topic);
       holder.setTopic(topicExp);
     }

@@ -1,0 +1,9 @@
+<fileSet>
+  <directory>../../resources/lib</directory>
+  <outputDirectory>${HOME}/lib/module1</outputDirectory>
+  <directoryMode>755</directoryMode>
+  <fileMode>644</fileMode>
+  <includes>
+    <include>commons-io-*</include>
+  </includes>
+</fileSet>

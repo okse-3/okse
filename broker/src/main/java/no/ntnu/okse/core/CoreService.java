@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Norwegian Defence Research Establishment / NTNU
+ * Copyright (c) 2015 - 2018 Norwegian Defence Research Establishment / NTNU
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import no.ntnu.okse.Application;
 import no.ntnu.okse.EclipsePahoMQTTSNGateway;
 import no.ntnu.okse.OpenfireXMPPServerFactory;
+import no.ntnu.okse.RabbitMQServerManager;
 import no.ntnu.okse.core.event.Event;
 import no.ntnu.okse.core.event.SystemEvent;
 import no.ntnu.okse.core.messaging.Message;
@@ -168,7 +169,7 @@ public class CoreService extends AbstractCoreService {
     // Sleep for 1 second to allow the primary protocol servers to start up, as the secondary
     // protocol servers are dependent on the primary protocol servers
     try {
-      Thread.sleep(1000);
+      Thread.sleep(5000);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
@@ -191,7 +192,7 @@ public class CoreService extends AbstractCoreService {
         // Are we booting protocol servers?
         else if (e.getType().equals(SystemEvent.Type.BOOT_PROTOCOL_SERVERS)) {
           bootProtocolServers();
-          Thread.sleep(3000);
+          Thread.sleep(5000);
           bootSecondaryServers();
         }
       } catch (InterruptedException e) {
@@ -238,6 +239,9 @@ public class CoreService extends AbstractCoreService {
   private void stopAllOptionalProtocolSupportServers() {
     if (OpenfireXMPPServerFactory.isRunning()) {
       OpenfireXMPPServerFactory.stop();
+    }
+    if (RabbitMQServerManager.isRunning()) {
+      RabbitMQServerManager.stopRabbitMqBroker();
     }
   }
 

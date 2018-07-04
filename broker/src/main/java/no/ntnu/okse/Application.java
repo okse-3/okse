@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Norwegian Defence Research Establishment / NTNU
+ * Copyright (c) 2015 - 2018 Norwegian Defence Research Establishment / NTNU
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import no.ntnu.okse.core.CoreService;
@@ -55,7 +56,7 @@ import org.xml.sax.SAXException;
 public class Application {
 
   // Version
-  public static final String VERSION = "2.0.0";
+  public static final String VERSION = "3.0.0";
 
   // Initialization time
   public static long startedAt = System.currentTimeMillis();
@@ -123,6 +124,19 @@ public class Application {
     // Start the CoreService
     log.info("Starting OKSE " + VERSION);
     cs.boot();
+
+    // Wait for CoreService to boot
+    Thread.sleep(30000);
+
+    // Shutdown
+    Scanner scn = new Scanner(System.in);
+    boolean _run = true;
+    while (_run) {
+      System.out.println("Enter 'stop' to shut down OKSE");
+      _run = !scn.nextLine().equals("stop");
+    }
+    cs.stop();
+    System.exit(0);
   }
 
   /**
@@ -257,6 +271,12 @@ public class Application {
    */
   private static void createOptionalProtocolSupportServers(String name) {
     switch (name) {
+      case "rabbitmq":
+        try {
+          RabbitMQServerManager.startRabbitMqBroker();
+        } catch (Exception e) {
+          e.printStackTrace(); }
+        break;
       case "openfire-xmpp":
         try {
           OpenfireXMPPServerFactory.start();

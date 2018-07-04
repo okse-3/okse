@@ -29,9 +29,9 @@ public class XMPPClientTest {
     Thread.sleep(1000);
 
     //Creates and connects clients
-    client = new XMPPClient("localhost", 5222, "test-client-1@localhost");
+    client = new XMPPClient("localhost", 5222, "test-client-1@localhost", "password");
     client.connect();
-    client2 = new XMPPClient("localhost", 5222, "test-client-2@localhost");
+    client2 = new XMPPClient("localhost", 5222, "test-client-2@localhost", "password");
     client2.connect();
 
     //Field access control

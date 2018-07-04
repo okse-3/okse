@@ -7,7 +7,10 @@ import no.ntnu.okse.clients.TestClient;
 public class MQTTSNPublisher extends PublishClient {
 
   @Parameter(names = {"--port", "-p"}, description = "Port")
-  public final int port = 20000;
+  public int port = 20000;
+
+  @Parameter(names = {"--qos", "-q"}, description = "Quality of Service")
+  public int qos = 0;
 
   private MQTTSNClient client;
 
@@ -19,6 +22,11 @@ public class MQTTSNPublisher extends PublishClient {
   @Override
   protected TestClient getClient() {
     return client;
+  }
+
+  @Override
+  public void publish(String topic, String message) {
+    client.publish(topic, message, qos);
   }
 
   public static void main(String[] args) {

@@ -86,3 +86,7 @@ moquette_store.*
 server-update.xml
 available-plugins.xml
 openfire.xml
+
+# RabbitMq (zip and folder)
+*/resources/*.log
+*/resources/rabbitmq_server*

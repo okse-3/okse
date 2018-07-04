@@ -17,6 +17,7 @@
 package no.ntnu.okse.clients.wsn;
 
 import no.ntnu.okse.clients.TestClient;
+import org.apache.cxf.wsn.client.NotificationBroker;
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.wsn.bw_2.UnableToDestroySubscriptionFault;
 import org.oasis_open.docs.wsrf.rw_2.ResourceUnknownFault;
@@ -31,31 +32,22 @@ import java.util.Map;
 public final class WSNClient implements TestClient {
 
   private static final Logger log = Logger.getLogger(WSNClient.class);
+  private static final String DEFAULT_URL_EXTENSION = "";
   private static final String DEFAULT_HOST = "localhost";
   private static final int DEFAULT_PORT = 61000;
   private final TestNotificationBroker notificationBroker;
-  private final Map<String, Subscription> subscriptions;
-  private final Map<String, Consumer> consumers;
+  private final Map<String, Subscription> subscriptions = new HashMap<>();
+  private final Map<String, Consumer> consumers = new HashMap<>();
   private Consumer.Callback callback;
 
 
   public WSNClient() {
-    this(DEFAULT_HOST, DEFAULT_PORT);
+    this(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_URL_EXTENSION);
   }
 
-  public WSNClient(String host, int port) {
-    subscriptions = new HashMap<>();
-    consumers = new HashMap<>();
-    notificationBroker = new TestNotificationBroker(String.format("http://%s:%d", host, port));
-  }
-
-  public static void main(String[] args) throws Exception {
-    WSNClient client = new WSNClient();
-    client.subscribe("example");
-    client.publish("example", "Hello World!");
-    Thread.sleep(5000);
-    client.unsubscribe("example");
-    System.exit(0);
+  public WSNClient(String host, int port, String url_extension) {
+    notificationBroker = new TestNotificationBroker(
+        String.format("http://%s:%d/%s", host, port, url_extension));
   }
 
   @Override
@@ -111,9 +103,7 @@ public final class WSNClient implements TestClient {
   @Override
   public void publish(String topic, String content) {
     log.debug(String.format("Publishing to topic %s with content %s", topic, content));
-    // TODO: Try to get rid of JAXB element wrapping
-    notificationBroker.notify(topic, new JAXBElement<>(
-        new QName("string"), String.class, content));
+    notificationBroker.notify(topic, new JAXBElement<>(new QName("string"), String.class, content));
     log.debug("Published message successfully");
   }
 
